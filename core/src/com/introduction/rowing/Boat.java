@@ -4,17 +4,25 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 
 public class Boat extends Entity{
+    private final int acceleration;
+    private final int robustness;
+    private final int momentum;
+    private final int fatigue;
     private int speedX;
     private int speedY;
     private final int lane;
     private final MyInputProcessor inputProcessor;
 
-    public Boat(int speedX, int speedY, int lane, Position position, Texture image) {
+    public Boat(int speedX, int speedY, int lane, Position position, Texture image, int acceleration, int robustness, int momentum, int fatigue) {
         super(position, image.getWidth(), image.getHeight(), image);
         this.speedX = speedX;
         this.speedY = speedY;
         this.lane = lane;
         this.inputProcessor = new MyInputProcessor();
+        this.acceleration = acceleration;
+        this.robustness = robustness;
+        this.momentum = momentum;
+        this.fatigue = fatigue;
         Gdx.input.setInputProcessor(inputProcessor);
     }
 
@@ -36,7 +44,8 @@ public class Boat extends Entity{
             }
         }
         // Update boat position
-        position.setX(Math.round(Math.max(0, Math.min(1920 - image.getWidth(), newX))));
+        position.setX(Math.round(Math.max(0, Math.min(Gdx.graphics.getWidth() - image.getWidth(), newX))));
+        System.out.println("Boat position: " + position.getX() + ", " + position.getY());
     }
     /**
      * Change the speed of the boat vertically
