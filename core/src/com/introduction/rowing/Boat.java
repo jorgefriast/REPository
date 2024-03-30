@@ -3,18 +3,14 @@ package com.introduction.rowing;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 
-import java.awt.*;
-
 public class Boat extends Entity{
     private int speedX;
     private int speedY;
     private final int lane;
     private final MyInputProcessor inputProcessor;
-//    private final Image image = Toolkit.getDefaultToolkit().getImage("boat.png");
-//    private final Texture texture = new Texture("boat.webp");
 
     public Boat(int speedX, int speedY, int lane, Position position, Texture image) {
-        super(position, 400, 600, image);
+        super(position, image.getWidth(), image.getHeight(), image);
         this.speedX = speedX;
         this.speedY = speedY;
         this.lane = lane;
@@ -30,7 +26,6 @@ public class Boat extends Entity{
         // Adjust boat position based on input direction
         float newX = position.getX();
         float newY = position.getY();
-        System.out.println("old X : " + newX + "old Y : "+ newY);
         if (moving) {
             switch (direction) {
                 case 0: // Up
@@ -50,6 +45,7 @@ public class Boat extends Entity{
         System.out.println("new X : " + newX + "new Y : "+ newY);
         // Update boat position
         position.setX(Math.round(Math.max(0, Math.min(1920 - image.getWidth(), newX))));
+        System.out.println("width : "+ image.getWidth() + " height: "+ image.getHeight());
         position.setY(Math.round(Math.max(0, Math.min(1080 - image.getHeight(), newY))));
     }
     public int deplacementBoatX(boolean moving, int direction, int delta) {

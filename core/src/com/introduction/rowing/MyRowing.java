@@ -2,9 +2,6 @@ package com.introduction.rowing;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -12,7 +9,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 public class MyRowing extends ApplicationAdapter {
 	SpriteBatch batch;
-	Texture boat;
 	TextureRegion[] water;
 
 	float stateTime = 0;
@@ -40,13 +36,14 @@ public class MyRowing extends ApplicationAdapter {
 	public void render () {
 		ScreenUtils.clear(0, 1, 0, 1);
 		batch.begin();
-		userBoat.update(Gdx.graphics.getDeltaTime());
-		batch.draw(userBoat.getImage(), userBoat.getPosition().getX(), userBoat.getPosition().getY(), userBoat.getWidth(), userBoat.getHeight());
-
 		// Water flow (GIF)
 		stateTime += Gdx.graphics.getDeltaTime();
 		int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
 		batch.draw(water[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		//boat
+		userBoat.update(Gdx.graphics.getDeltaTime());
+		batch.draw(userBoat.getImage(), userBoat.getPosition().getX(), userBoat.getPosition().getY(), userBoat.getWidth(), userBoat.getHeight());
+
 
 		batch.end();
 	}
