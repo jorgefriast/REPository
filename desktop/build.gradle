@@ -43,6 +43,11 @@ tasks.register('dist', Jar) {
     with jar
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '8.5'
+}
+
+
 
 dist.dependsOn classes
 
