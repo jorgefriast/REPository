@@ -9,15 +9,12 @@ public class Boat extends Entity{
     private int speedX;
     private int speedY;
     private final int lane;
-    private final int width = 10;
-    private final int height = 50;
-
     private final MyInputProcessor inputProcessor;
 //    private final Image image = Toolkit.getDefaultToolkit().getImage("boat.png");
 //    private final Texture texture = new Texture("boat.webp");
 
     public Boat(int speedX, int speedY, int lane, Position position, Texture image) {
-        super(position, 10, 50, image);
+        super(position, 400, 600, image);
         this.speedX = speedX;
         this.speedY = speedY;
         this.lane = lane;
@@ -52,8 +49,8 @@ public class Boat extends Entity{
         }
         System.out.println("new X : " + newX + "new Y : "+ newY);
         // Update boat position
-        position.setX(Math.round(Math.max(0, Math.min(1000 + image.getWidth(), newX)))); // Limit boat within screen boundaries
-        position.setY(Math.round(Math.max(0, Math.min(1000 + image.getHeight(), newY))));
+        position.setX(Math.round(Math.max(0, Math.min(1920 - image.getWidth(), newX))));
+        position.setY(Math.round(Math.max(0, Math.min(1080 - image.getHeight(), newY))));
     }
     public int deplacementBoatX(boolean moving, int direction, int delta) {
 
