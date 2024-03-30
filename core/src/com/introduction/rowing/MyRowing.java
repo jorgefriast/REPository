@@ -37,7 +37,7 @@ public class MyRowing extends ApplicationAdapter {
 		int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
 		batch.draw(water[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-		batch.draw(boat, 650, -200, 400, 600);
+		batch.draw(boat, 650, -200, 200, 600);
 		batch.end();
 	}
 	
