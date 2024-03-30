@@ -2,7 +2,6 @@ package com.introduction.rowing;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.introduction.rowing.MyRowing;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
