@@ -53,5 +53,4 @@ public class MyRowing extends ApplicationAdapter {
 		batch.dispose();
         boatPicture.dispose();
 	}
-
 }
