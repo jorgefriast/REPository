@@ -14,6 +14,8 @@ public class Boat extends Entity{
     private final int lane;
     private final MyInputProcessor inputProcessor;
 
+    private int timeTicker = 0;
+
     public Boat(int lane, Position position, Texture image, int speedFactor, int acceleration, int robustness, int maneuverability, int momentum, int fatigue) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
         this.speedX = maneuverability;
@@ -42,16 +44,16 @@ public class Boat extends Entity{
                     break;
                 case 3: // Right
                     newX +=  (speedX * 2);
-                    break;,
+                    break;
             }
         }
 
         // Update boat position
         position.setX(Math.round(Math.max(0, Math.min(Gdx.graphics.getWidth() - image.getWidth()/2, newX))));
-        System.out.println("Boat position: " + position.getX() + ", " + position.getY());
     }
 
     public void updateY(float delta) {
+        timeTicker++;
         // Update boat speed
         speedY = getCurrentSpeed();
 
@@ -63,20 +65,27 @@ public class Boat extends Entity{
             // Update boat position
             position.setY((int) Math.round( position.getY() + speedY));
         }
-
+        System.out.println("Ticker: " + timeTicker);
     }
 
     /**
-     * Calculate the current speed of the boat
-     * @return the current speed of the boat between 1 and 10
+     * Calculate the current speed of the boat (Speed algorithm)
+     * @return the current speed of the boat between -2.5 and 2.5
      */
     public double getCurrentSpeed() {
         double accelerationWeight = 0.5;
         double robustnessWeight = 0.3;
         double fatigueWeight = 0.6;
+        double extraSpeed = 0;
 
+        if (timeTicker % 10 == 0) {
+            extraSpeed = 0.5 * speedFactor;
+        }
+
+        // Personnal note : max new speed will be 2.5 and min -2.5
 //        double newSpeed =  this.getSpeedFactor() * 2 * ((accelerationWeight * this.getAcceleration() + robustnessWeight * this.getRobustness() + fatigueWeight * this.getFatigue()) / 10) * this.getSpeedY();
-        double newSpeed =  this.getSpeedFactor() * 0.5;
+//        double newSpeed =  this.getSpeedFactor() * 0.5;
+        double newSpeed =  0 + extraSpeed;
         System.out.println("New speed: " + newSpeed);
         return newSpeed;
     }
