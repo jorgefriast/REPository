@@ -18,8 +18,6 @@ public class MyRowing extends ApplicationAdapter {
 
     float stateTime = 0;
     float frameDuration = 0.1f; // Adjust the frame duration as needed
-
-    private Boat userBoat;
     Texture boatPicture;
 
 
@@ -33,23 +31,18 @@ public class MyRowing extends ApplicationAdapter {
         for (int i = 0; i < water.length; i++)
             water[i] = new TextureRegion(new Texture("water-frames//frame_" + i + "_delay-0.1s.gif"));
 
-		userBoat =
-
         lanes = new Lane[Constants.NUMBER_OF_LANES];
         int laneWidth = Constants.WINDOW_WIDTH / Constants.NUMBER_OF_LANES;
         int currentLeftBoundary = 0;
         for (int i = 0; i < Constants.NUMBER_OF_LANES; i++) {
-			Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), 0);
+			Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), -230);
 			if (i == 0) {
-				lanes[i] = new Lane(new Boat(1, new Position(650,-230), boatPicture, true, 1, 3, 5, 1, 0, 0), currentLeftBoundary);
+				lanes[i] = new Lane(new Boat(startingPosition, boatPicture, true, 1, 3, 5, 1, 0, 0), currentLeftBoundary);
 			}else {
-				lanes[i] = new Lane(new Boat(10, i, startingPosition, boatPicture, false), currentLeftBoundary);
+				lanes[i] = new Lane(new Boat(startingPosition, boatPicture, false, 1, 3, 5, 1, 0, 0), currentLeftBoundary);
 			}
 			currentLeftBoundary += laneWidth;
-            // Create a boat for each lane
         }
-
-
     }
 
 	@Override
@@ -61,20 +54,16 @@ public class MyRowing extends ApplicationAdapter {
 		int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
 		batch.draw(water[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-		//boat
-		batch.draw(userBoat.getImage(), userBoat.getPosition().getX(), userBoat.getPosition().getY(), userBoat.getWidth(), userBoat.getHeight());
-		userBoat.updateKeys(Gdx.graphics.getDeltaTime());
-
-		//update boat's y position every 5 frames
-		if(currentFrameIndex % 5 == 0) {
-			userBoat.updateY(Gdx.graphics.getDeltaTime());
-		}
-
         //boat movement & obstacle spawning
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
-            currentBoat.update(Gdx.graphics.getDeltaTime());
             batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY(), currentBoat.getWidth(), currentBoat.getHeight());
+
+            currentBoat.updateKeys(Gdx.graphics.getDeltaTime());
+            //update boat's y position every 5 frames
+            if(currentFrameIndex % 5 == 0) {
+                currentBoat.updateY(Gdx.graphics.getDeltaTime());
+            }
 
             if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) {
                 lane.spawnObstacles();
@@ -83,7 +72,7 @@ public class MyRowing extends ApplicationAdapter {
             Iterator<Entity> iterator = obstacles.iterator();
             while (iterator.hasNext()) {
                 Entity obstacle = iterator.next();
-                obstacle.adjustPosition((float) 0, (float) (-10));
+                obstacle.adjustPosition((float) 0, (float) (-5));
                 batch.draw(obstacle.getImage(), obstacle.getPosition().getX(), obstacle.getPosition().getY(), obstacle.getWidth(), obstacle.getHeight());
 
                 // Remove obstacle if it's below the screen

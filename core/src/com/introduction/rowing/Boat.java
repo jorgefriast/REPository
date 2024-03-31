@@ -11,18 +11,16 @@ public class Boat extends Entity{
     private final int fatigue;
     private int speedX;
     private double speedY = 1;
-    private final int lane;
     private final MyInputProcessor inputProcessor;
     private boolean isPlayer;
 
     private int timeTicker = 0;
     private boolean accelerating = false;
 
-    public Boat(int lane, Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentum, int fatigue) {
+    public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentum, int fatigue) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
         this.speedX = maneuverability;
         this.speedY = getCurrentSpeed();
-        this.lane = lane;
         this.inputProcessor = new MyInputProcessor();
         this.speedFactor = speedFactor;
         this.acceleration = acceleration;
@@ -129,14 +127,6 @@ public class Boat extends Entity{
      */
     public double getSpeedY() {
         return speedY;
-    }
-
-    /**
-     * Get the lane of the boat
-     * @return the lane of the boat
-     */
-    public int getLane() {
-        return lane;
     }
 
     /**
