@@ -6,19 +6,21 @@ import com.badlogic.gdx.graphics.Texture;
 public class Boat extends Entity{
     private int speedX;
     private int speedY;
-    private final int lane;
-    private final MyInputProcessor inputProcessor;
+    private boolean isPlayer;
+    public final MyInputProcessor inputProcessor;
 
-    public Boat(int speedX, int speedY, int lane, Position position, Texture image) {
-        super(position, image.getWidth(), image.getHeight(), image);
+    public Boat(int speedX, int speedY, Position position, Texture image, boolean isPlayer) {
+        super(position, image.getWidth()/2, image.getHeight()/2, image);
         this.speedX = speedX;
         this.speedY = speedY;
-        this.lane = lane;
+        this.isPlayer = isPlayer;
         this.inputProcessor = new MyInputProcessor();
-        Gdx.input.setInputProcessor(inputProcessor);
+        if (isPlayer)
+            Gdx.input.setInputProcessor(inputProcessor);
     }
 
     public void update(float delta) {
+        if(!isPlayer) return;
         // Check if boat is moving based on input
         boolean moving = inputProcessor.moving;
         int direction = inputProcessor.direction;
@@ -36,7 +38,8 @@ public class Boat extends Entity{
             }
         }
         // Update boat position
-        position.setX(Math.round(Math.max(0, Math.min(1920 - image.getWidth(), newX))));
+        position.setX(Math.round(Math.max(0, Math.min(Gdx.graphics.getWidth() - ((float) image.getWidth() /2), newX))));
+
     }
     /**
      * Change the speed of the boat vertically
@@ -52,14 +55,6 @@ public class Boat extends Entity{
      */
     public void setSpeedX(int speedX) {
         this.speedX = speedX;
-    }
-
-    /**
-     * Get the lane of the boat
-     * @return the lane of the boat
-     */
-    public int getLane() {
-        return lane;
     }
 
     /**
