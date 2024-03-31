@@ -59,5 +59,9 @@ public class Entity {
         return new Rectangle(position.getX(), position.getY(), width, height);
     }
 
+    public void adjustPosition(float deltaX, float deltaY) {
+        position.setX(Math.round(position.getX() + deltaX));
+        position.setY(Math.round(position.getY() + deltaY));
+    }
 
 }

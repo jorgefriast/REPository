@@ -13,11 +13,12 @@ public class Boat extends Entity{
     private double speedY = 1;
     private final int lane;
     private final MyInputProcessor inputProcessor;
+    private boolean isPlayer;
 
     private int timeTicker = 0;
     private boolean accelerating = false;
 
-    public Boat(int lane, Position position, Texture image, int speedFactor, int acceleration, int robustness, int maneuverability, int momentum, int fatigue) {
+    public Boat(int lane, Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentum, int fatigue) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
         this.speedX = maneuverability;
         this.speedY = getCurrentSpeed();
@@ -29,9 +30,12 @@ public class Boat extends Entity{
         this.momentum = momentum;
         this.fatigue = fatigue;
         Gdx.input.setInputProcessor(inputProcessor);
+        if (isPlayer)
+            Gdx.input.setInputProcessor(inputProcessor);
     }
 
     public void updateKeys(float delta) {
+        if(!isPlayer) return;
         // Check if boat is moving based on input
         boolean moving = inputProcessor.moving;
         int direction = inputProcessor.direction;
@@ -53,9 +57,9 @@ public class Boat extends Entity{
                     break;
             }
         }
-
         // Update boat position
         position.setX(Math.round(Math.max(0, Math.min(Gdx.graphics.getWidth() - image.getWidth()/2, newX))));
+
     }
 
     public void updateY(float delta) {
