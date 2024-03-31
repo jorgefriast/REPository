@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.ScreenUtils;
+import sun.tools.jconsole.JConsole;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -37,7 +38,7 @@ public class MyRowing extends ApplicationAdapter {
         for (int i = 0; i < Constants.NUMBER_OF_LANES; i++) {
 			Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), -230);
 			if (i == 0) {
-				lanes[i] = new Lane(new Boat(startingPosition, boatPicture, true, 1, 3, 5, 1, 0, 0), currentLeftBoundary);
+				lanes[i] = new Lane(new Boat(startingPosition, boatPicture, true, 1, 3, 5, 2, 0, 0), currentLeftBoundary);
 			}else {
 				lanes[i] = new Lane(new Boat(startingPosition, boatPicture, false, 1, 3, 5, 1, 0, 0), currentLeftBoundary);
 			}
@@ -58,7 +59,6 @@ public class MyRowing extends ApplicationAdapter {
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
             batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY(), currentBoat.getWidth(), currentBoat.getHeight());
-
             currentBoat.updateKeys(Gdx.graphics.getDeltaTime());
             //update boat's y position every 5 frames
             if(currentFrameIndex % 5 == 0) {

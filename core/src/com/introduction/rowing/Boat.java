@@ -12,8 +12,7 @@ public class Boat extends Entity{
     private int speedX;
     private double speedY = 1;
     private final MyInputProcessor inputProcessor;
-    private boolean isPlayer;
-
+    private final boolean isPlayer;
     private int timeTicker = 0;
     private boolean accelerating = false;
 
@@ -21,13 +20,13 @@ public class Boat extends Entity{
         super(position, image.getWidth()/2, image.getHeight()/2, image);
         this.speedX = maneuverability;
         this.speedY = getCurrentSpeed();
+        this.isPlayer = isPlayer;
         this.inputProcessor = new MyInputProcessor();
         this.speedFactor = speedFactor;
         this.acceleration = acceleration;
         this.robustness = robustness;
         this.momentum = momentum;
         this.fatigue = fatigue;
-        Gdx.input.setInputProcessor(inputProcessor);
         if (isPlayer)
             Gdx.input.setInputProcessor(inputProcessor);
     }
