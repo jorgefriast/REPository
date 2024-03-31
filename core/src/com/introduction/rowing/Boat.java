@@ -15,6 +15,7 @@ public class Boat extends Entity{
     private final MyInputProcessor inputProcessor;
 
     private int timeTicker = 0;
+    private boolean accelerating = false;
 
     public Boat(int lane, Position position, Texture image, int speedFactor, int acceleration, int robustness, int maneuverability, int momentum, int fatigue) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
@@ -30,7 +31,7 @@ public class Boat extends Entity{
         Gdx.input.setInputProcessor(inputProcessor);
     }
 
-    public void updateX(float delta) {
+    public void updateKeys(float delta) {
         // Check if boat is moving based on input
         boolean moving = inputProcessor.moving;
         int direction = inputProcessor.direction;
@@ -39,6 +40,11 @@ public class Boat extends Entity{
         float newX = position.getX();
         if (moving) {
             switch (direction) {
+                case 0: // Up
+                    accelerating = true;
+                    updateY(delta);
+                    accelerating = false;
+                    break;
                 case 1: // Left
                     newX -= (speedX * 2);
                     break;
@@ -65,7 +71,6 @@ public class Boat extends Entity{
             // Update boat position
             position.setY((int) Math.round( position.getY() + speedY));
         }
-        System.out.println("Ticker: " + timeTicker);
     }
 
     /**
@@ -73,20 +78,20 @@ public class Boat extends Entity{
      * @return the current speed of the boat between -2.5 and 2.5
      */
     public double getCurrentSpeed() {
-        double accelerationWeight = 0.5;
-        double robustnessWeight = 0.3;
-        double fatigueWeight = 0.6;
+        double accelerationWeight = 0;
+        double fatigueWeight = -0.6;
         double extraSpeed = 0;
+
+        if (accelerating) {
+            accelerationWeight = 0.5;
+        }
 
         if (timeTicker % 10 == 0) {
             extraSpeed = 0.5 * speedFactor;
         }
 
         // Personnal note : max new speed will be 2.5 and min -2.5
-//        double newSpeed =  this.getSpeedFactor() * 2 * ((accelerationWeight * this.getAcceleration() + robustnessWeight * this.getRobustness() + fatigueWeight * this.getFatigue()) / 10) * this.getSpeedY();
-//        double newSpeed =  this.getSpeedFactor() * 0.5;
-        double newSpeed =  0 + extraSpeed;
-        System.out.println("New speed: " + newSpeed);
+        double newSpeed =  extraSpeed + accelerationWeight * this.acceleration + fatigueWeight * this.fatigue;
         return newSpeed;
     }
 

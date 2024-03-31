@@ -28,7 +28,7 @@ public class MyRowing extends ApplicationAdapter {
 		for(int i = 0; i < water.length; i++)
 			water[i] = new TextureRegion(new Texture("water-frames//frame_" + i + "_delay-0.1s.gif"));
 
-		userBoat = new Boat(1, new Position(650,-230), boatPicture, 1, 2, 5, 1, 0, 0);
+		userBoat = new Boat(1, new Position(650,-230), boatPicture, 1, 3, 5, 1, 0, 0);
 
 	}
 
@@ -43,9 +43,9 @@ public class MyRowing extends ApplicationAdapter {
 
 		//boat
 		batch.draw(userBoat.getImage(), userBoat.getPosition().getX(), userBoat.getPosition().getY(), userBoat.getWidth(), userBoat.getHeight());
-		userBoat.updateX(Gdx.graphics.getDeltaTime());
+		userBoat.updateKeys(Gdx.graphics.getDeltaTime());
 
-		//update y position every 5 frames
+		//update boat's y position every 5 frames
 		if(currentFrameIndex % 5 == 0) {
 			userBoat.updateY(Gdx.graphics.getDeltaTime());
 		}

@@ -15,7 +15,7 @@ public class MyInputProcessor extends InputAdapter {
 		switch (keycode) {
 			case Input.Keys.UP:
 				this.direction = 0;
-				this.moving = false;
+				this.moving = true;
 				break;
 			case Input.Keys.LEFT:
 				this.direction = 1;
