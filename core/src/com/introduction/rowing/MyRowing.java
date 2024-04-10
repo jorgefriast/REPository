@@ -59,7 +59,12 @@ public class MyRowing extends ApplicationAdapter {
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
             batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY(), currentBoat.getWidth(), currentBoat.getHeight());
-            currentBoat.updateKeys(Gdx.graphics.getDeltaTime());
+            if(currentBoat.isPlayer()) {
+                currentBoat.updateKeys(Gdx.graphics.getDeltaTime());
+            }else {
+                currentBoat.avoidObstacles(lane.getObstacles());
+            }
+//            currentBoat.updateKeys(Gdx.graphics.getDeltaTime());
             //update boat's y position every 5 frames
             if(currentFrameIndex % 5 == 0) {
                 currentBoat.updateY(Gdx.graphics.getDeltaTime());
@@ -68,6 +73,7 @@ public class MyRowing extends ApplicationAdapter {
             if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) {
                 lane.spawnObstacles();
             }
+            //make the obstacles move
             ArrayList<Entity> obstacles = lane.getObstacles();
             Iterator<Entity> iterator = obstacles.iterator();
             while (iterator.hasNext()) {

@@ -3,6 +3,8 @@ package com.introduction.rowing;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 
+import java.util.ArrayList;
+
 public class Boat extends Entity{
     private final int speedFactor;
     private final int acceleration;
@@ -71,6 +73,30 @@ public class Boat extends Entity{
         else {
             // Update boat position
             position.setY((int) Math.round( position.getY() + speedY));
+        }
+    }
+
+    /**
+     * Avoid obstacles on the way for the boat controlled by the computer
+     */
+    public void avoidObstacles(ArrayList<Entity> obstacles){
+        Entity nearestObstacle = null;
+        double nearestDistance = Double.MAX_VALUE;
+        for (Entity obstacle : obstacles) {
+            double distance = Math.sqrt(Math.pow(obstacle.getPosition().getX() - position.getX(), 2) + Math.pow(obstacle.getPosition().getY() - position.getY(), 2));
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestObstacle = obstacle;
+            }
+        }
+        if (nearestObstacle != null) {
+            if (nearestObstacle.getPosition().getX() < position.getX()) {
+                int newPosX = position.getX() + (nearestObstacle.getPosition().getX() + nearestObstacle.getWidth() - position.getX()) / 2;
+                position.setX(newPosX);
+            } else {
+                int newPosX = position.getX() - (position.getX() + image.getWidth() - nearestObstacle.getPosition().getX()) / 2;
+                position.setX(newPosX);
+            }
         }
     }
 
@@ -174,5 +200,13 @@ public class Boat extends Entity{
      */
     public int getFatigue() {
         return fatigue;
+    }
+
+    /**
+     * Get the state of the boat (if it's controlled by the player or not)
+     * @return if its a player or not
+     */
+    public boolean isPlayer() {
+        return isPlayer;
     }
 }
