@@ -17,6 +17,8 @@ import sun.tools.jconsole.JConsole;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import static com.introduction.rowing.Constants.*;
+
 public class MyRowing extends ApplicationAdapter {
     SpriteBatch batch;
     TextureRegion[] water;
@@ -32,10 +34,8 @@ public class MyRowing extends ApplicationAdapter {
     Texture background;
     float backgroundWidth = 196;
     float backgroundHeight = 46;
-
-    Stage stage;
-    float accelerationLevel = 100;
-
+    float accelerationLevel = 0;
+    boolean isHoldIncreasingAccelerationLevel = false;
 
     @Override
     public void create() {
@@ -72,15 +72,23 @@ public class MyRowing extends ApplicationAdapter {
 		int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
 		batch.draw(water[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
+
+
         //boat movement & obstacle spawning
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
             batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY(), currentBoat.getWidth(), currentBoat.getHeight());
             currentBoat.updateKeys(Gdx.graphics.getDeltaTime());
 
-            // Update acceleration level
+            // Decrease acceleration level
             if (currentBoat.getIsPlayer() && currentBoat.getAccelerating()) {
                 decreaseAcceleration(Gdx.graphics.getDeltaTime(), currentBoat);
+            }
+
+            // Increase acceleration level
+            if (currentFrameIndex % 5 == 0 && accelerationLevel < 100) {
+                increaseAcceleration(Gdx.graphics.getDeltaTime(), currentBoat);
+
             }
 
             //update boat's y position every 5 frames
@@ -117,6 +125,14 @@ public class MyRowing extends ApplicationAdapter {
         boatPicture.dispose();
     }
 
+    private void increaseAcceleration(float deltaTime, Boat boat) {
+        accelerationLevel += ACCELERATION_BAR_INCREASE_RATE * deltaTime;
+        if (accelerationLevel >= 99) {
+            boat.setIsAcceleratorAvailable(true);
+        }
+        updateAccelerationBar();
+    }
+
     private void decreaseAcceleration(float delta, Boat boat) {
         // Decrease acceleration level over time
         float decreaseRate = 100; // Amount of acceleration decrease per second
@@ -131,17 +147,10 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private void updateAccelerationBar() {
-        // Calculate the ratio of acceleration level to maximum acceleration level
         float ratio = accelerationLevel / 100f;
-
-        // Calculate the width of the background based on the ratio
-        backgroundWidth = 200 * ratio;
-
-        System.out.println("Background width: " + backgroundWidth);
+        backgroundWidth = 200 * ratio - 4;
+        if (backgroundWidth < 0) {
+            backgroundWidth = 0;
+        }
     }
-
-
-
-
-
 }

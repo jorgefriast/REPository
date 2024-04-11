@@ -15,7 +15,7 @@ public class Boat extends Entity{
     private final boolean isPlayer;
     private int timeTicker = 0;
     private boolean accelerating = false;
-    private boolean isAcceleratorAvailable = true;
+    private boolean isAcceleratorAvailable = false;
 
     public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentum, int fatigue) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
