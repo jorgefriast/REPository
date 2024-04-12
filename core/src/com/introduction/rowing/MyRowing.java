@@ -36,6 +36,7 @@ public class MyRowing extends ApplicationAdapter {
     float backgroundHeight = 46;
     float accelerationLevel = 0;
     boolean isHoldIncreasingAccelerationLevel = false;
+    boolean stateAccelerating = false;
 
     @Override
     public void create() {
@@ -82,13 +83,13 @@ public class MyRowing extends ApplicationAdapter {
 
             // Decrease acceleration level
             if (currentBoat.getIsPlayer() && currentBoat.getAccelerating()) {
+                stateAccelerating = true;
                 decreaseAcceleration(Gdx.graphics.getDeltaTime(), currentBoat);
             }
 
             // Increase acceleration level
-            if (currentFrameIndex % 5 == 0 && accelerationLevel < 100) {
+            if (currentFrameIndex % 5 == 0 && accelerationLevel < 100 && !stateAccelerating) {
                 increaseAcceleration(Gdx.graphics.getDeltaTime(), currentBoat);
-
             }
 
             //update boat's y position every 5 frames
@@ -141,6 +142,7 @@ public class MyRowing extends ApplicationAdapter {
             accelerationLevel = 0;
             boat.setIsAcceleratorAvailable(false);
             boat.setAccelerating(false);
+            stateAccelerating = false;
         }
         updateAccelerationBar();
         boat.setAccelerating(false);
