@@ -26,24 +26,23 @@ public class MyRowing extends ApplicationAdapter {
     Lane[] lanes;
 
     float stateTime = 0;
-    float frameDuration = 0.1f; // Adjust the frame duration as needed
+    float frameDuration = 0.1f;
     Texture boatPicture;
-    Texture knob;
-    float knobWidth = 204;
-    float knobHeight = 54;
-    Texture background;
-    float backgroundWidth = 196;
-    float backgroundHeight = 46;
+    Texture progressionBarRectangle;
+    float progressionBarRectangleWidth = 204;
+    float progressionBarRectangleHeight = 54;
+    Texture progressionBarBackground;
+    float progressionBarBackgroundWidth = 196;
+    float progressionBarBackgroundHeight = 46;
     float accelerationLevel = 0;
-    boolean isHoldIncreasingAccelerationLevel = false;
     boolean stateAccelerating = false;
 
     @Override
     public void create() {
         batch = new SpriteBatch();
         boatPicture = new Texture("boat-top-view-2.png");
-        knob = new Texture("knob.png");
-        background = new Texture("acceleration_bar_background.png");
+        progressionBarRectangle = new Texture("progressionBarRectangle.png");
+        progressionBarBackground = new Texture("acceleration_bar_background.png");
 
         // Water GIF setup
         water = new TextureRegion[5];
@@ -73,8 +72,6 @@ public class MyRowing extends ApplicationAdapter {
 		int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
 		batch.draw(water[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-
-
         //boat movement & obstacle spawning
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
@@ -88,7 +85,7 @@ public class MyRowing extends ApplicationAdapter {
             }
 
             // Increase acceleration level
-            if (currentFrameIndex % 5 == 0 && accelerationLevel < 100 && !stateAccelerating) {
+            if (currentFrameIndex % 5 == 0 && accelerationLevel < FULL_PROGRESSION_BAR && !stateAccelerating) {
                 increaseAcceleration(Gdx.graphics.getDeltaTime(), currentBoat);
             }
 
@@ -113,9 +110,8 @@ public class MyRowing extends ApplicationAdapter {
                 }
             }
         }
-        //Progression bar
-        batch.draw(knob, 1450, 800, knobWidth, knobHeight);
-        batch.draw(background, 1454, 804, backgroundWidth, backgroundHeight);
+        batch.draw(progressionBarRectangle, PBR_X_POS, PBR_Y_POS, progressionBarRectangleWidth, progressionBarRectangleHeight);
+        batch.draw(progressionBarBackground, PBB_X_POS, PBB_Y_POS, progressionBarBackgroundWidth, progressionBarBackgroundHeight);
 
         batch.end();
     }
@@ -128,15 +124,14 @@ public class MyRowing extends ApplicationAdapter {
 
     private void increaseAcceleration(float deltaTime, Boat boat) {
         accelerationLevel += ACCELERATION_BAR_INCREASE_RATE * deltaTime;
-        if (accelerationLevel >= 99) {
+        if (accelerationLevel >= FULL_PROGRESSION_BAR - 1) {
             boat.setIsAcceleratorAvailable(true);
         }
         updateAccelerationBar();
     }
 
     private void decreaseAcceleration(float delta, Boat boat) {
-        // Decrease acceleration level over time
-        float decreaseRate = 100; // Amount of acceleration decrease per second
+        float decreaseRate = FULL_PROGRESSION_BAR;
         accelerationLevel -= decreaseRate * delta;
         if (accelerationLevel <= 0) {
             accelerationLevel = 0;
@@ -149,10 +144,10 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private void updateAccelerationBar() {
-        float ratio = accelerationLevel / 100f;
-        backgroundWidth = 200 * ratio - 4;
-        if (backgroundWidth < 0) {
-            backgroundWidth = 0;
+        float ratio = accelerationLevel / FULL_PROGRESSION_BAR;
+        progressionBarBackgroundWidth = 2 * FULL_PROGRESSION_BAR * ratio - PROGRESSION_BAR_OFFSET;
+        if (progressionBarBackgroundWidth < 0) {
+            progressionBarBackgroundWidth = 0;
         }
     }
 }
