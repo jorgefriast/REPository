@@ -3,6 +3,8 @@ package com.introduction.rowing;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 
+import java.util.ArrayList;
+
 public class Boat extends Entity{
     private final int speedFactor;
     private final int acceleration;
@@ -32,7 +34,7 @@ public class Boat extends Entity{
             Gdx.input.setInputProcessor(inputProcessor);
     }
 
-    public void updateKeys(float delta) {
+    public void updateKeys(float delta, int leftBoundary) {
         if(!isPlayer) return;
         // Check if boat is moving based on input
         boolean moving = inputProcessor.moving;
@@ -57,7 +59,8 @@ public class Boat extends Entity{
             }
         }
         // Update boat position
-        position.setX(Math.round(Math.max(0, Math.min(Gdx.graphics.getWidth() - image.getWidth()/2, newX))));
+        int laneWidth = Constants.WINDOW_WIDTH / Constants.NUMBER_OF_LANES;
+        position.setX(Math.round(Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - image.getWidth()/2, newX))));
 
     }
 
@@ -75,6 +78,45 @@ public class Boat extends Entity{
             position.setY((int) Math.round( position.getY() + speedY));
         }
     }
+
+    /**
+     * Avoid obstacles on the way for the boat controlled by the computer
+     */
+    public void avoidObstacles(ArrayList<Entity> obstacles, int leftBoundary) {
+        Entity nearestObstacle = null;
+        double nearestDistance = Double.MAX_VALUE;
+        for (Entity obstacle : obstacles) {
+            double distance = Math.sqrt(Math.pow(obstacle.getPosition().getX() - position.getX(), 2) + Math.pow(obstacle.getPosition().getY() - position.getY(), 2));
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestObstacle = obstacle;
+            }
+        }
+        if (nearestObstacle != null) {
+            // Calculate desired position to steer away from the obstacle
+            int desiredX = position.getX();
+            int laneWidth = Constants.WINDOW_WIDTH / Constants.NUMBER_OF_LANES;
+            int boatWidth = image.getWidth();
+            int obstacleWidth = nearestObstacle.getWidth();
+            int buffer = 20;
+            int safeDistance = boatWidth / 2 + obstacleWidth / 2 + buffer;
+
+            if (nearestObstacle.getPosition().getX() < position.getX()) {
+                // Steer to the right if there's enough space; otherwise, steer to the left
+                desiredX = Math.max(leftBoundary, nearestObstacle.getPosition().getX() + obstacleWidth / 2 + safeDistance);
+            } else {
+                // Steer to the left if there's enough space; otherwise, steer to the right
+                desiredX = Math.min(leftBoundary + laneWidth - boatWidth, nearestObstacle.getPosition().getX() - obstacleWidth / 2 - safeDistance);
+            }
+
+            int newX = position.getX() + Math.round((desiredX - position.getX()) * 0.1f);
+
+            // ensure the boat stays within the lane
+            int positionInLane = Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - boatWidth/2, newX));
+            position.setX(positionInLane);
+        }
+    }
+
 
     /**
      * Calculate the current speed of the boat (Speed algorithm)
