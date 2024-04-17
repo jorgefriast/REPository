@@ -17,6 +17,7 @@ public class Boat extends Entity{
     private final boolean isPlayer;
     private int timeTicker = 0;
     private boolean accelerating = false;
+    private boolean isAcceleratorAvailable = false;
 
     public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentum, int fatigue) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
@@ -44,9 +45,10 @@ public class Boat extends Entity{
         if (moving) {
             switch (direction) {
                 case 0: // Up
-                    accelerating = true;
-                    updateY(delta);
-                    accelerating = false;
+                    if (isAcceleratorAvailable) {
+                        accelerating = true;
+                        updateY(delta);
+                    }
                     break;
                 case 1: // Left
                     newX -= (speedX * 2);
@@ -218,11 +220,22 @@ public class Boat extends Entity{
         return fatigue;
     }
 
-    /**
-     * Get the state of the boat (if it's controlled by the player or not)
-     * @return if its a player or not
-     */
-    public boolean isPlayer() {
+    //get isPlayer
+    public boolean getIsPlayer() {
         return isPlayer;
+    }
+
+    //get accelerating
+    public boolean getAccelerating() {
+        return accelerating;
+    }
+
+    //set accelerating
+    public void setAccelerating(boolean accelerating) {
+        this.accelerating = accelerating;
+    }
+
+    public void setIsAcceleratorAvailable(boolean b) {
+        isAcceleratorAvailable = b;
     }
 }

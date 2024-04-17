@@ -2,15 +2,23 @@ package com.introduction.rowing;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import sun.tools.jconsole.JConsole;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import static com.introduction.rowing.Constants.*;
 
 public class MyRowing extends ApplicationAdapter {
     SpriteBatch batch;
@@ -19,14 +27,23 @@ public class MyRowing extends ApplicationAdapter {
     Lane[] lanes;
 
     float stateTime = 0;
-    float frameDuration = 0.1f; // Adjust the frame duration as needed
+    float frameDuration = 0.1f;
     Texture boatPicture;
-
+    Texture progressionBarRectangle;
+    float progressionBarRectangleWidth = 204;
+    float progressionBarRectangleHeight = 54;
+    Texture progressionBarBackground;
+    float progressionBarBackgroundWidth = 196;
+    float progressionBarBackgroundHeight = 46;
+    float accelerationLevel = 0;
+    boolean stateAccelerating = false;
 
     @Override
     public void create() {
         batch = new SpriteBatch();
         boatPicture = new Texture("boat-top-view-2.png");
+        progressionBarRectangle = new Texture("progressionBarRectangle.png");
+        progressionBarBackground = new Texture("acceleration_bar_background.png");
 
         // Water GIF setup
         water = new TextureRegion[5];
@@ -60,12 +77,23 @@ public class MyRowing extends ApplicationAdapter {
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
             batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY(), currentBoat.getWidth(), currentBoat.getHeight());
-            if (currentBoat.isPlayer()) {
+            if (currentBoat.getIsPlayer()) {
                 currentBoat.updateKeys(Gdx.graphics.getDeltaTime(), lane.getLeftBoundary());
             } else {
                 currentBoat.avoidObstacles(lane.getObstacles(), lane.getLeftBoundary());
             }
-//            currentBoat.updateKeys(Gdx.graphics.getDeltaTime());
+
+            // Decrease acceleration level
+            if (currentBoat.getIsPlayer() && currentBoat.getAccelerating()) {
+                stateAccelerating = true;
+                decreaseAcceleration(Gdx.graphics.getDeltaTime(), currentBoat);
+            }
+
+            // Increase acceleration level
+            if (currentFrameIndex % 5 == 0 && accelerationLevel < FULL_PROGRESSION_BAR && !stateAccelerating) {
+                increaseAcceleration(Gdx.graphics.getDeltaTime(), currentBoat);
+            }
+
             //update boat's y position every 5 frames
             if (currentFrameIndex % 5 == 0) {
                 currentBoat.updateY(Gdx.graphics.getDeltaTime());
@@ -96,6 +124,9 @@ public class MyRowing extends ApplicationAdapter {
                 }
             }
         }
+        batch.draw(progressionBarRectangle, PBR_X_POS, PBR_Y_POS, progressionBarRectangleWidth, progressionBarRectangleHeight);
+        batch.draw(progressionBarBackground, PBB_X_POS, PBB_Y_POS, progressionBarBackgroundWidth, progressionBarBackgroundHeight);
+
         batch.end();
     }
 
@@ -103,5 +134,34 @@ public class MyRowing extends ApplicationAdapter {
     public void dispose() {
         batch.dispose();
         boatPicture.dispose();
+    }
+
+    private void increaseAcceleration(float deltaTime, Boat boat) {
+        accelerationLevel += ACCELERATION_BAR_INCREASE_RATE * deltaTime;
+        if (accelerationLevel >= FULL_PROGRESSION_BAR - 1) {
+            boat.setIsAcceleratorAvailable(true);
+        }
+        updateAccelerationBar();
+    }
+
+    private void decreaseAcceleration(float delta, Boat boat) {
+        float decreaseRate = FULL_PROGRESSION_BAR;
+        accelerationLevel -= decreaseRate * delta;
+        if (accelerationLevel <= 0) {
+            accelerationLevel = 0;
+            boat.setIsAcceleratorAvailable(false);
+            boat.setAccelerating(false);
+            stateAccelerating = false;
+        }
+        updateAccelerationBar();
+        boat.setAccelerating(false);
+    }
+
+    private void updateAccelerationBar() {
+        float ratio = accelerationLevel / FULL_PROGRESSION_BAR;
+        progressionBarBackgroundWidth = 2 * FULL_PROGRESSION_BAR * ratio - PROGRESSION_BAR_OFFSET;
+        if (progressionBarBackgroundWidth < 0) {
+            progressionBarBackgroundWidth = 0;
+        }
     }
 }
