@@ -23,9 +23,7 @@ import static com.introduction.rowing.Constants.*;
 public class MyRowing extends ApplicationAdapter {
     SpriteBatch batch;
     TextureRegion[] water;
-
     Lane[] lanes;
-
     float stateTime = 0;
     float frameDuration = 0.1f;
     Texture boatPicture;

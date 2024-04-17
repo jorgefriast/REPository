@@ -18,11 +18,12 @@ public class Boat extends Entity{
     private int timeTicker = 0;
     private boolean accelerating = false;
     private boolean isAcceleratorAvailable = false;
+    private int numberOfAvoidedObstacles = 0;
 
     public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentum, int fatigue) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
         this.speedX = maneuverability;
-        this.speedY = getCurrentSpeed();
+        this.speedY = getNewCalculatedSpeed();
         this.isPlayer = isPlayer;
         this.inputProcessor = new MyInputProcessor();
         this.speedFactor = speedFactor;
@@ -67,7 +68,7 @@ public class Boat extends Entity{
     public void updateY(float delta) {
         timeTicker++;
         // Update boat speed
-        speedY = getCurrentSpeed();
+        speedY = getNewCalculatedSpeed();
 
         // Boat cannot go higher than the middle of the screen
         if (position.getY() > Gdx.graphics.getHeight()/6) {
@@ -122,22 +123,20 @@ public class Boat extends Entity{
      * Calculate the current speed of the boat (Speed algorithm)
      * @return the current speed of the boat between -2.5 and 2.5
      */
-    public double getCurrentSpeed() {
+    public double getNewCalculatedSpeed() {
         double accelerationWeight = 0;
-        double fatigueWeight = -0.6;
-        double extraSpeed = 0;
+        double baseSpeed = 0;
 
         if (accelerating) {
             accelerationWeight = 0.5;
         }
 
         if (timeTicker % 10 == 0) {
-            extraSpeed = 0.5 * speedFactor;
+            baseSpeed = 0.5 * speedFactor;
         }
 
-        // Personnal note : max new speed will be 2.5 and min -2.5
-        double newSpeed =  extraSpeed + accelerationWeight * this.acceleration + fatigueWeight * this.fatigue;
-        return newSpeed;
+        // Personnal note : max new speed will be 2.5 max and min -2.5
+        return baseSpeed + accelerationWeight * this.acceleration;
     }
 
     /**
@@ -237,5 +236,17 @@ public class Boat extends Entity{
 
     public void setIsAcceleratorAvailable(boolean b) {
         isAcceleratorAvailable = b;
+    }
+
+    public void increaseNumberOfAvoidedObstacles() {
+        numberOfAvoidedObstacles++;
+    }
+
+    public int getNumberOfAvoidedObstacles() {
+        return numberOfAvoidedObstacles;
+    }
+
+    public void resetNumberOfAvoidedObstacles() {
+        numberOfAvoidedObstacles = 0;
     }
 }

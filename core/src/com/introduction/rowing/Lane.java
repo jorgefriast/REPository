@@ -68,6 +68,12 @@ public class Lane {
             if (boat.getBounds().intersects(obstacle.getBounds())) {
                 obstacles.remove(obstacle);
                 boat.setPosition(boat.getPosition().getX(), boat.getPosition().getY() - 50);
+                boat.resetNumberOfAvoidedObstacles();
+                break;
+            }
+            else if (obstacle.getPosition().getY() < 0) {
+                obstacles.remove(obstacle);
+                boat.increaseNumberOfAvoidedObstacles();
                 break;
             }
         }
