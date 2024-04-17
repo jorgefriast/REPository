@@ -27,6 +27,10 @@ public class Lane {
         return obstacles;
     }
 
+    public int getLeftBoundary() {
+        return leftBoundary;
+    }
+
     //create a method to check if its time to add an obstacle
     public boolean spawnObstacleReady(float delta) {
         Random rnd3 = new Random();
@@ -45,17 +49,27 @@ public class Lane {
         Random rnd = new Random();
         int random = rnd.nextInt(3);
         int LANE_WIDTH = Gdx.graphics.getWidth() / 4;
-        int randomWidth = rnd.nextInt(LANE_WIDTH);
+        int randomWidth = rnd.nextInt(LANE_WIDTH) - 50;
         Texture gees = new Texture("geeses-bg.png");
         Texture ducks = new Texture("duck-bg.png");
         Texture branch = new Texture("wood.png");
 
         if (random == 0) {
-            obstacles.add(new Gees(new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight()), 150, 150, gees));
+            obstacles.add(new Gees(new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight()), 100, 100, gees));
         } else if (random == 1) {
-            obstacles.add(new Ducks(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 150, 150, ducks));
+            obstacles.add(new Ducks(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, ducks));
         } else {
-            obstacles.add(new Branch(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 150, 150, branch));
+            obstacles.add(new Branch(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, branch));
+        }
+    }
+
+    public void collision(){
+        for (Entity obstacle : obstacles) {
+            if (boat.getBounds().intersects(obstacle.getBounds())) {
+                obstacles.remove(obstacle);
+                boat.setPosition(boat.getPosition().getX(), boat.getPosition().getY() - 50);
+                break;
+            }
         }
     }
 }
