@@ -9,7 +9,7 @@ public class Boat extends Entity{
     private final int speedFactor;
     private final int acceleration;
     private final int robustness;
-    private final int momentum;
+    private final int momentumFactor;
     private final int fatigue;
     private int speedX;
     private double speedY = 1;
@@ -20,7 +20,7 @@ public class Boat extends Entity{
     private boolean isAcceleratorAvailable = false;
     private int numberOfAvoidedObstacles = 0;
 
-    public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentum, int fatigue) {
+    public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentumFactor, int fatigue) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
         this.speedX = maneuverability;
         this.speedY = getNewCalculatedSpeed();
@@ -29,7 +29,7 @@ public class Boat extends Entity{
         this.speedFactor = speedFactor;
         this.acceleration = acceleration;
         this.robustness = robustness;
-        this.momentum = momentum;
+        this.momentumFactor = momentumFactor;
         this.fatigue = fatigue;
         if (isPlayer)
             Gdx.input.setInputProcessor(inputProcessor);
@@ -118,7 +118,6 @@ public class Boat extends Entity{
         }
     }
 
-
     /**
      * Calculate the current speed of the boat (Speed algorithm)
      * @return the current speed of the boat between -2.5 and 2.5
@@ -126,6 +125,7 @@ public class Boat extends Entity{
     public double getNewCalculatedSpeed() {
         double accelerationWeight = 0;
         double baseSpeed = 0;
+        double momentumEffect = 0;
 
         if (accelerating) {
             accelerationWeight = 0.5;
@@ -135,8 +135,28 @@ public class Boat extends Entity{
             baseSpeed = 0.5 * speedFactor;
         }
 
+        // Momentum effect
+        if (timeTicker % (7 - momentumFactor) == 0) {
+            momentumEffect = getCurrentMomentum();
+        }
+
         // Personnal note : max new speed will be 2.5 max and min -2.5
-        return baseSpeed + accelerationWeight * this.acceleration;
+        return baseSpeed + momentumEffect + accelerationWeight * this.acceleration;
+    }
+
+    private double getCurrentMomentum() {
+        if (numberOfAvoidedObstacles >= 15)
+            return 2.5;
+        else if (numberOfAvoidedObstacles >= 10)
+            return 2;
+        else if (numberOfAvoidedObstacles >= 8)
+            return 1.5;
+        else if (numberOfAvoidedObstacles >= 5)
+            return 1;
+        else if (numberOfAvoidedObstacles >= 3)
+            return 0.5;
+        else
+            return 0;
     }
 
     /**
@@ -207,8 +227,8 @@ public class Boat extends Entity{
      * Get the momentum of the boat
      * @return the momentum of the boat
      */
-    public int getMomentum() {
-        return momentum;
+    public int getMomentumFactor() {
+        return momentumFactor;
     }
 
     /**
