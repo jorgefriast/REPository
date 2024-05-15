@@ -27,12 +27,12 @@ public class MyRowing extends ApplicationAdapter {
     float stateTime = 0;
     float frameDuration = 0.1f;
     Texture boatPicture;
-    Texture progressionBarRectangle;
-    float progressionBarRectangleWidth = 204;
-    float progressionBarRectangleHeight = 54;
-    Texture progressionBarBackground;
-    float progressionBarBackgroundWidth = 196;
-    float progressionBarBackgroundHeight = 46;
+    Texture accelerationBarRectangle;
+    float accelerationBarRectangleWidth = 204;
+    float accelerationBarRectangleHeight = 54;
+    Texture accelerationBarBackground;
+    float accelerationBarBackgroundWidth = 196;
+    float accelerationBarBackgroundHeight = 46;
     float accelerationLevel = 0;
     boolean stateAccelerating = false;
 
@@ -40,8 +40,8 @@ public class MyRowing extends ApplicationAdapter {
     public void create() {
         batch = new SpriteBatch();
         boatPicture = new Texture("boat-top-view-2.png");
-        progressionBarRectangle = new Texture("progressionBarRectangle.png");
-        progressionBarBackground = new Texture("acceleration_bar_background.png");
+        accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
+        accelerationBarBackground = new Texture("acceleration_bar_background.png");
 
         // Water GIF setup
         water = new TextureRegion[5];
@@ -54,9 +54,9 @@ public class MyRowing extends ApplicationAdapter {
         for (int i = 0; i < Constants.NUMBER_OF_LANES; i++) {
             Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), -230);
             if (i == 0) {
-                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, true, 5, 5, 5, 5, 5, 0), currentLeftBoundary);
+                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, true, 1, 1, 5, 1, 1, 1), currentLeftBoundary);
             } else {
-                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, false, 1, 3, 5, 1, 1, 0), currentLeftBoundary);
+                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, false, 5, 5, 5, 5, 5, 5), currentLeftBoundary);
             }
             currentLeftBoundary += laneWidth;
         }
@@ -88,7 +88,7 @@ public class MyRowing extends ApplicationAdapter {
             }
 
             // Increase acceleration level
-            if (currentFrameIndex % 5 == 0 && accelerationLevel < FULL_PROGRESSION_BAR && !stateAccelerating) {
+            if (currentFrameIndex % 5 == 0 && accelerationLevel < FULL_ACCELERATION_BAR && !stateAccelerating) {
                 increaseAcceleration(Gdx.graphics.getDeltaTime(), currentBoat);
             }
 
@@ -122,8 +122,8 @@ public class MyRowing extends ApplicationAdapter {
                 }
             }
         }
-        batch.draw(progressionBarRectangle, PBR_X_POS, PBR_Y_POS, progressionBarRectangleWidth, progressionBarRectangleHeight);
-        batch.draw(progressionBarBackground, PBB_X_POS, PBB_Y_POS, progressionBarBackgroundWidth, progressionBarBackgroundHeight);
+        batch.draw(accelerationBarRectangle, PBR_X_POS, PBR_Y_POS, accelerationBarRectangleWidth, accelerationBarRectangleHeight);
+        batch.draw(accelerationBarBackground, PBB_X_POS, PBB_Y_POS, accelerationBarBackgroundWidth, accelerationBarBackgroundHeight);
 
         batch.end();
     }
@@ -136,14 +136,14 @@ public class MyRowing extends ApplicationAdapter {
 
     private void increaseAcceleration(float deltaTime, Boat boat) {
         accelerationLevel += ACCELERATION_BAR_INCREASE_RATE * deltaTime;
-        if (accelerationLevel >= FULL_PROGRESSION_BAR - 1) {
+        if (accelerationLevel >= FULL_ACCELERATION_BAR - 1) {
             boat.setIsAcceleratorAvailable(true);
         }
         updateAccelerationBar();
     }
 
     private void decreaseAcceleration(float delta, Boat boat) {
-        float decreaseRate = FULL_PROGRESSION_BAR;
+        float decreaseRate = FULL_ACCELERATION_BAR;
         accelerationLevel -= decreaseRate * delta;
         if (accelerationLevel <= 0) {
             accelerationLevel = 0;
@@ -156,10 +156,10 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private void updateAccelerationBar() {
-        float ratio = accelerationLevel / FULL_PROGRESSION_BAR;
-        progressionBarBackgroundWidth = 2 * FULL_PROGRESSION_BAR * ratio - PROGRESSION_BAR_OFFSET;
-        if (progressionBarBackgroundWidth < 0) {
-            progressionBarBackgroundWidth = 0;
+        float ratio = accelerationLevel / FULL_ACCELERATION_BAR;
+        accelerationBarBackgroundWidth = 2 * FULL_ACCELERATION_BAR * ratio - PROGRESSION_BAR_OFFSET;
+        if (accelerationBarBackgroundWidth < 0) {
+            accelerationBarBackgroundWidth = 0;
         }
     }
 }

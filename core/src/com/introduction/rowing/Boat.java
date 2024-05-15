@@ -2,7 +2,6 @@ package com.introduction.rowing;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-
 import java.util.ArrayList;
 
 public class Boat extends Entity{
@@ -19,6 +18,8 @@ public class Boat extends Entity{
     private boolean accelerating = false;
     private boolean isAcceleratorAvailable = false;
     private int numberOfAvoidedObstacles = 0;
+    private double fatigueLevel = 0;
+    private  float fatigueRate;
 
     public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentumFactor, int fatigue) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
@@ -31,6 +32,7 @@ public class Boat extends Entity{
         this.robustness = robustness;
         this.momentumFactor = momentumFactor;
         this.fatigue = fatigue;
+        this.fatigueRate = calculateFatigueRate(fatigue);
         if (isPlayer)
             Gdx.input.setInputProcessor(inputProcessor);
     }
@@ -67,6 +69,10 @@ public class Boat extends Entity{
 
     public void updateY(float delta) {
         timeTicker++;
+
+        // Increase fatigue over time
+        fatigueLevel += delta * fatigueRate;
+
         // Update boat speed
         speedY = getNewCalculatedSpeed();
 
@@ -126,6 +132,7 @@ public class Boat extends Entity{
         double accelerationWeight = 0;
         double baseSpeed = 0;
         double momentumEffect = 0;
+        double fatigueEffect = 1 - (fatigueLevel / 100);
 
         if (accelerating) {
             accelerationWeight = 0.5;
@@ -140,8 +147,17 @@ public class Boat extends Entity{
             momentumEffect = getCurrentMomentum();
         }
 
+        if (isPlayer) {
+            System.out.println("Player FatigueLevel: " + fatigueLevel);
+            System.out.println("Player fatigueEffect: " + fatigueEffect);
+            System.out.println("Player Speed: " + fatigueEffect * (baseSpeed + momentumEffect + accelerationWeight * this.acceleration));
+        }
+        else {
+            System.out.println("Computer: " + fatigueLevel);
+        }
+
         // Personnal note : max new speed will be 2.5 max and min -2.5
-        return baseSpeed + momentumEffect + accelerationWeight * this.acceleration;
+        return (baseSpeed + momentumEffect + accelerationWeight * this.acceleration) * fatigueEffect;
     }
 
     private double getCurrentMomentum() {
@@ -157,6 +173,12 @@ public class Boat extends Entity{
             return 0.5;
         else
             return 0;
+    }
+
+    private float calculateFatigueRate(int fatigue) {
+        // Calculate fatigue rate based on the fatigue value (higher fatigue value means slower fatigue increase)
+        // The fatigue rate is inversely proportional to the fatigue value
+        return 1.0f / fatigue;
     }
 
     /**
