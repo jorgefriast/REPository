@@ -54,7 +54,7 @@ public class MyRowing extends ApplicationAdapter {
         for (int i = 0; i < Constants.NUMBER_OF_LANES; i++) {
             Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), -230);
             if (i == 0) {
-                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, true, 1, 1, 5, 1, 1, 1), currentLeftBoundary);
+                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, true, 5, 1, 5, 5, 1, 1), currentLeftBoundary);
             } else {
                 lanes[i] = new Lane(new Boat(startingPosition, boatPicture, false, 5, 5, 5, 5, 5, 5), currentLeftBoundary);
             }

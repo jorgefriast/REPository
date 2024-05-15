@@ -10,8 +10,8 @@ public class Boat extends Entity{
     private final int robustness;
     private final int momentumFactor;
     private final int fatigue;
-    private int speedX;
-    private double speedY = 1;
+    private double speedX;
+    private double speedY;
     private final MyInputProcessor inputProcessor;
     private final boolean isPlayer;
     private int timeTicker = 0;
@@ -23,7 +23,7 @@ public class Boat extends Entity{
 
     public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentumFactor, int fatigue) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
-        this.speedX = maneuverability;
+        this.speedX = maneuverability * getFatigueEffect();
         this.speedY = getNewCalculatedSpeed();
         this.isPlayer = isPlayer;
         this.inputProcessor = new MyInputProcessor();
@@ -54,13 +54,16 @@ public class Boat extends Entity{
                     }
                     break;
                 case 1: // Left
-                    newX -= (speedX * 2);
+                    newX -= speedX * getFatigueEffect() * 2;
                     break;
                 case 3: // Right
-                    newX +=  (speedX * 2);
+                    newX += speedX * getFatigueEffect() * 2;
                     break;
             }
         }
+
+        System.out.println("speed: " + speedX * getFatigueEffect() * 2);
+
         // Update boat position
         int laneWidth = Constants.WINDOW_WIDTH / Constants.NUMBER_OF_LANES;
         position.setX(Math.round(Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - image.getWidth()/2, newX))));
@@ -132,7 +135,6 @@ public class Boat extends Entity{
         double accelerationWeight = 0;
         double baseSpeed = 0;
         double momentumEffect = 0;
-        double fatigueEffect = 1 - (fatigueLevel / 100);
 
         if (accelerating) {
             accelerationWeight = 0.5;
@@ -147,17 +149,8 @@ public class Boat extends Entity{
             momentumEffect = getCurrentMomentum();
         }
 
-        if (isPlayer) {
-            System.out.println("Player FatigueLevel: " + fatigueLevel);
-            System.out.println("Player fatigueEffect: " + fatigueEffect);
-            System.out.println("Player Speed: " + fatigueEffect * (baseSpeed + momentumEffect + accelerationWeight * this.acceleration));
-        }
-        else {
-            System.out.println("Computer: " + fatigueLevel);
-        }
-
         // Personnal note : max new speed will be 2.5 max and min -2.5
-        return (baseSpeed + momentumEffect + accelerationWeight * this.acceleration) * fatigueEffect;
+        return (baseSpeed + momentumEffect + accelerationWeight * this.acceleration) * getFatigueEffect();
     }
 
     private double getCurrentMomentum() {
@@ -181,6 +174,10 @@ public class Boat extends Entity{
         return 1.0f / fatigue;
     }
 
+    private double getFatigueEffect() {
+        return 1 - (fatigueLevel / 60);
+    }
+
     /**
      * Change the speed of the boat vertically
      * @param speed the new speed of the boat
@@ -201,7 +198,7 @@ public class Boat extends Entity{
      * Get the speed of the boat horizontally
      * @return the speed of the boat horizontally
      */
-    public int getSpeedX() {
+    public double getSpeedX() {
         return speedX;
     }
 
