@@ -12,22 +12,23 @@ public class Boat extends Entity{
     private final int fatigue;
     private double speedX;
     private double speedY;
-    private final MyInputProcessor inputProcessor;
+    private final GameInputProcessor inputProcessor;
     private final boolean isPlayer;
     private int timeTicker = 0;
     private boolean accelerating = false;
     private boolean isAcceleratorAvailable = false;
+    private int distance_traveled = 0;
     private int numberOfAvoidedObstacles = 0;
     private double fatigueLevel = 0;
     private  float fatigueRate;
     private int boatHealth;
 
-    public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentumFactor, int fatigue) {
+    public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentumFactor, int fatigue, GameInputProcessor inputProcessor) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
         this.speedX = maneuverability * getFatigueEffect();
         this.speedY = getNewCalculatedSpeed();
         this.isPlayer = isPlayer;
-        this.inputProcessor = new MyInputProcessor();
+        this.inputProcessor = inputProcessor;
         this.speedFactor = speedFactor;
         this.acceleration = acceleration;
         this.robustness = robustness;
@@ -63,8 +64,7 @@ public class Boat extends Entity{
                     break;
             }
         }
-
-        // Update boat position and speed
+        // Update boat position
         int laneWidth = Constants.WINDOW_WIDTH / Constants.NUMBER_OF_LANES;
         position.setX(Math.round(Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - image.getWidth()/2, newX))));
     }
@@ -84,6 +84,7 @@ public class Boat extends Entity{
         }
         else {
             // Update boat position
+            this.setDistance_traveled((int) Math.round(speedY));
             position.setY((int) Math.round( position.getY() + speedY));
         }
     }
@@ -148,7 +149,6 @@ public class Boat extends Entity{
             momentumEffect = getCurrentMomentum();
         }
 
-        // Personnal note : max new speed will be 2.5 max and min -2.5
         return (baseSpeed + momentumEffect + accelerationWeight * this.acceleration) * getFatigueEffect();
     }
 
@@ -223,6 +223,22 @@ public class Boat extends Entity{
      */
     public double getSpeedY() {
         return speedY;
+    }
+
+    /**
+     * Get the distance traveled by the boat
+     * @return the distance traveled by the boat
+     */
+    public int getDistance_traveled() {
+        return distance_traveled;
+    }
+
+    /**
+     * Set the distance traveled by the boat
+     * @param distance_traveled the distance traveled by the boat
+     */
+    public void setDistance_traveled(int distance_traveled) {
+        this.distance_traveled += distance_traveled;
     }
 
     /**

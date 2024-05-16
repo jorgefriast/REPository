@@ -13,6 +13,7 @@ public class Lane {
     Boat boat;
     int leftBoundary;
     private double newObstacleReady = 0;
+    private boolean finishLineAppeared = false;
 
     public Lane(Boat boat, int leftBoundary) {
         this.boat = boat;
@@ -31,13 +32,16 @@ public class Lane {
         return leftBoundary;
     }
 
-    //create a method to check if its time to add an obstacle
+    /**
+     * Method to check if the lane is ready to spawn an obstacle
+     * @param delta
+     */
     public boolean spawnObstacleReady(float delta) {
         Random rnd3 = new Random();
-        double tempsRecharge = 0.2;
+        double rechargeTime = 0.2;
         int temps = rnd3.nextInt(5);
-        tempsRecharge = tempsRecharge * temps;
-        newObstacleReady += tempsRecharge * delta;
+        rechargeTime = rechargeTime * temps;
+        newObstacleReady += rechargeTime * delta;
         if (newObstacleReady >= 0.8) {
             newObstacleReady = 0;
             return true;
@@ -70,7 +74,7 @@ public class Lane {
         for (Obstacle obstacle : obstacles) {
             if (boat.getBounds().intersects(obstacle.getBounds())) {
                 obstacles.remove(obstacle);
-                boat.setPosition(boat.getPosition().getX(), boat.getPosition().getY() - obstacle.pushBack);
+                boat.setPosition(boat.getPosition().getX(), Math.max(-230, boat.getPosition().getY() - obstacle.pushBack));
                 boat.resetNumberOfAvoidedObstacles();
                 boat.damageBoat(obstacle.getDamage());
                 if (boat.getIsPlayer() && boat.getBoatHealth() <= 0) {
