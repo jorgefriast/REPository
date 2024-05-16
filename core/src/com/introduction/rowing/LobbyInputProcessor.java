@@ -7,13 +7,13 @@ public class LobbyInputProcessor extends InputProcessor {
     public boolean keyDown(int keycode) {
         switch (keycode) {
             case Input.Keys.NUM_1:
-                gameState = GameState.PLAY_GAME;
+                setGameState(GameState.PLAY_GAME);
                 break;
             case Input.Keys.NUM_2:
-                gameState = GameState.PLAY_MINI_GAME;
+                setGameState(GameState.PLAY_MINI_GAME);
                 break;
             case Input.Keys.NUM_3:
-                gameState = GameState.ENTER_SHOP;
+                setGameState(GameState.ENTER_SHOP);
                 break;
 
         }

@@ -29,7 +29,7 @@ public class GameInputProcessor extends InputProcessor {
 				this.moving = true;
 				break;
 			case Input.Keys.ESCAPE:
-				gameState = GameState.LOBBY;
+				setGameState(GameState.LOBBY);
 				break;
 		}
 		return false;

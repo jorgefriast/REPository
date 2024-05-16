@@ -20,6 +20,7 @@ public class Entity {
 
     /**
      * Get the position of the entity
+     *
      * @return the position of the entity
      */
     public Position getPosition() {
@@ -28,6 +29,7 @@ public class Entity {
 
     /**
      * Get the width of the entity
+     *
      * @return the width of the entity
      */
     public int getWidth() {
@@ -36,6 +38,7 @@ public class Entity {
 
     /**
      * Get the height of the entity
+     *
      * @return the height of the entity
      */
     public int getHeight() {
@@ -44,6 +47,7 @@ public class Entity {
 
     /**
      * Get the image of the entity
+     *
      * @return the image of the entity
      */
     public Texture getImage() {

@@ -34,6 +34,7 @@ public class Lane {
 
     /**
      * Method to check if the lane is ready to spawn an obstacle
+     *
      * @param delta
      */
     public boolean spawnObstacleReady(float delta) {
@@ -65,16 +66,16 @@ public class Lane {
         if (random == 0) {
             obstacles.add(new Geese(new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight()), 100, 100, gees));
         } else if (random == 1) {
-            obstacles.add(new Ducks(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, ducks));
+            obstacles.add(new Ducks(new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight() - 50), 100, 100, ducks));
         } else {
-            obstacles.add(new Branch(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, branch));
+            obstacles.add(new Branch(new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight() - 50), 100, 100, branch));
         }
     }
 
     /**
      * Method to check for collision
      */
-    public void collision(){
+    public void collision() {
         for (Entity obstacle : obstacles) {
             if (boat.getBounds().intersects(obstacle.getBounds()) && !(obstacle instanceof FinishLine)) {
                 obstacles.remove(obstacle);
@@ -83,7 +84,6 @@ public class Lane {
             }
         }
     }
-
 
 
 }

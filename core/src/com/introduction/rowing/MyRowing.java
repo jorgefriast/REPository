@@ -74,7 +74,7 @@ public class MyRowing extends ApplicationAdapter {
     public void render() {
         ScreenUtils.clear(0, 1, 0, 1);
         batch.begin();
-        currentState = InputProcessor.gameState;
+        currentState = InputProcessor.getGameState();
         switch (currentState) {
             case LOBBY:
                 batch.draw(lobbyImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -98,15 +98,15 @@ public class MyRowing extends ApplicationAdapter {
 
     private void renderGame() {
         currentState = GameState.PLAY_GAME;
-        if(boatsPosition.size() == lanes.length) {
-            System.out.println("Game is finished winner is: "+ boatsPosition.get(0));
+        if (boatsPosition.size() == lanes.length) {
+            System.out.println("Game is finished winner is: " + boatsPosition.get(0));
         }
         // Water flow (GIF)
         stateTime += Gdx.graphics.getDeltaTime();
         int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
         batch.draw(water[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         //boat movement & obstacle spawning
-        if(stateTime > 1){
+        if (stateTime > 1) {
             finishLine();
         }
         boolean crossed;
@@ -141,13 +141,13 @@ public class MyRowing extends ApplicationAdapter {
             lane.collision();
 
             crossed = checkFinishLineCrossed(lane.getBoat());
-            if(crossed){
+            if (crossed) {
                 if (!boatsPosition.contains(currentBoat)) {
                     boatsPosition.add(currentBoat);
                 }
-//                if(boatsPosition.size() == lanes.length) {
-//                    System.out.println("Winner");
-//                }
+                if (boatsPosition.size() == lanes.length) {
+                    InputProcessor.setGameState(GameState.LOBBY);
+                }
             }
             //make the obstacles move
             ArrayList<Entity> obstacles = lane.getObstacles();
@@ -158,10 +158,9 @@ public class MyRowing extends ApplicationAdapter {
                     float movementSpeed = 2;
                     float deltaX = MathUtils.sinDeg(obstacle.getPosition().getY() * 5) * 5;
                     obstacle.adjustPosition(deltaX, -movementSpeed); // Move left to right with a downward speed
-                } else if(obstacle instanceof FinishLine){
+                } else if (obstacle instanceof FinishLine) {
                     obstacle.adjustPosition(0, -3);
-                }
-                else {
+                } else {
                     obstacle.adjustPosition(0, -5);
                 }
 //                obstacle.adjustPosition((float) 0, (float) (-5));
@@ -199,6 +198,7 @@ public class MyRowing extends ApplicationAdapter {
         }
 
     }
+
     /**
      * Method to make the finish line appear at the end of the game
      */
