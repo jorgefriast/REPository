@@ -20,6 +20,7 @@ public class Boat extends Entity{
     private int numberOfAvoidedObstacles = 0;
     private double fatigueLevel = 0;
     private  float fatigueRate;
+    private int boatHealth;
 
     public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentumFactor, int fatigue) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
@@ -35,6 +36,7 @@ public class Boat extends Entity{
         this.fatigueRate = calculateFatigueRate(fatigue);
         if (isPlayer)
             Gdx.input.setInputProcessor(inputProcessor);
+        this.boatHealth = determineBoatHealth();
     }
 
     public void updateKeys(float delta, int leftBoundary) {
@@ -62,12 +64,9 @@ public class Boat extends Entity{
             }
         }
 
-        System.out.println("speed: " + speedX * getFatigueEffect() * 2);
-
-        // Update boat position
+        // Update boat position and speed
         int laneWidth = Constants.WINDOW_WIDTH / Constants.NUMBER_OF_LANES;
         position.setX(Math.round(Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - image.getWidth()/2, newX))));
-
     }
 
     public void updateY(float delta) {
@@ -92,10 +91,10 @@ public class Boat extends Entity{
     /**
      * Avoid obstacles on the way for the boat controlled by the computer
      */
-    public void avoidObstacles(ArrayList<Entity> obstacles, int leftBoundary) {
-        Entity nearestObstacle = null;
+    public void avoidObstacles(ArrayList<Obstacle> obstacles, int leftBoundary) {
+        Obstacle nearestObstacle = null;
         double nearestDistance = Double.MAX_VALUE;
-        for (Entity obstacle : obstacles) {
+        for (Obstacle obstacle : obstacles) {
             double distance = Math.sqrt(Math.pow(obstacle.getPosition().getX() - position.getX(), 2) + Math.pow(obstacle.getPosition().getY() - position.getY(), 2));
             if (distance < nearestDistance) {
                 nearestDistance = distance;
@@ -153,7 +152,7 @@ public class Boat extends Entity{
         return (baseSpeed + momentumEffect + accelerationWeight * this.acceleration) * getFatigueEffect();
     }
 
-    private double getCurrentMomentum() {
+    public double getCurrentMomentum() {
         if (numberOfAvoidedObstacles >= 15)
             return 2.5;
         else if (numberOfAvoidedObstacles >= 10)
@@ -169,13 +168,29 @@ public class Boat extends Entity{
     }
 
     private float calculateFatigueRate(int fatigue) {
-        // Calculate fatigue rate based on the fatigue value (higher fatigue value means slower fatigue increase)
         // The fatigue rate is inversely proportional to the fatigue value
         return 1.0f / fatigue;
     }
 
-    private double getFatigueEffect() {
+    public double getFatigueEffect() {
         return 1 - (fatigueLevel / 60);
+    }
+
+    private int determineBoatHealth() {
+        switch (robustness) {
+            case 1:
+                return 50;
+            case 2:
+                return 75;
+            case 3:
+                return 100;
+            case 4:
+                return 125;
+            case 5:
+                return 150;
+            default:
+                return 0;
+        }
     }
 
     /**
@@ -258,17 +273,18 @@ public class Boat extends Entity{
         return fatigue;
     }
 
-    //get isPlayer
+    public int getBoatHealth() {
+        return boatHealth;
+    }
+
     public boolean getIsPlayer() {
         return isPlayer;
     }
 
-    //get accelerating
     public boolean getAccelerating() {
         return accelerating;
     }
 
-    //set accelerating
     public void setAccelerating(boolean accelerating) {
         this.accelerating = accelerating;
     }
@@ -287,5 +303,13 @@ public class Boat extends Entity{
 
     public void resetNumberOfAvoidedObstacles() {
         numberOfAvoidedObstacles = 0;
+    }
+
+    public void damageBoat(int damage) {
+        boatHealth -= damage;
+    }
+
+    public void setBoatHealth(int value) {
+        boatHealth = value;
     }
 }

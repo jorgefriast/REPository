@@ -2,8 +2,10 @@ package com.introduction.rowing;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -23,6 +25,7 @@ import static com.introduction.rowing.Constants.*;
 public class MyRowing extends ApplicationAdapter {
     SpriteBatch batch;
     TextureRegion[] water;
+    BitmapFont font;
     Lane[] lanes;
     float stateTime = 0;
     float frameDuration = 0.1f;
@@ -42,6 +45,9 @@ public class MyRowing extends ApplicationAdapter {
         boatPicture = new Texture("boat-top-view-2.png");
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
+        font = new BitmapFont();
+        font.setColor(Color.BLACK);
+        font.getData().setScale(2);
 
         // Water GIF setup
         water = new TextureRegion[5];
@@ -102,10 +108,10 @@ public class MyRowing extends ApplicationAdapter {
             }
             lane.collision();
             //make the obstacles move
-            ArrayList<Entity> obstacles = lane.getObstacles();
-            Iterator<Entity> iterator = obstacles.iterator();
+            ArrayList<Obstacle> obstacles = lane.getObstacles();
+            Iterator<Obstacle> iterator = obstacles.iterator();
             while (iterator.hasNext()) {
-                Entity obstacle = iterator.next();
+                Obstacle obstacle = iterator.next();
                 if (obstacle instanceof Gees) {
                     float movementSpeed = 2;
                     float deltaX = MathUtils.sinDeg(obstacle.getPosition().getY() * 5) * 5;
@@ -122,8 +128,25 @@ public class MyRowing extends ApplicationAdapter {
                 }
             }
         }
+        font.draw(batch, ACCELERATION_BAR_TEXT, 1400, 900);
         batch.draw(accelerationBarRectangle, PBR_X_POS, PBR_Y_POS, accelerationBarRectangleWidth, accelerationBarRectangleHeight);
         batch.draw(accelerationBarBackground, PBB_X_POS, PBB_Y_POS, accelerationBarBackgroundWidth, accelerationBarBackgroundHeight);
+
+        // Display the fatigue level of the player as a percentage in text
+        for (Lane lane : lanes) {
+            Boat currentBoat = lane.getBoat();
+            if (currentBoat.getIsPlayer()) {
+                double fatiguePercentage = currentBoat.getFatigueEffect();
+                String fatigueText = "Fatigue Effect: " + (int) (fatiguePercentage * 100) + "%";
+                String boatHealthText = "Boat Health: " + currentBoat.getBoatHealth();
+                String avoidedObstaclesText = "Avoided Obstacles: " + currentBoat.getNumberOfAvoidedObstacles();
+                String momentumText = "Momentum: " + currentBoat.getCurrentMomentum();
+                font.draw(batch, fatigueText, 1400, 750);
+                font.draw(batch, boatHealthText, 1400, 700);
+                font.draw(batch, avoidedObstaclesText, 1400, 650);
+                font.draw(batch, momentumText, 1400, 600);
+            }
+        }
 
         batch.end();
     }
