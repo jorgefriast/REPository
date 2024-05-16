@@ -74,16 +74,15 @@ public class MyRowing extends ApplicationAdapter {
     public void render() {
         ScreenUtils.clear(0, 1, 0, 1);
         batch.begin();
+        currentState = InputProcessor.gameState;
         switch (currentState) {
             case LOBBY:
                 batch.draw(lobbyImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 Gdx.input.setInputProcessor(lobbyInputProcessor);
-                currentState = InputProcessor.gameState;
                 break;
             case PLAY_GAME:
                 Gdx.input.setInputProcessor(gameInputProcessor);
                 renderGame();
-                currentState = InputProcessor.gameState;
                 break;
             case PLAY_MINI_GAME:
                 renderMiniGame();

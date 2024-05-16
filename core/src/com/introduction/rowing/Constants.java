@@ -11,5 +11,4 @@ public class Constants {
     public static final int PBB_X_POS = 1454;
     public static final int PBB_Y_POS = 804;
     public static final int PROGRESSION_BAR_OFFSET = 4;
-    public static final int FINISH_LINE_DISTANCE = 2;
 }

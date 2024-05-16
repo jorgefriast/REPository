@@ -13,7 +13,7 @@ public class Boat extends Entity{
     private final int fatigue;
     private int speedX;
     private double speedY = 1;
-    private GameInputProcessor inputProcessor;
+    private final GameInputProcessor inputProcessor;
     private final boolean isPlayer;
     private int timeTicker = 0;
     private boolean accelerating = false;

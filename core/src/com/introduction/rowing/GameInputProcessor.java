@@ -28,7 +28,7 @@ public class GameInputProcessor extends InputProcessor {
 				this.direction = 3;
 				this.moving = true;
 				break;
-			case Input.Keys.SPACE:
+			case Input.Keys.ESCAPE:
 				gameState = GameState.LOBBY;
 				break;
 		}
