@@ -11,6 +11,7 @@ public class Position {
 
     /**
      * Get the x coordinate of the position
+     *
      * @return the x coordinate of the position
      */
     public int getX() {
@@ -19,6 +20,7 @@ public class Position {
 
     /**
      * Get the y coordinate of the position
+     *
      * @return the y coordinate of the position
      */
     public int getY() {
@@ -27,6 +29,7 @@ public class Position {
 
     /**
      * Change the x coordinate of the position
+     *
      * @param x the new x coordinate of the position
      */
     public void setX(int x) {
@@ -35,6 +38,7 @@ public class Position {
 
     /**
      * Change the y coordinate of the position
+     *
      * @param y the new y coordinate of the position
      */
     public void setY(int y) {

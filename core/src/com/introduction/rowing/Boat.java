@@ -2,36 +2,40 @@ package com.introduction.rowing;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-
 import java.util.ArrayList;
 
 public class Boat extends Entity{
     private final int speedFactor;
     private final int acceleration;
     private final int robustness;
-    private final int momentum;
+    private final int momentumFactor;
     private final int fatigue;
-    private int speedX;
-    private double speedY = 1;
-    private final MyInputProcessor inputProcessor;
+    private double speedX;
+    private double speedY;
+    private final GameInputProcessor inputProcessor;
     private final boolean isPlayer;
     private int timeTicker = 0;
     private boolean accelerating = false;
     private boolean isAcceleratorAvailable = false;
+    private int distance_traveled = 0;
+    private int numberOfAvoidedObstacles = 0;
+    private double fatigueLevel = 0;
+    private  float fatigueRate;
+    private int boatHealth;
 
-    public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentum, int fatigue) {
+    public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentumFactor, int fatigue, GameInputProcessor inputProcessor) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
-        this.speedX = maneuverability;
-        this.speedY = getCurrentSpeed();
+        this.speedX = maneuverability * getFatigueEffect();
+        this.speedY = getNewCalculatedSpeed();
         this.isPlayer = isPlayer;
-        this.inputProcessor = new MyInputProcessor();
+        this.inputProcessor = inputProcessor;
         this.speedFactor = speedFactor;
         this.acceleration = acceleration;
         this.robustness = robustness;
-        this.momentum = momentum;
+        this.momentumFactor = momentumFactor;
         this.fatigue = fatigue;
-        if (isPlayer)
-            Gdx.input.setInputProcessor(inputProcessor);
+        this.fatigueRate = calculateFatigueRate(fatigue);
+        this.boatHealth = determineBoatHealth();
     }
 
     public void updateKeys(float delta, int leftBoundary) {
@@ -51,23 +55,26 @@ public class Boat extends Entity{
                     }
                     break;
                 case 1: // Left
-                    newX -= (speedX * 2);
+                    newX -= speedX * getFatigueEffect() * 2;
                     break;
                 case 3: // Right
-                    newX +=  (speedX * 2);
+                    newX += speedX * getFatigueEffect() * 2;
                     break;
             }
         }
         // Update boat position
         int laneWidth = Constants.WINDOW_WIDTH / Constants.NUMBER_OF_LANES;
         position.setX(Math.round(Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - image.getWidth()/2, newX))));
-
     }
 
     public void updateY(float delta) {
         timeTicker++;
+
+        // Increase fatigue over time
+        fatigueLevel += delta * fatigueRate;
+
         // Update boat speed
-        speedY = getCurrentSpeed();
+        speedY = getNewCalculatedSpeed();
 
         // Boat cannot go higher than the middle of the screen
         if (position.getY() > Gdx.graphics.getHeight()/6) {
@@ -75,6 +82,7 @@ public class Boat extends Entity{
         }
         else {
             // Update boat position
+            this.setDistance_traveled((int) Math.round(speedY));
             position.setY((int) Math.round( position.getY() + speedY));
         }
     }
@@ -82,10 +90,10 @@ public class Boat extends Entity{
     /**
      * Avoid obstacles on the way for the boat controlled by the computer
      */
-    public void avoidObstacles(ArrayList<Entity> obstacles, int leftBoundary) {
-        Entity nearestObstacle = null;
+    public void avoidObstacles(ArrayList<Obstacle> obstacles, int leftBoundary) {
+        Obstacle nearestObstacle = null;
         double nearestDistance = Double.MAX_VALUE;
-        for (Entity obstacle : obstacles) {
+        for (Obstacle obstacle : obstacles) {
             double distance = Math.sqrt(Math.pow(obstacle.getPosition().getX() - position.getX(), 2) + Math.pow(obstacle.getPosition().getY() - position.getY(), 2));
             if (distance < nearestDistance) {
                 nearestDistance = distance;
@@ -117,27 +125,70 @@ public class Boat extends Entity{
         }
     }
 
-
     /**
      * Calculate the current speed of the boat (Speed algorithm)
      * @return the current speed of the boat between -2.5 and 2.5
      */
-    public double getCurrentSpeed() {
+    public double getNewCalculatedSpeed() {
         double accelerationWeight = 0;
-        double fatigueWeight = -0.6;
-        double extraSpeed = 0;
+        double baseSpeed = 0;
+        double momentumEffect = 0;
 
         if (accelerating) {
             accelerationWeight = 0.5;
         }
 
         if (timeTicker % 10 == 0) {
-            extraSpeed = 0.5 * speedFactor;
+            baseSpeed = 0.5 * speedFactor;
         }
 
-        // Personnal note : max new speed will be 2.5 and min -2.5
-        double newSpeed =  extraSpeed + accelerationWeight * this.acceleration + fatigueWeight * this.fatigue;
-        return newSpeed;
+        // Momentum effect
+        if (timeTicker % (7 - momentumFactor) == 0) {
+            momentumEffect = getCurrentMomentum();
+        }
+
+        return (baseSpeed + momentumEffect + accelerationWeight * this.acceleration) * getFatigueEffect();
+    }
+
+    public double getCurrentMomentum() {
+        if (numberOfAvoidedObstacles >= 15)
+            return 2.5;
+        else if (numberOfAvoidedObstacles >= 10)
+            return 2;
+        else if (numberOfAvoidedObstacles >= 8)
+            return 1.5;
+        else if (numberOfAvoidedObstacles >= 5)
+            return 1;
+        else if (numberOfAvoidedObstacles >= 3)
+            return 0.5;
+        else
+            return 0;
+    }
+
+    private float calculateFatigueRate(int fatigue) {
+        // The fatigue rate is inversely proportional to the fatigue value
+        return 1.0f / fatigue;
+    }
+
+    public double getFatigueEffect() {
+        return 1 - (fatigueLevel / 60);
+    }
+
+    private int determineBoatHealth() {
+        switch (robustness) {
+            case 1:
+                return 50;
+            case 2:
+                return 75;
+            case 3:
+                return 100;
+            case 4:
+                return 125;
+            case 5:
+                return 150;
+            default:
+                return 0;
+        }
     }
 
     /**
@@ -160,7 +211,7 @@ public class Boat extends Entity{
      * Get the speed of the boat horizontally
      * @return the speed of the boat horizontally
      */
-    public int getSpeedX() {
+    public double getSpeedX() {
         return speedX;
     }
 
@@ -170,6 +221,22 @@ public class Boat extends Entity{
      */
     public double getSpeedY() {
         return speedY;
+    }
+
+    /**
+     * Get the distance traveled by the boat
+     * @return the distance traveled by the boat
+     */
+    public int getDistance_traveled() {
+        return distance_traveled;
+    }
+
+    /**
+     * Set the distance traveled by the boat
+     * @param distance_traveled the distance traveled by the boat
+     */
+    public void setDistance_traveled(int distance_traveled) {
+        this.distance_traveled += distance_traveled;
     }
 
     /**
@@ -208,8 +275,8 @@ public class Boat extends Entity{
      * Get the momentum of the boat
      * @return the momentum of the boat
      */
-    public int getMomentum() {
-        return momentum;
+    public int getMomentumFactor() {
+        return momentumFactor;
     }
 
     /**
@@ -220,22 +287,43 @@ public class Boat extends Entity{
         return fatigue;
     }
 
-    //get isPlayer
+    public int getBoatHealth() {
+        return boatHealth;
+    }
+
     public boolean getIsPlayer() {
         return isPlayer;
     }
 
-    //get accelerating
     public boolean getAccelerating() {
         return accelerating;
     }
 
-    //set accelerating
     public void setAccelerating(boolean accelerating) {
         this.accelerating = accelerating;
     }
 
     public void setIsAcceleratorAvailable(boolean b) {
         isAcceleratorAvailable = b;
+    }
+
+    public void increaseNumberOfAvoidedObstacles() {
+        numberOfAvoidedObstacles++;
+    }
+
+    public int getNumberOfAvoidedObstacles() {
+        return numberOfAvoidedObstacles;
+    }
+
+    public void resetNumberOfAvoidedObstacles() {
+        numberOfAvoidedObstacles = 0;
+    }
+
+    public void damageBoat(int damage) {
+        boatHealth -= damage;
+    }
+
+    public void setBoatHealth(int value) {
+        boatHealth = value;
     }
 }

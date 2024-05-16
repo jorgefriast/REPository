@@ -3,7 +3,7 @@ package com.introduction.rowing;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 
-public class MyInputProcessor extends InputAdapter {
+public class GameInputProcessor extends InputProcessor {
 
 	public boolean moving = false;
 	public int direction = 0;
@@ -11,7 +11,6 @@ public class MyInputProcessor extends InputAdapter {
 
 	@Override
 	public boolean keyDown(int keycode) {
-		// Handle key down events
 		switch (keycode) {
 			case Input.Keys.UP:
 				this.direction = 0;
@@ -28,6 +27,9 @@ public class MyInputProcessor extends InputAdapter {
 			case Input.Keys.RIGHT:
 				this.direction = 3;
 				this.moving = true;
+				break;
+			case Input.Keys.ESCAPE:
+				setGameState(GameState.LOBBY);
 				break;
 		}
 		return false;
