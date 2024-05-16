@@ -13,6 +13,7 @@ public class Lane {
     Boat boat;
     int leftBoundary;
     private double newObstacleReady = 0;
+    private boolean finishLineAppeared = false;
 
     public Lane(Boat boat, int leftBoundary) {
         this.boat = boat;
@@ -31,13 +32,16 @@ public class Lane {
         return leftBoundary;
     }
 
-    //create a method to check if its time to add an obstacle
+    /**
+     * Method to check if the lane is ready to spawn an obstacle
+     * @param delta
+     */
     public boolean spawnObstacleReady(float delta) {
         Random rnd3 = new Random();
-        double tempsRecharge = 0.2;
+        double rechargeTime = 0.2;
         int temps = rnd3.nextInt(5);
-        tempsRecharge = tempsRecharge * temps;
-        newObstacleReady += tempsRecharge * delta;
+        rechargeTime = rechargeTime * temps;
+        newObstacleReady += rechargeTime * delta;
         if (newObstacleReady >= 0.8) {
             newObstacleReady = 0;
             return true;
@@ -45,6 +49,10 @@ public class Lane {
         return false;
     }
 
+
+    /**
+     * Method to spawn obstacles
+     */
     public void spawnObstacles() {
         Random rnd = new Random();
         int random = rnd.nextInt(3);
@@ -55,7 +63,7 @@ public class Lane {
         Texture branch = new Texture("wood.png");
 
         if (random == 0) {
-            obstacles.add(new Gees(new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight()), 100, 100, gees));
+            obstacles.add(new Geese(new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight()), 100, 100, gees));
         } else if (random == 1) {
             obstacles.add(new Ducks(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, ducks));
         } else {
@@ -63,13 +71,19 @@ public class Lane {
         }
     }
 
+    /**
+     * Method to check for collision
+     */
     public void collision(){
         for (Entity obstacle : obstacles) {
-            if (boat.getBounds().intersects(obstacle.getBounds())) {
+            if (boat.getBounds().intersects(obstacle.getBounds()) && !(obstacle instanceof FinishLine)) {
                 obstacles.remove(obstacle);
-                boat.setPosition(boat.getPosition().getX(), boat.getPosition().getY() - 50);
+                boat.setPosition(boat.getPosition().getX(), Math.max(-230, boat.getPosition().getY() - 25));
                 break;
             }
         }
     }
+
+
+
 }

@@ -13,25 +13,28 @@ public class Boat extends Entity{
     private final int fatigue;
     private int speedX;
     private double speedY = 1;
-    private final MyInputProcessor inputProcessor;
+    private GameInputProcessor inputProcessor;
     private final boolean isPlayer;
     private int timeTicker = 0;
     private boolean accelerating = false;
     private boolean isAcceleratorAvailable = false;
+    private int distance_traveled = 0;
 
     public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentum, int fatigue) {
+        this(position, image, isPlayer, speedFactor, acceleration, robustness, maneuverability, momentum, fatigue, null);
+    }
+
+    public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentum, int fatigue, GameInputProcessor inputProcessor) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
         this.speedX = maneuverability;
         this.speedY = getCurrentSpeed();
         this.isPlayer = isPlayer;
-        this.inputProcessor = new MyInputProcessor();
+        this.inputProcessor = inputProcessor;
         this.speedFactor = speedFactor;
         this.acceleration = acceleration;
         this.robustness = robustness;
         this.momentum = momentum;
         this.fatigue = fatigue;
-        if (isPlayer)
-            Gdx.input.setInputProcessor(inputProcessor);
     }
 
     public void updateKeys(float delta, int leftBoundary) {
@@ -75,6 +78,7 @@ public class Boat extends Entity{
         }
         else {
             // Update boat position
+            this.setDistance_traveled((int) Math.round(speedY));
             position.setY((int) Math.round( position.getY() + speedY));
         }
     }
@@ -170,6 +174,22 @@ public class Boat extends Entity{
      */
     public double getSpeedY() {
         return speedY;
+    }
+
+    /**
+     * Get the distance traveled by the boat
+     * @return the distance traveled by the boat
+     */
+    public int getDistance_traveled() {
+        return distance_traveled;
+    }
+
+    /**
+     * Set the distance traveled by the boat
+     * @param distance_traveled the distance traveled by the boat
+     */
+    public void setDistance_traveled(int distance_traveled) {
+        this.distance_traveled += distance_traveled;
     }
 
     /**
