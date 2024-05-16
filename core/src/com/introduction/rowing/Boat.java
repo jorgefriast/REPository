@@ -35,8 +35,6 @@ public class Boat extends Entity{
         this.momentumFactor = momentumFactor;
         this.fatigue = fatigue;
         this.fatigueRate = calculateFatigueRate(fatigue);
-        if (isPlayer)
-            Gdx.input.setInputProcessor(inputProcessor);
         this.boatHealth = determineBoatHealth();
     }
 
