@@ -5,7 +5,7 @@ import java.io.*;
 public class MoneyBalance {
 
     private int balance;
-    private static final String FILE_PATH = "com/introduction/data/money_balance.txt";
+    private static final String FILE_PATH = "data/money_balance.txt";
 
     public MoneyBalance() {
         this.balance = readBalance();
