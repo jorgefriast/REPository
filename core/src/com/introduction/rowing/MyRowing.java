@@ -43,7 +43,9 @@ public class MyRowing extends ApplicationAdapter {
     LobbyInputProcessor lobbyInputProcessor;
     ScreenViewport viewport;
     Stage stage;
-    private MoneyBalance moneyBalance;
+    private DataManager dataManager;
+    int currentShopBoatIndex = 0;
+
 
     @Override
     public void create() {
@@ -69,7 +71,7 @@ public class MyRowing extends ApplicationAdapter {
         viewport = new ScreenViewport();
         stage = new Stage(viewport, batch);
 
-        moneyBalance = new MoneyBalance();
+        dataManager = new DataManager();
 
     }
 
@@ -109,7 +111,7 @@ public class MyRowing extends ApplicationAdapter {
             case LOBBY:
                 batch.draw(lobbyImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 Gdx.input.setInputProcessor(lobbyInputProcessor);
-                font.draw(batch, "Money balance: " + moneyBalance.getBalance(), 50, 50);
+                font.draw(batch, "Money balance: " + dataManager.getBalance(), 50, 50);
                 break;
             case PLAY_GAME:
                 Gdx.input.setInputProcessor(gameInputProcessor);
@@ -235,8 +237,44 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private void renderShop() {
-        // Render the shop
+        ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
 
+        Texture boatTexture = new Texture(Gdx.files.internal("boats/" + shopBoat.getImageName()));
+        batch.draw(boatTexture, 0, 0, 200, 200);
+        font.draw(batch, "Boat Name: " + shopBoat.getName(), 250, 1000);
+        font.draw(batch, "Speed Factor: " + shopBoat.getSpeedFactor(), 250, 800);
+        font.draw(batch, "Acceleration: " + shopBoat.getAcceleration(), 250, 700);
+        font.draw(batch, "Robustness: " + shopBoat.getRobustness(), 250, 600);
+        font.draw(batch, "Maneuverability: " + shopBoat.getManeuverability(), 250, 500);
+        font.draw(batch, "Momentum Factor: " + shopBoat.getMomentumFactor(), 250, 400);
+        font.draw(batch, "Fatigue: " + shopBoat.getFatigue(), 250, 300);
+        if (!shopBoat.isUnlocked()) {
+            font.draw(batch, "Price: " + shopBoat.getPrice(), 250, 200);
+        } else {
+            font.draw(batch, "Unlocked", 250, 200);
+            font.draw(batch, "Selected: " + shopBoat.isSelected(), 250, 100);
+        }
+    }
+
+    public void nextBoat() {
+        currentShopBoatIndex = (currentShopBoatIndex + 1) % dataManager.boats.size();
+    }
+
+    public void previousBoat() {
+        currentShopBoatIndex = (currentShopBoatIndex - 1 + dataManager.boats.size()) % dataManager.boats.size();
+    }
+
+    public void buyOrSelectBoat() {
+        ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
+        if (!shopBoat.isUnlocked() && dataManager.getBalance() >= shopBoat.getPrice()) {
+            shopBoat.setSelected(true);
+            dataManager.setBalance(dataManager.getBalance() - shopBoat.getPrice());
+        } else if (shopBoat.isSelected()) {
+            for (ShopBoat b : dataManager.boats) {
+                b.setSelected(false);
+            }
+            shopBoat.setSelected(true);
+        }
     }
 
     @Override
