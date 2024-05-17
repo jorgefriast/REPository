@@ -3,7 +3,6 @@ package com.introduction.rowing;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -44,6 +43,7 @@ public class MyRowing extends ApplicationAdapter {
     LobbyInputProcessor lobbyInputProcessor;
     ScreenViewport viewport;
     Stage stage;
+    private MoneyBalance moneyBalance;
 
     @Override
     public void create() {
@@ -68,6 +68,8 @@ public class MyRowing extends ApplicationAdapter {
         // Initialize the stage and viewport
         viewport = new ScreenViewport();
         stage = new Stage(viewport, batch);
+
+        moneyBalance = new MoneyBalance();
 
     }
 
@@ -107,6 +109,7 @@ public class MyRowing extends ApplicationAdapter {
             case LOBBY:
                 batch.draw(lobbyImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 Gdx.input.setInputProcessor(lobbyInputProcessor);
+                font.draw(batch, "Money balance: " + moneyBalance.getBalance(), 50, 50);
                 break;
             case PLAY_GAME:
                 Gdx.input.setInputProcessor(gameInputProcessor);
