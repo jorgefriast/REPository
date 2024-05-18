@@ -13,16 +13,16 @@ public class DragonHead extends Entity{
         if (inputProcessor.moving) {
             switch (inputProcessor.direction) {
                 case 0:
-                    this.position.setY((int) (this.position.getY() + (175 * delta)));
+                    this.position.setY((int) (this.position.getY() + (250 * delta)));
                     break;
                 case 1:
-                    this.position.setX((int) (this.position.getX() - (150 * delta)));
+                    this.position.setX((int) (this.position.getX() - (250 * delta)));
                     break;
                 case 2:
-                    this.position.setY((int) (this.position.getY() - (150 * delta)));
+                    this.position.setY((int) (this.position.getY() - (250 * delta)));
                     break;
                 case 3:
-                    this.position.setX((int) (this.position.getX() + (175 * delta)));
+                    this.position.setX((int) (this.position.getX() + (250 * delta)));
                     break;
             }
         }

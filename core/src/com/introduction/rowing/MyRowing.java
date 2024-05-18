@@ -15,7 +15,9 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.w3c.dom.Text;
 
+import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 import static com.introduction.rowing.Constants.*;
@@ -250,229 +252,263 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private void renderMiniGame() {
-        int difficulty = 1;
-        String gameTitle = "Tile master";
-        GlyphLayout layout = new GlyphLayout(font, gameTitle);
-        float titleWidth = layout.width;
-        font.draw(batch, gameTitle, (Gdx.graphics.getWidth() - titleWidth) / 2, Gdx.graphics.getHeight() - 50);
-
-        String coinsEarned = "Coins: "+ money + " ";
-        font.draw(batch, coinsEarned, 10, Gdx.graphics.getHeight() - 40);
-
-        String countdown = "Time: " + (int) (countdownTimer.getTime() + 1) +"s"; // Replace countdownVariable with your actual variable
-        GlyphLayout countDownLayout = new GlyphLayout(font, countdown);
-        float countdownWidth = countDownLayout.width;
-
-        font.draw(batch, countdown, Gdx.graphics.getWidth() - countdownWidth - 40, Gdx.graphics.getHeight() - 40);
-        // Render the mini-game
-        switch (miniGameState){
+        renderUI();
+        switch (miniGameState) {
             case NOT_STARTED:
-                // Render the mini-game not started
-                for (int i = 0; i < 4; i++){
-                    for (int j = 0; j < 4; j++){
-                        int tileWidth = Gdx.graphics.getWidth() / 4;
-                        float tileHeight = (float) (Gdx.graphics.getHeight() - 100) / 4;
-                        float x = i * tileWidth;
-                        float y = (3-j) * tileHeight;
-                        batch.draw(tiles, x, y, tileWidth, tileHeight);
-                    }
-                }
-                countdownTimer.start();
-                countdownTimer.update(Gdx.graphics.getDeltaTime());
-                if (countdownTimer.getTime() <= 0){
-                    countdownTimer.reset();
-                    randomObstacle = MathUtils.random(1, 4);
-                    miniGameState = MiniGameState.HIDING_ITEMS;
+                renderTiles();
+                updateCountdownTimer();
+                if (countdownTimer.getTime() <= 0) {
+                    prepareHidingItems();
                 }
                 break;
             case HIDING_ITEMS:
-                // Render the mini-game hiding items
-                countdownTimer.start();
-                countdownTimer.update(Gdx.graphics.getDeltaTime());
-                if (countdownTimer.getTime() <= 0){
-                    miniGameState = MiniGameState.SHOWING_ITEMS;
-                    countdownTimer.reset();
-                    itemTiles = new ArrayList<>();
-                    for(int i = 0; i < 16; i++){
-                        itemTiles.add(i, null);
-                    }
+                renderTiles();
+                updateCountdownTimer();
+                if (countdownTimer.getTime() <= 0) {
+                    prepareShowingItems();
                 }
-                for (int i = 0; i < 4; i++){
-                    for (int j = 0; j < 4; j++){
-                        int tileWidth = Gdx.graphics.getWidth() / 4;
-                        float tileHeight = (float) (Gdx.graphics.getHeight() - 100) / 4;
-                        float x = i * tileWidth;
-                        float y = (3-j) * tileHeight;
-                        batch.draw(tiles, x, y, tileWidth, tileHeight);
-                    }
-                }
-
-                switch (randomObstacle){
-                    case 1:
-                        Texture rockTexture = new Texture("rock.png");
-                        Rock rockItem = new Rock(new Position((Gdx.graphics.getWidth() - rockTexture.getWidth()/2), (Gdx.graphics.getHeight()- rockTexture.getHeight()/2)), 100, 100, rockTexture);
-                        batch.draw(rockItem.getImage(), rockItem.getPosition().getX(), rockItem.getPosition().getY(), rockItem.getWidth(), rockItem.getHeight());
-
-                        break;
-                    case 2:
-                        Texture geeseTexture = new Texture("geeses.png");
-                        Gees geeseItem = new Gees(new Position((Gdx.graphics.getWidth() - geeseTexture.getWidth()/2), (Gdx.graphics.getHeight()- geeseTexture.getHeight()/2)), 100, 100, geeseTexture);
-                        batch.draw(geeseItem.getImage(), geeseItem.getPosition().getX(), geeseItem.getPosition().getY(), geeseItem.getWidth(), geeseItem.getHeight());
-                        break;
-                    case 3:
-                        Texture duckTexture = new Texture("duck.jpg");
-                        Ducks duckItem = new Ducks(new Position((Gdx.graphics.getWidth() - duckTexture.getWidth()/2), (Gdx.graphics.getHeight()- duckTexture.getHeight()/2)), 100, 100, duckTexture);
-                        batch.draw(duckItem.getImage(), duckItem.getPosition().getX(), duckItem.getPosition().getY(), duckItem.getWidth(), duckItem.getHeight());
-                        break;
-                    case 4:
-                        Texture logTexture = new Texture("wood.png");
-                        Branch logItem = new Branch(new Position((Gdx.graphics.getWidth() - logTexture.getWidth()/2) , (Gdx.graphics.getHeight()- logTexture.getHeight()/2)), 100, 100, logTexture);
-                        batch.draw(logItem.getImage(), logItem.getPosition().getX(), logItem.getPosition().getY(), logItem.getWidth(), logItem.getHeight());
-                        break;
-                    default:
-                        break;
-                }
+                renderRandomObstacle();
                 break;
             case SHOWING_ITEMS:
-                // Render the mini-game showing items
-                int correctTileCount = MathUtils.random(2, 4);
-                while(correctTileCount > 0){
-                    int randomTile = MathUtils.random(0, 15);
-                    System.out.println(itemTiles.get(randomTile));
-                    if (itemTiles.get(randomTile) == null){
-                        int tileWidth = Gdx.graphics.getWidth() / 4;
-                        float tileHeight = (float) (Gdx.graphics.getHeight() - 100) / 4;
-                        int row = randomTile % 4;
-                        int column = randomTile / 4;
-
-                        float x = column * tileWidth;
-                        float y = (3 - row) * tileHeight;
-                        Texture correctTileTexture = new Texture("tile.jpg");
-
-                        switch(randomObstacle){
-                            case 1:
-                                 correctTileTexture = new Texture("rock_tile.png");
-                                break;
-                            case 2:
-                                 correctTileTexture = new Texture("geese_tile.png");
-                                break;
-                            case 3:
-                                 correctTileTexture = new Texture("duck_tile.png");
-                                break;
-                            case 4:
-                                 correctTileTexture = new Texture("log_tile.png");
-                                break;
-                            default:
-                                break;
-                        }
-
-                        itemTiles.set(randomTile, new Entity(new Position((int) x, (int) y), tileWidth, (int) tileHeight, correctTileTexture));
-                        correctTileCount--;
-                    }
-                }
-                for(int i = 0; i< itemTiles.size(); i++){
-                    if (itemTiles.get(i) == null){
-                        int tileWidth = Gdx.graphics.getWidth() / 4;
-                        float tileHeight = (float) (Gdx.graphics.getHeight() - 100) / 4;
-                        int row = i % 4;
-                        int column = i / 4;
-
-                        float x = column * tileWidth;
-                        float y = (3 - row) * tileHeight;
-                        int randomTileIncorrect = MathUtils.random(1, 4);
-                        while (randomTileIncorrect == randomObstacle){
-                            randomTileIncorrect = MathUtils.random(1, 4);
-                        }
-                        Texture inCorrectTileTexture = new Texture("tile.jpg");
-
-                        switch(randomTileIncorrect){
-                            case 1:
-                                inCorrectTileTexture = new Texture("rock_tile.png");
-                                break;
-                            case 2:
-                                inCorrectTileTexture = new Texture("geese_tile.png");
-                                break;
-                            case 3:
-                                inCorrectTileTexture = new Texture("duck_tile.png");
-                                break;
-                            case 4:
-                                inCorrectTileTexture = new Texture("log_tile.png");
-                                break;
-                            default:
-                                break;
-                        }
-
-                        itemTiles.set(i, new Entity(new Position((int) x, (int) y), tileWidth, (int) tileHeight, inCorrectTileTexture));
-                    }
-                }
+                preparePlayingState();
                 miniGameState = MiniGameState.PLAYING;
                 break;
             case PLAYING:
-                // Render the mini-game playing
-                for (Entity itemTile : itemTiles){
-                    batch.draw(itemTile.getImage(), itemTile.getPosition().getX(), itemTile.getPosition().getY(), itemTile.getWidth(), itemTile.getHeight());
-                }
-                countdownTimer.start();
-                countdownTimer.update(Gdx.graphics.getDeltaTime());
-                if (countdownTimer.getTime() <= 0){
+                renderItemTiles();
+                updateCountdownTimer();
+                if (countdownTimer.getTime() <= 0) {
                     miniGameState = MiniGameState.FINISHED;
                     countdownTimer.reset();
                 }
                 break;
             case FINISHED:
-                boolean correctTileClicked = false;
-                for (Entity itemTile : itemTiles){
-                    if (dragonPlayer.getBounds().intersects(itemTile.getBounds())){
-                         switch(randomObstacle){
-                            case 1:
-                                if (itemTile.getImage().toString().equals("rock_tile.png")){
-                                    money += 10;
-                                    correctTileClicked = true;
-                                }
-                                break;
-                            case 2:
-                                if (itemTile.getImage().toString().equals("geese_tile.png")){
-                                    money += 10;
-                                    correctTileClicked = true;
-                                }
-                                break;
-                            case 3:
-                                if (itemTile.getImage().toString().equals("duck_tile.png")){
-                                    money += 10;
-                                    correctTileClicked = true;
-                                }
-                                break;
-                            case 4:
-                                if (itemTile.getImage().toString().equals("log_tile.png")){
-                                    money += 10;
-                                    correctTileClicked = true;
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-                // Render the mini-game finished
-                if(correctTileClicked) {
+                boolean correctTileClicked = checkCorrectTileClicked();
+                if (correctTileClicked) {
                     miniGameState = MiniGameState.NOT_STARTED;
-                }else {
+                } else {
                     miniGameState = MiniGameState.GAME_OVER;
                 }
                 break;
             case GAME_OVER:
-                // Render the mini-game game over
-                batch.draw(gameOverMiniGame, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
+                renderGameOverScreen();
                 break;
             default:
                 break;
+        }
+        if (miniGameState != MiniGameState.GAME_OVER) {
+            renderDragonPlayer();
+        }
+    }
 
+    private void renderUI() {
+        String gameTitle = "Tile master";
+        GlyphLayout layout = new GlyphLayout(font, gameTitle);
+        float titleWidth = layout.width;
+        font.draw(batch, gameTitle, (Gdx.graphics.getWidth() - titleWidth) / 2, Gdx.graphics.getHeight() - 50);
+
+        String coinsEarned = "Coins: " + money + " ";
+        font.draw(batch, coinsEarned, 10, Gdx.graphics.getHeight() - 40);
+
+        String countdown = "Time: " + (int) (countdownTimer.getTime() + 1) + "s";
+        GlyphLayout countDownLayout = new GlyphLayout(font, countdown);
+        float countdownWidth = countDownLayout.width;
+        font.draw(batch, countdown, Gdx.graphics.getWidth() - countdownWidth - 40, Gdx.graphics.getHeight() - 40);
+    }
+
+    private void renderTiles() {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                int tileWidth = Gdx.graphics.getWidth() / 4;
+                float tileHeight = (float) (Gdx.graphics.getHeight() - 100) / 4;
+                float x = i * tileWidth;
+                float y = (3 - j) * tileHeight;
+                batch.draw(tiles, x, y, tileWidth, tileHeight);
+            }
         }
-        if(miniGameState != MiniGameState.GAME_OVER) {
-            dragonPlayer.updateKeys(Gdx.graphics.getDeltaTime());
-            batch.draw(dragonPlayer.getImage(), dragonPlayer.position.getX(), dragonPlayer.position.getY(), dragonPlayer.getWidth(), dragonPlayer.getHeight());
+    }
+
+    private void updateCountdownTimer() {
+        countdownTimer.start();
+        countdownTimer.update(Gdx.graphics.getDeltaTime());
+    }
+
+    private void prepareHidingItems() {
+        countdownTimer.reset();
+        randomObstacle = MathUtils.random(1, 4);
+        miniGameState = MiniGameState.HIDING_ITEMS;
+    }
+
+    private void renderRandomObstacle() {
+        Texture texture;
+        switch (randomObstacle) {
+            case 1:
+                texture = new Texture("rock.png");
+                break;
+            case 2:
+                texture = new Texture("geeses-bg.png");
+                break;
+            case 3:
+                texture = new Texture("duck-bg.jpg");
+                break;
+            case 4:
+                texture = new Texture("wood.png");
+                break;
+            default:
+                return;
         }
+        renderObstacle(texture);
+    }
+
+    private void renderObstacle(Texture texture) {
+        Entity obstacle = new Entity(
+                new Position((Gdx.graphics.getWidth() - texture.getWidth() / 2), (Gdx.graphics.getHeight() - texture.getHeight() / 2)),
+                100, 100, texture
+        );
+        batch.draw(obstacle.getImage(), obstacle.getPosition().getX(), obstacle.getPosition().getY(), obstacle.getWidth(), obstacle.getHeight());
+    }
+
+    private void prepareShowingItems() {
+        countdownTimer.reset();
+        itemTiles = new ArrayList<>(Collections.nCopies(16, null));
+        miniGameState = MiniGameState.SHOWING_ITEMS;
+    }
+
+    private void preparePlayingState() {
+        int correctTileCount = MathUtils.random(2, 4);
+        while (correctTileCount > 0) {
+            int randomTile = MathUtils.random(0, 15);
+            if (itemTiles.get(randomTile) == null) {
+                itemTiles.set(randomTile, createCorrectTile(randomTile));
+                correctTileCount--;
+            }
+        }
+        fillIncorrectTiles();
+    }
+
+    private Entity createCorrectTile(int index) {
+        int tileWidth = Gdx.graphics.getWidth() / 4;
+        float tileHeight = (float) (Gdx.graphics.getHeight() - 100) / 4;
+        int row = index % 4;
+        int column = index / 4;
+        float x = column * tileWidth;
+        float y = (3 - row) * tileHeight;
+        Texture texture;
+        switch (randomObstacle) {
+            case 1:
+                texture = new Texture("rock_tile.png");
+                break;
+            case 2:
+                texture = new Texture("geese_tile.png");
+                break;
+            case 3:
+                texture = new Texture("duck_tile.png");
+                break;
+            case 4:
+                texture = new Texture("log_tile.png");
+                break;
+            default:
+                return null;
+        }
+        return new Entity(new Position((int) x, (int) y), tileWidth, (int) tileHeight, texture);
+    }
+
+    private void fillIncorrectTiles() {
+        for (int i = 0; i < itemTiles.size(); i++) {
+            if (itemTiles.get(i) == null) {
+                itemTiles.set(i, createIncorrectTile(i));
+            }
+        }
+    }
+
+    private Entity createIncorrectTile(int index) {
+        int tileWidth = Gdx.graphics.getWidth() / 4;
+        float tileHeight = (float) (Gdx.graphics.getHeight() - 100) / 4;
+        int row = index % 4;
+        int column = index / 4;
+        float x = column * tileWidth;
+        float y = (3 - row) * tileHeight;
+        int randomTileIncorrect;
+        do {
+            randomTileIncorrect = MathUtils.random(1, 4);
+        } while (randomTileIncorrect == randomObstacle);
+        Texture texture;
+        switch (randomTileIncorrect) {
+            case 1:
+                texture = new Texture("rock_tile.png");
+                break;
+            case 2:
+                texture = new Texture("geese_tile.png");
+                break;
+            case 3:
+                texture = new Texture("duck_tile.png");
+                break;
+            case 4:
+                texture = new Texture("log_tile.png");
+                break;
+            default:
+                return null;
+        }
+        return new Entity(new Position((int) x, (int) y), tileWidth, (int) tileHeight, texture);
+    }
+
+    private void renderItemTiles() {
+        for (Entity itemTile : itemTiles) {
+            batch.draw(itemTile.getImage(), itemTile.getPosition().getX(), itemTile.getPosition().getY(), itemTile.getWidth(), itemTile.getHeight());
+        }
+    }
+
+    private boolean checkCorrectTileClicked() {
+        for (Entity itemTile : itemTiles) {
+            if (isDragonPlayerInsideTile(dragonPlayer, itemTile)){
+                switch (randomObstacle) {
+                    case 1:
+                        if (itemTile.getImage().toString().equals("rock_tile.png")) {
+                            money += 10;
+                            return true;
+                        }
+                        break;
+                    case 2:
+                        if (itemTile.getImage().toString().equals("geese_tile.png")) {
+                            money += 10;
+                            return true;
+                        }
+                        break;
+                    case 3:
+                        if (itemTile.getImage().toString().equals("duck_tile.png")) {
+                            money += 10;
+                            return true;
+                        }
+                        break;
+                    case 4:
+                        if (itemTile.getImage().toString().equals("log_tile.png")) {
+                            money += 10;
+                            return true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return false;
+    }
+    private boolean isDragonPlayerInsideTile(Entity dragonPlayer, Entity itemTile) {
+        Rectangle dragonBounds = dragonPlayer.getBounds();
+        Rectangle tileBounds = itemTile.getBounds();
+
+        return tileBounds.contains(dragonBounds.x, dragonBounds.y) &&
+                tileBounds.contains(dragonBounds.x + dragonBounds.width, dragonBounds.y) &&
+                tileBounds.contains(dragonBounds.x, dragonBounds.y + dragonBounds.height) &&
+                tileBounds.contains(dragonBounds.x + dragonBounds.width, dragonBounds.y + dragonBounds.height);
+    }
+
+    private void renderGameOverScreen() {
+        batch.draw(gameOverMiniGame, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    }
+
+    private void renderDragonPlayer() {
+        dragonPlayer.updateKeys(Gdx.graphics.getDeltaTime());
+        batch.draw(dragonPlayer.getImage(), dragonPlayer.position.getX(), dragonPlayer.position.getY(), dragonPlayer.getWidth(), dragonPlayer.getHeight());
     }
 
     private void renderShop() {
