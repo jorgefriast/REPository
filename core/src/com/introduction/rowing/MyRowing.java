@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,7 +26,6 @@ public class MyRowing extends ApplicationAdapter {
     TextureRegion[] water;
     TextureRegion[] shopBackground;
     BitmapFont font;
-    BitmapFont font2;
     Lane[] lanes;
     float stateTime = 0;
     float frameDuration = 0.1f;
@@ -49,6 +49,8 @@ public class MyRowing extends ApplicationAdapter {
     Stage stage;
     private DataManager dataManager;
     int currentShopBoatIndex = 0;
+    FreeTypeFontGenerator generator;
+    FreeTypeFontParameter parameter;
 
 
     @Override
@@ -60,12 +62,11 @@ public class MyRowing extends ApplicationAdapter {
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
 
         // Load the custom font using FreeTypeFontGenerator
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Zanden.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 32; // Set the font size
-        parameter.color = Color.WHITE; // Set the font color
-        font2 = generator.generateFont(parameter);
-        generator.dispose(); // Don't forget to dispose the generator
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("Zanden.ttf"));
+        parameter = new FreeTypeFontParameter();
+        parameter.size = 32;
+        parameter.color = Color.BLACK;
+        font = generator.generateFont(parameter);
 
         currentState = GameState.LOBBY;
         gameInputProcessor = new GameInputProcessor();
@@ -125,7 +126,7 @@ public class MyRowing extends ApplicationAdapter {
             case LOBBY:
                 batch.draw(lobbyImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 Gdx.input.setInputProcessor(lobbyInputProcessor);
-                font.draw(batch, "Money balance: " + dataManager.getBalance(), 50, 50);
+                font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
                 break;
             case PLAY_GAME:
                 Gdx.input.setInputProcessor(gameInputProcessor);
@@ -305,6 +306,7 @@ public class MyRowing extends ApplicationAdapter {
         accelerationBarRectangle.dispose();
         accelerationBarBackground.dispose();
         finishLineTexture.dispose();
+        generator.dispose();
         for (TextureRegion textureRegion : water) {
             textureRegion.getTexture().dispose();
         }
