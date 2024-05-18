@@ -22,7 +22,7 @@ public class GameInputProcessor extends InputProcessor {
 				break;
 			case Input.Keys.DOWN:
 				this.direction = 2;
-				this.moving = false;
+				this.moving = true;
 				break;
 			case Input.Keys.RIGHT:
 				this.direction = 3;
