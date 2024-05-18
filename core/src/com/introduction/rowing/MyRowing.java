@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ public class MyRowing extends ApplicationAdapter {
     GameState currentState;
     Texture lobbyImage;
     TextureRegion[] water;
+    TextureRegion[] shopBackground;
     BitmapFont font;
     Lane[] lanes;
     float stateTime = 0;
@@ -41,6 +43,7 @@ public class MyRowing extends ApplicationAdapter {
 
     GameInputProcessor gameInputProcessor;
     LobbyInputProcessor lobbyInputProcessor;
+    ShopInputProcessor shopInputProcessor;
     ScreenViewport viewport;
     Stage stage;
     private DataManager dataManager;
@@ -54,18 +57,29 @@ public class MyRowing extends ApplicationAdapter {
         boatPicture = new Texture("boat-top-view-2.png");
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
-        font = new BitmapFont();
-        font.setColor(Color.BLACK);
-        font.getData().setScale(2);
-        currentState = GameState.LOBBY;
 
+        // Load the custom font using FreeTypeFontGenerator
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Zanden.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 32; // Set the font size
+        parameter.color = Color.WHITE; // Set the font color
+        font = generator.generateFont(parameter);
+        generator.dispose(); // Don't forget to dispose the generator
+
+        currentState = GameState.LOBBY;
         gameInputProcessor = new GameInputProcessor();
         lobbyInputProcessor = new LobbyInputProcessor();
+        shopInputProcessor = new ShopInputProcessor(this);
 
         // Water GIF setup
         water = new TextureRegion[5];
         for (int i = 0; i < water.length; i++)
             water[i] = new TextureRegion(new Texture("water-frames//frame_" + i + "_delay-0.1s.gif"));
+
+        // Shop Background GIF
+        shopBackground = new TextureRegion[6];
+        for (int i = 0; i < shopBackground.length; i++)
+            shopBackground[i] = new TextureRegion(new Texture("shop-background//frame_" + i + "_delay-0.1s.gif"));
 
         // Initialize the stage and viewport
         viewport = new ScreenViewport();
@@ -90,7 +104,6 @@ public class MyRowing extends ApplicationAdapter {
             }
             currentLeftBoundary += laneWidth;
         }
-        System.out.println("Game created");
     }
 
     public void resetGame() {
@@ -121,6 +134,7 @@ public class MyRowing extends ApplicationAdapter {
                 renderMiniGame();
                 break;
             case ENTER_SHOP:
+                Gdx.input.setInputProcessor(shopInputProcessor);
                 renderShop();
                 break;
             default:
@@ -238,6 +252,11 @@ public class MyRowing extends ApplicationAdapter {
 
     private void renderShop() {
         ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
+
+        // Background GIF
+        stateTime += Gdx.graphics.getDeltaTime();
+        int currentFrameIndex = (int) (stateTime / frameDuration) % 6;
+        batch.draw(shopBackground[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         Texture boatTexture = new Texture(Gdx.files.internal("boats/" + shopBoat.getImageName()));
         batch.draw(boatTexture, 0, 0, 200, 200);

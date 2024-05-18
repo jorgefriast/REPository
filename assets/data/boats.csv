@@ -4,7 +4,7 @@ id,name,price,imageName,speedFactor,acceleration,robustness,maneuverability,mome
 3,Steady Stream,800,steady_stream.png,2,3,3,2,3,2,false,false
 4,Wave Rider,1200,wave_rider.png,3,3,2,3,3,3,false,false
 5,Speedster,1500,speedster.png,4,4,2,3,4,3,false,false
-6,Fire Dragon,1800,tough_treader.png,3,3,4,2,4,4,false,false
+6,Fire Dragon,1800,fire_dragon.png,3,3,4,2,4,4,false,false
 7,Agile Arrow,2100,agile_arrow.png,3,4,3,4,3,4,false,false
 8,Marathoner,2500,marathoner.png,4,3,4,3,4,4,false,false
 9,Blazing Boat,3000,blazing_boat.png,4,4,4,4,4,4,false,false
