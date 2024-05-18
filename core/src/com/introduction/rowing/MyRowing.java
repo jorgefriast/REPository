@@ -48,14 +48,14 @@ public class MyRowing extends ApplicationAdapter {
     CountdownTimer countdownTimer;
     int randomObstacle;
     ArrayList<Entity> itemTiles;
+    Texture gameOverMiniGame;
     int money;
 
     GameInputProcessor gameInputProcessor;
     LobbyInputProcessor lobbyInputProcessor;
-    GameInputProcessor miniGameInputProcessor;
+    MiniGameInputProcessor miniGameInputProcessor;
     ScreenViewport viewport;
     Stage stage;
-
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -65,6 +65,7 @@ public class MyRowing extends ApplicationAdapter {
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
         tiles = new Texture("tile.jpg");
         dragonHead = new Texture("head-removebg.png");
+        gameOverMiniGame = new Texture("GameOver.png");
         font = new BitmapFont();
         font.setColor(Color.BLACK);
         font.getData().setScale(2);
@@ -72,15 +73,13 @@ public class MyRowing extends ApplicationAdapter {
         currentState = GameState.LOBBY;
         miniGameState = MiniGameState.NOT_STARTED;
 
-        gameInputProcessor = new GameInputProcessor();
-        lobbyInputProcessor = new LobbyInputProcessor();
-        miniGameInputProcessor = new GameInputProcessor();
-        dragonPlayer = new DragonHead(new Position((Gdx.graphics.getWidth() - dragonHead.getWidth()/2) / 2, (Gdx.graphics.getHeight() - dragonHead.getHeight()/2) / 2 -50), dragonHead.getWidth() /2, dragonHead.getHeight()/2, dragonHead, gameInputProcessor);
+        gameInputProcessor = new GameInputProcessor(this);
+        lobbyInputProcessor = new LobbyInputProcessor(this);
+        miniGameInputProcessor = new MiniGameInputProcessor(this);
+        dragonPlayer = new DragonHead(new Position((Gdx.graphics.getWidth() - dragonHead.getWidth()/2) / 2, (Gdx.graphics.getHeight() - dragonHead.getHeight()/2) / 2 -50), dragonHead.getWidth() /2, dragonHead.getHeight()/2, dragonHead, miniGameInputProcessor);
         countdownTimer = new CountdownTimer(3);
         randomObstacle = 1;
         money = 0;
-
-
 
         // Water GIF setup
         water = new TextureRegion[5];
@@ -135,7 +134,7 @@ public class MyRowing extends ApplicationAdapter {
                 renderGame();
                 break;
             case PLAY_MINI_GAME:
-                Gdx.input.setInputProcessor(gameInputProcessor);
+                Gdx.input.setInputProcessor(miniGameInputProcessor);
                 renderMiniGame();
                 break;
             case ENTER_SHOP:
@@ -265,12 +264,10 @@ public class MyRowing extends ApplicationAdapter {
         float countdownWidth = countDownLayout.width;
 
         font.draw(batch, countdown, Gdx.graphics.getWidth() - countdownWidth - 40, Gdx.graphics.getHeight() - 40);
-        //draw the dragon head in the middle of the screen
         // Render the mini-game
         switch (miniGameState){
             case NOT_STARTED:
                 // Render the mini-game not started
-                // render on the screen 16 tiles in a 4x4 grid
                 for (int i = 0; i < 4; i++){
                     for (int j = 0; j < 4; j++){
                         int tileWidth = Gdx.graphics.getWidth() / 4;
@@ -290,7 +287,6 @@ public class MyRowing extends ApplicationAdapter {
                 break;
             case HIDING_ITEMS:
                 // Render the mini-game hiding items
-                // random selector between a rock, a geese, a duck and a log to be displayed on the screen
                 countdownTimer.start();
                 countdownTimer.update(Gdx.graphics.getDeltaTime());
                 if (countdownTimer.getTime() <= 0){
@@ -310,30 +306,27 @@ public class MyRowing extends ApplicationAdapter {
                         batch.draw(tiles, x, y, tileWidth, tileHeight);
                     }
                 }
+
                 switch (randomObstacle){
                     case 1:
-                        // render a rock
                         Texture rockTexture = new Texture("rock.png");
-                        Rock rockItem = new Rock(new Position((Gdx.graphics.getWidth() - rockTexture.getWidth()/2) / 3, (Gdx.graphics.getHeight()- rockTexture.getHeight()/2)/3), 100, 100, rockTexture);
+                        Rock rockItem = new Rock(new Position((Gdx.graphics.getWidth() - rockTexture.getWidth()/2), (Gdx.graphics.getHeight()- rockTexture.getHeight()/2)), 100, 100, rockTexture);
                         batch.draw(rockItem.getImage(), rockItem.getPosition().getX(), rockItem.getPosition().getY(), rockItem.getWidth(), rockItem.getHeight());
 
                         break;
                     case 2:
                         Texture geeseTexture = new Texture("geeses.png");
-                        Gees geeseItem = new Gees(new Position((Gdx.graphics.getWidth() - geeseTexture.getWidth()/2) / 3, (Gdx.graphics.getHeight()- geeseTexture.getHeight()/2)/3), 100, 100, geeseTexture);
+                        Gees geeseItem = new Gees(new Position((Gdx.graphics.getWidth() - geeseTexture.getWidth()/2), (Gdx.graphics.getHeight()- geeseTexture.getHeight()/2)), 100, 100, geeseTexture);
                         batch.draw(geeseItem.getImage(), geeseItem.getPosition().getX(), geeseItem.getPosition().getY(), geeseItem.getWidth(), geeseItem.getHeight());
-                        // render a geese
                         break;
                     case 3:
-                        // render a duck
                         Texture duckTexture = new Texture("duck.jpg");
-                        Ducks duckItem = new Ducks(new Position((Gdx.graphics.getWidth() - duckTexture.getWidth()/2) / 3, (Gdx.graphics.getHeight()- duckTexture.getHeight()/2)/3), 100, 100, duckTexture);
+                        Ducks duckItem = new Ducks(new Position((Gdx.graphics.getWidth() - duckTexture.getWidth()/2), (Gdx.graphics.getHeight()- duckTexture.getHeight()/2)), 100, 100, duckTexture);
                         batch.draw(duckItem.getImage(), duckItem.getPosition().getX(), duckItem.getPosition().getY(), duckItem.getWidth(), duckItem.getHeight());
                         break;
                     case 4:
-                        // render a log
                         Texture logTexture = new Texture("wood.png");
-                        Branch logItem = new Branch(new Position((Gdx.graphics.getWidth() - logTexture.getWidth()/2) / 3, (Gdx.graphics.getHeight()- logTexture.getHeight()/2)), 100, 100, logTexture);
+                        Branch logItem = new Branch(new Position((Gdx.graphics.getWidth() - logTexture.getWidth()/2) , (Gdx.graphics.getHeight()- logTexture.getHeight()/2)), 100, 100, logTexture);
                         batch.draw(logItem.getImage(), logItem.getPosition().getX(), logItem.getPosition().getY(), logItem.getWidth(), logItem.getHeight());
                         break;
                     default:
@@ -427,28 +420,32 @@ public class MyRowing extends ApplicationAdapter {
                 }
                 break;
             case FINISHED:
-                //check if the player is standing on the correct tile and update the money, the correct tile is the one that has the same image as the random obstacle
+                boolean correctTileClicked = false;
                 for (Entity itemTile : itemTiles){
                     if (dragonPlayer.getBounds().intersects(itemTile.getBounds())){
                          switch(randomObstacle){
                             case 1:
                                 if (itemTile.getImage().toString().equals("rock_tile.png")){
                                     money += 10;
+                                    correctTileClicked = true;
                                 }
                                 break;
                             case 2:
                                 if (itemTile.getImage().toString().equals("geese_tile.png")){
                                     money += 10;
+                                    correctTileClicked = true;
                                 }
                                 break;
                             case 3:
                                 if (itemTile.getImage().toString().equals("duck_tile.png")){
                                     money += 10;
+                                    correctTileClicked = true;
                                 }
                                 break;
                             case 4:
                                 if (itemTile.getImage().toString().equals("log_tile.png")){
                                     money += 10;
+                                    correctTileClicked = true;
                                 }
                                 break;
                             default:
@@ -457,14 +454,25 @@ public class MyRowing extends ApplicationAdapter {
                     }
                 }
                 // Render the mini-game finished
-                miniGameState = MiniGameState.NOT_STARTED;
+                if(correctTileClicked) {
+                    miniGameState = MiniGameState.NOT_STARTED;
+                }else {
+                    miniGameState = MiniGameState.GAME_OVER;
+                }
+                break;
+            case GAME_OVER:
+                // Render the mini-game game over
+                batch.draw(gameOverMiniGame, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
                 break;
             default:
                 break;
 
         }
-        dragonPlayer.updateKeys(Gdx.graphics.getDeltaTime());
-        batch.draw(dragonPlayer.getImage(), dragonPlayer.position.getX(), dragonPlayer.position.getY(), dragonPlayer.getWidth(), dragonPlayer.getHeight());
+        if(miniGameState != MiniGameState.GAME_OVER) {
+            dragonPlayer.updateKeys(Gdx.graphics.getDeltaTime());
+            batch.draw(dragonPlayer.getImage(), dragonPlayer.position.getX(), dragonPlayer.position.getY(), dragonPlayer.getWidth(), dragonPlayer.getHeight());
+        }
     }
 
     private void renderShop() {

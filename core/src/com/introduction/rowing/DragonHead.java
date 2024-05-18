@@ -3,8 +3,8 @@ package com.introduction.rowing;
 import com.badlogic.gdx.graphics.Texture;
 
 public class DragonHead extends Entity{
-    GameInputProcessor inputProcessor;
-    public DragonHead(Position position, int width, int height, Texture image, GameInputProcessor inputProcessor) {
+    MiniGameInputProcessor inputProcessor;
+    public DragonHead(Position position, int width, int height, Texture image, MiniGameInputProcessor inputProcessor) {
         super(position, width, height, image);
         this.inputProcessor = inputProcessor;
     }
@@ -13,7 +13,7 @@ public class DragonHead extends Entity{
         if (inputProcessor.moving) {
             switch (inputProcessor.direction) {
                 case 0:
-                    this.position.setY((int) (this.position.getY() + (150 * delta)));
+                    this.position.setY((int) (this.position.getY() + (175 * delta)));
                     break;
                 case 1:
                     this.position.setX((int) (this.position.getX() - (150 * delta)));
@@ -22,7 +22,7 @@ public class DragonHead extends Entity{
                     this.position.setY((int) (this.position.getY() - (150 * delta)));
                     break;
                 case 3:
-                    this.position.setX((int) (this.position.getX() + (150 * delta)));
+                    this.position.setX((int) (this.position.getX() + (175 * delta)));
                     break;
             }
         }

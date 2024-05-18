@@ -3,6 +3,10 @@ package com.introduction.rowing;
 import com.badlogic.gdx.Input;
 
 public class LobbyInputProcessor extends InputProcessor {
+    public LobbyInputProcessor(MyRowing myRowing) {
+        super(myRowing);
+    }
+
     @Override
     public boolean keyDown(int keycode) {
         switch (keycode) {

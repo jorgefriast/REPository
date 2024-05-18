@@ -5,5 +5,6 @@ public enum MiniGameState {
     HIDING_ITEMS,
     SHOWING_ITEMS,
     PLAYING,
-    FINISHED
+    FINISHED,
+    GAME_OVER
 }

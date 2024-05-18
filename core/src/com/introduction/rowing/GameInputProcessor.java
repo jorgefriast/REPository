@@ -8,6 +8,10 @@ public class GameInputProcessor extends InputProcessor {
 	public boolean moving = false;
 	public int direction = 0;
 
+	public GameInputProcessor(MyRowing myRowing) {
+		super(myRowing);
+	}
+
 
 	@Override
 	public boolean keyDown(int keycode) {

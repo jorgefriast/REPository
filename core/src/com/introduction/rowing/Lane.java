@@ -13,7 +13,6 @@ public class Lane {
     Boat boat;
     int leftBoundary;
     private double newObstacleReady = 0;
-    private boolean finishLineAppeared = false;
 
     public Lane(Boat boat, int leftBoundary) {
         this.boat = boat;
