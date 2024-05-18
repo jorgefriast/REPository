@@ -25,6 +25,7 @@ public class MyRowing extends ApplicationAdapter {
     TextureRegion[] water;
     TextureRegion[] shopBackground;
     BitmapFont font;
+    BitmapFont font2;
     Lane[] lanes;
     float stateTime = 0;
     float frameDuration = 0.1f;
@@ -63,7 +64,7 @@ public class MyRowing extends ApplicationAdapter {
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 32; // Set the font size
         parameter.color = Color.WHITE; // Set the font color
-        font = generator.generateFont(parameter);
+        font2 = generator.generateFont(parameter);
         generator.dispose(); // Don't forget to dispose the generator
 
         currentState = GameState.LOBBY;
@@ -74,12 +75,12 @@ public class MyRowing extends ApplicationAdapter {
         // Water GIF setup
         water = new TextureRegion[5];
         for (int i = 0; i < water.length; i++)
-            water[i] = new TextureRegion(new Texture("water-frames//frame_" + i + "_delay-0.1s.gif"));
+            water[i] = new TextureRegion(new Texture("water-frames//frame_" + i + "_delay-0.1s.png"));
 
         // Shop Background GIF
         shopBackground = new TextureRegion[6];
         for (int i = 0; i < shopBackground.length; i++)
-            shopBackground[i] = new TextureRegion(new Texture("shop-background//frame_" + i + "_delay-0.1s.gif"));
+            shopBackground[i] = new TextureRegion(new Texture("shop-background//frame_" + i + "_delay-0.1s.png"));
 
         // Initialize the stage and viewport
         viewport = new ScreenViewport();
