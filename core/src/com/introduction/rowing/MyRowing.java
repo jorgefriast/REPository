@@ -348,7 +348,7 @@ public class MyRowing extends ApplicationAdapter {
                 texture = new Texture("geeses-bg.png");
                 break;
             case 3:
-                texture = new Texture("duck-bg.jpg");
+                texture = new Texture("duck-bg.png");
                 break;
             case 4:
                 texture = new Texture("wood.png");
