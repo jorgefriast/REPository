@@ -42,6 +42,8 @@ public class MyRowing extends ApplicationAdapter {
     float accelerationLevel = 0;
     boolean stateAccelerating = false;
     ArrayList<Boat> boatsPosition = new ArrayList<>();
+    Texture laneDividerTexture;
+    ArrayList<LaneDivider> laneDividers;
     FinishLine finishline;
     Texture finishLineTexture;
     Texture tiles;
@@ -65,6 +67,7 @@ public class MyRowing extends ApplicationAdapter {
         boatPicture = new Texture("boat-top-view-2.png");
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
+        laneDividerTexture = new Texture("lanedivider.jpeg");
         tiles = new Texture("tile.jpg");
         dragonHead = new Texture("head-removebg.png");
         gameOverMiniGame = new Texture("GameOver.png");
@@ -82,6 +85,9 @@ public class MyRowing extends ApplicationAdapter {
         countdownTimer = new CountdownTimer(3);
         randomObstacle = 1;
         money = 0;
+
+        laneDividers = new ArrayList<>();
+
 
         // Water GIF setup
         water = new TextureRegion[5];
@@ -108,6 +114,9 @@ public class MyRowing extends ApplicationAdapter {
                 lanes[i] = new Lane(new Boat(startingPosition, boatPicture, false, 5, 5, 5, 5, 5, 5, null), currentLeftBoundary);
             }
             currentLeftBoundary += laneWidth;
+        }
+        for(int i = 1; i < 4; i++) {
+            laneDividers.add(new LaneDivider(new Position((int) (i * ((float) WINDOW_WIDTH / NUMBER_OF_LANES)), 0), 10, WINDOW_HEIGHT, laneDividerTexture));
         }
         System.out.println("Game created");
     }
@@ -152,7 +161,14 @@ public class MyRowing extends ApplicationAdapter {
         if (lanes == null) {
             System.out.println("Creating new game");
             createNewGame();
+            //draw the lane dividers on the screen between the 4 lines
+            for (int i = 1; i < laneDividers.size(); i++) {
+                System.out.println("Drawing lane dividers");
+                batch.draw(laneDividers.get(i).getImage(), laneDividers.get(i).position.getX(), laneDividers.get(i).position.getY(), laneDividers.get(i).getWidth(), WINDOW_HEIGHT);
+            }
         }
+        //make the lineDividers move down the screen at the speed of the boat
+
         if (boatsPosition.size() == lanes.length) {
             System.out.println("Game is finished winner is: " + boatsPosition.get(0));
         }
@@ -161,6 +177,10 @@ public class MyRowing extends ApplicationAdapter {
         int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
         batch.draw(water[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         //boat movement & obstacle spawning
+        for (LaneDivider laneDivider : laneDividers) {
+            laneDivider.adjustPosition(0, -2);
+            batch.draw(laneDivider.getImage(), laneDivider.getPosition().getX(), laneDivider.getPosition().getY(), laneDivider.getWidth(), laneDivider.getHeight());
+        }
         if (stateTime > 3) {
             finishLine();
         }
