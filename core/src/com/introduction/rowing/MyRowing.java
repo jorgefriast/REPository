@@ -70,7 +70,7 @@ public class MyRowing extends ApplicationAdapter {
         laneDividerTexture = new Texture("lanedivider.jpeg");
         tiles = new Texture("tile.jpg");
         dragonHead = new Texture("head-removebg.png");
-        gameOverMiniGame = new Texture("GameOver.png");
+        gameOverMiniGame = new Texture("GameOver_score.png");
         font = new BitmapFont();
         font.setColor(Color.BLACK);
         font.getData().setScale(2);
@@ -524,6 +524,22 @@ public class MyRowing extends ApplicationAdapter {
 
     private void renderGameOverScreen() {
         batch.draw(gameOverMiniGame, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        String coinsEarned = "Coins earned: " + money;
+        String roundMade = "Round made: " + (money / 10);
+        GlyphLayout layout = new GlyphLayout(font, coinsEarned);
+        GlyphLayout layout2 = new GlyphLayout(font, roundMade);
+        float width = layout.width;
+        float width2 = layout2.width;
+        font.draw(batch, coinsEarned, (Gdx.graphics.getWidth() - width) / 2, ((float) Gdx.graphics.getHeight() /2) + 200);
+        font.draw(batch, roundMade, (Gdx.graphics.getWidth() - width2) / 2, ((float) Gdx.graphics.getHeight() /2) + 150);
+    }
+
+    public void resetMiniGame(){
+        money = 0;
+        miniGameState = MiniGameState.NOT_STARTED;
+        dragonPlayer.setPosition((Gdx.graphics.getWidth() - dragonHead.getWidth()/2) / 2, (Gdx.graphics.getHeight() - dragonHead.getHeight()/2) / 2 -50);
+        countdownTimer.reset();
+        itemTiles.clear();
     }
 
     private void renderDragonPlayer() {

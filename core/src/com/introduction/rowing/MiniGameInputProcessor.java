@@ -33,10 +33,13 @@ public class MiniGameInputProcessor extends InputProcessor {
                 break;
             case Input.Keys.ESCAPE:
                 setGameState(GameState.LOBBY);
+                myRowing.miniGameState = MiniGameState.NOT_STARTED;
+                myRowing.resetMiniGame();
                 break;
             case Input.Keys.ENTER:
                 if(myRowing.miniGameState == MiniGameState.GAME_OVER) {
                     myRowing.miniGameState = MiniGameState.NOT_STARTED;
+                    myRowing.resetMiniGame();
                 }
         }
         return false;
