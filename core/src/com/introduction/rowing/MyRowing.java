@@ -380,9 +380,12 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private void renderObstacle(Texture texture) {
+        float centeredX = ((float) WINDOW_WIDTH / 2) - ((float) texture.getWidth() / 2);
+        float centeredY = ((float) WINDOW_HEIGHT / 2) - ((float) texture.getHeight() / 2);
+
         Entity obstacle = new Entity(
-                new Position((Gdx.graphics.getWidth() - texture.getWidth() / 2), (Gdx.graphics.getHeight() - texture.getHeight() / 2)),
-                100, 100, texture
+                new Position((int) centeredX, (int) centeredY),
+                texture.getWidth(), texture.getHeight(), texture
         );
         batch.draw(obstacle.getImage(), obstacle.getPosition().getX(), obstacle.getPosition().getY(), obstacle.getWidth(), obstacle.getHeight());
     }
