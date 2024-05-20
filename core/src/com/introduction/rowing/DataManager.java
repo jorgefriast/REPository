@@ -23,27 +23,20 @@ public class DataManager {
     // Read the txt file to get the balance
     private int readBalance() {
         int balance = 0;
-        BufferedReader reader = null;
         FileHandle file = Gdx.files.local(MONEY_BALANCE_FILE_PATH);
-        try {
-            reader = new BufferedReader(new InputStreamReader(file.read()));
-            String line = file.readString();
-            if (line != null) {
-                balance = Integer.parseInt(line.trim());
-            }
-        } catch ( NumberFormatException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
+        if (!file.exists()) {
+            file.writeString("0", false);
         }
+
+        String line = file.readString();
+        if (line != null) {
+            balance = Integer.parseInt(line.trim());
+        }
+
         return balance;
     }
+
     public void saveBalance() {
         BufferedWriter writer = null;
         try {
