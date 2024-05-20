@@ -3,7 +3,6 @@ package com.introduction.rowing;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -13,7 +12,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import org.w3c.dom.Text;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -28,6 +28,7 @@ public class MyRowing extends ApplicationAdapter {
     MiniGameState miniGameState;
     Texture lobbyImage;
     TextureRegion[] water;
+    TextureRegion[] shopBackground;
     BitmapFont font;
     Lane[] lanes;
     float stateTime = 0;
@@ -57,9 +58,16 @@ public class MyRowing extends ApplicationAdapter {
 
     GameInputProcessor gameInputProcessor;
     LobbyInputProcessor lobbyInputProcessor;
+    ShopInputProcessor shopInputProcessor;
     MiniGameInputProcessor miniGameInputProcessor;
     ScreenViewport viewport;
     Stage stage;
+    private DataManager dataManager;
+    int currentShopBoatIndex = 0;
+    FreeTypeFontGenerator generator;
+    FreeTypeFontParameter parameter;
+
+
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -75,12 +83,22 @@ public class MyRowing extends ApplicationAdapter {
         font.setColor(Color.BLACK);
         font.getData().setScale(2);
 
+
+        // Load the custom font using FreeTypeFontGenerator
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("Zanden.ttf"));
+        parameter = new FreeTypeFontParameter();
+        parameter.size = 32;
+        parameter.color = Color.BLACK;
+        font = generator.generateFont(parameter);
+
         currentState = GameState.LOBBY;
+
         miniGameState = MiniGameState.NOT_STARTED;
 
         gameInputProcessor = new GameInputProcessor(this);
         lobbyInputProcessor = new LobbyInputProcessor(this);
         miniGameInputProcessor = new MiniGameInputProcessor(this);
+        shopInputProcessor = new ShopInputProcessor(this);
         dragonPlayer = new DragonHead(new Position((Gdx.graphics.getWidth() - dragonHead.getWidth()/2) / 2, (Gdx.graphics.getHeight() - dragonHead.getHeight()/2) / 2 -50), dragonHead.getWidth() /2, dragonHead.getHeight()/2, dragonHead, miniGameInputProcessor);
         countdownTimer = new CountdownTimer(3);
         randomObstacle = 1;
@@ -92,10 +110,18 @@ public class MyRowing extends ApplicationAdapter {
         // Water GIF setup
         water = new TextureRegion[5];
         for (int i = 0; i < water.length; i++)
-            water[i] = new TextureRegion(new Texture("water-frames//frame_" + i + "_delay-0.1s.gif"));
+            water[i] = new TextureRegion(new Texture("water-frames//frame_" + i + "_delay-0.1s.png"));
+
+        // Shop Background GIF
+        shopBackground = new TextureRegion[6];
+        for (int i = 0; i < shopBackground.length; i++)
+            shopBackground[i] = new TextureRegion(new Texture("shop-background//frame_" + i + "_delay-0.1s.png"));
+
         // Initialize the stage and viewport
         viewport = new ScreenViewport();
         stage = new Stage(viewport, batch);
+
+        dataManager = new DataManager();
 
     }
 
@@ -118,7 +144,6 @@ public class MyRowing extends ApplicationAdapter {
         for(int i = 1; i < 4; i++) {
             laneDividers.add(new LaneDivider(new Position((int) (i * ((float) WINDOW_WIDTH / NUMBER_OF_LANES)), 0), 10, WINDOW_HEIGHT, laneDividerTexture));
         }
-        System.out.println("Game created");
     }
 
     public void resetGame() {
@@ -139,6 +164,7 @@ public class MyRowing extends ApplicationAdapter {
             case LOBBY:
                 batch.draw(lobbyImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 Gdx.input.setInputProcessor(lobbyInputProcessor);
+                font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
                 break;
             case PLAY_GAME:
                 Gdx.input.setInputProcessor(gameInputProcessor);
@@ -149,6 +175,7 @@ public class MyRowing extends ApplicationAdapter {
                 renderMiniGame();
                 break;
             case ENTER_SHOP:
+                Gdx.input.setInputProcessor(shopInputProcessor);
                 renderShop();
                 break;
             default:
@@ -167,8 +194,6 @@ public class MyRowing extends ApplicationAdapter {
                 batch.draw(laneDividers.get(i).getImage(), laneDividers.get(i).position.getX(), laneDividers.get(i).position.getY(), laneDividers.get(i).getWidth(), WINDOW_HEIGHT);
             }
         }
-        //make the lineDividers move down the screen at the speed of the boat
-
         if (boatsPosition.size() == lanes.length) {
             System.out.println("Game is finished winner is: " + boatsPosition.get(0));
         }
@@ -306,6 +331,7 @@ public class MyRowing extends ApplicationAdapter {
                 if (correctTileClicked) {
                     miniGameState = MiniGameState.NOT_STARTED;
                 } else {
+                    dataManager.setBalance(dataManager.getBalance() + money);
                     miniGameState = MiniGameState.GAME_OVER;
                 }
                 break;
@@ -365,7 +391,7 @@ public class MyRowing extends ApplicationAdapter {
                 texture = new Texture("rock.png");
                 break;
             case 2:
-                texture = new Texture("geeses-bg.png");
+                texture = new Texture("geese-bg.png");
                 break;
             case 3:
                 texture = new Texture("duck-bg.png");
@@ -551,8 +577,49 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private void renderShop() {
-        // Render the shop
+        ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
 
+        // Background GIF
+        stateTime += Gdx.graphics.getDeltaTime();
+        int currentFrameIndex = (int) (stateTime / frameDuration) % 6;
+        batch.draw(shopBackground[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        Texture boatTexture = new Texture(Gdx.files.internal("boats/" + shopBoat.getImageName()));
+        batch.draw(boatTexture, 0, 0, 200, 200);
+        font.draw(batch, "Boat Name: " + shopBoat.getName(), 250, 1000);
+        font.draw(batch, "Speed Factor: " + shopBoat.getSpeedFactor(), 250, 800);
+        font.draw(batch, "Acceleration: " + shopBoat.getAcceleration(), 250, 700);
+        font.draw(batch, "Robustness: " + shopBoat.getRobustness(), 250, 600);
+        font.draw(batch, "Maneuverability: " + shopBoat.getManeuverability(), 250, 500);
+        font.draw(batch, "Momentum Factor: " + shopBoat.getMomentumFactor(), 250, 400);
+        font.draw(batch, "Fatigue: " + shopBoat.getFatigue(), 250, 300);
+        if (!shopBoat.isUnlocked()) {
+            font.draw(batch, "Price: " + shopBoat.getPrice(), 250, 200);
+        } else {
+            font.draw(batch, "Unlocked", 250, 200);
+            font.draw(batch, "Selected: " + shopBoat.isSelected(), 250, 100);
+        }
+    }
+
+    public void nextBoat() {
+        currentShopBoatIndex = (currentShopBoatIndex + 1) % dataManager.boats.size();
+    }
+
+    public void previousBoat() {
+        currentShopBoatIndex = (currentShopBoatIndex - 1 + dataManager.boats.size()) % dataManager.boats.size();
+    }
+
+    public void buyOrSelectBoat() {
+        ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
+        if (!shopBoat.isUnlocked() && dataManager.getBalance() >= shopBoat.getPrice()) {
+            shopBoat.setSelected(true);
+            dataManager.setBalance(dataManager.getBalance() - shopBoat.getPrice());
+        } else if (shopBoat.isSelected()) {
+            for (ShopBoat b : dataManager.boats) {
+                b.setSelected(false);
+            }
+            shopBoat.setSelected(true);
+        }
     }
 
     @Override
@@ -563,6 +630,7 @@ public class MyRowing extends ApplicationAdapter {
         accelerationBarRectangle.dispose();
         accelerationBarBackground.dispose();
         finishLineTexture.dispose();
+        generator.dispose();
         for (TextureRegion textureRegion : water) {
             textureRegion.getTexture().dispose();
         }

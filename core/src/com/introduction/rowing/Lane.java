@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Lane {
-    // This class should contain the logic for the lanes, each lanes contains a boat and a list of obstacles which are an Entity
+    // This class should contain the logic for the lanes, each lane contains a boat and a list of obstacles which are an Entity
 
     ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
     Boat boat;
@@ -53,7 +53,7 @@ public class Lane {
         int random = rnd.nextInt(4);
         int LANE_WIDTH = Gdx.graphics.getWidth() / 4;
         int randomWidth = rnd.nextInt(LANE_WIDTH) - 50;
-        Texture gees = new Texture("geeses-bg.png");
+        Texture gees = new Texture("geese-bg.png");
         Texture ducks = new Texture("duck-bg.png");
         Texture branch = new Texture("wood.png");
         Texture rock = new Texture("rock.png");
