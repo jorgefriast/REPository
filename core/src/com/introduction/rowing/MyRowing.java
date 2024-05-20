@@ -3,7 +3,6 @@ package com.introduction.rowing;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -13,7 +12,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import org.w3c.dom.Text;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 
@@ -333,6 +331,7 @@ public class MyRowing extends ApplicationAdapter {
                 if (correctTileClicked) {
                     miniGameState = MiniGameState.NOT_STARTED;
                 } else {
+                    dataManager.setBalance(dataManager.getBalance() + money);
                     miniGameState = MiniGameState.GAME_OVER;
                 }
                 break;
@@ -392,7 +391,7 @@ public class MyRowing extends ApplicationAdapter {
                 texture = new Texture("rock.png");
                 break;
             case 2:
-                texture = new Texture("geeses-bg.png");
+                texture = new Texture("geese-bg.png");
                 break;
             case 3:
                 texture = new Texture("duck-bg.png");

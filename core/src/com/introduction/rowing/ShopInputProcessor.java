@@ -4,10 +4,9 @@ import com.badlogic.gdx.Input;
 
 public class ShopInputProcessor extends InputProcessor {
 
-    private MyRowing myRowing;
 
     public ShopInputProcessor(MyRowing myRowing) {
-        this.myRowing = myRowing;
+        super(myRowing);
     }
 
     @Override
@@ -18,6 +17,9 @@ public class ShopInputProcessor extends InputProcessor {
                 break;
             case Input.Keys.RIGHT:
                 myRowing.nextBoat();
+                break;
+            case Input.Keys.ESCAPE:
+                setGameState(GameState.LOBBY);
                 break;
         }
         return false;

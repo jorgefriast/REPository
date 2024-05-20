@@ -1,14 +1,18 @@
 package com.introduction.rowing;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.FileHandler;
 
 public class DataManager {
 
     private int balance;
     public List<ShopBoat> boats;
-    private static final String MONEY_BALANCE_FILE_PATH = "data/money_balance.txt";
+    private static final String MONEY_BALANCE_FILE_PATH = "core/data/money_balance.txt";
     private static final String BOATS_FILE_PATH = "data/boats.csv";
 
     public DataManager() {
@@ -19,29 +23,20 @@ public class DataManager {
     // Read the txt file to get the balance
     private int readBalance() {
         int balance = 0;
-        InputStream is = null;
         BufferedReader reader = null;
+        FileHandle file = Gdx.files.local(MONEY_BALANCE_FILE_PATH);
         try {
-            is = getClass().getClassLoader().getResourceAsStream(MONEY_BALANCE_FILE_PATH);
-            if (is == null) {
-                throw new IOException("File not found: " + MONEY_BALANCE_FILE_PATH);
-            }
-            reader = new BufferedReader(new InputStreamReader(is));
-            String line = reader.readLine();
+            reader = new BufferedReader(new InputStreamReader(file.read()));
+            String line = file.readString();
             if (line != null) {
                 balance = Integer.parseInt(line.trim());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NumberFormatException e) {
+        } catch ( NumberFormatException e) {
             e.printStackTrace();
         } finally {
             try {
                 if (reader != null) {
                     reader.close();
-                }
-                if (is != null) {
-                    is.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
