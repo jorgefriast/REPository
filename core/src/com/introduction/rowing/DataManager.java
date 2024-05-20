@@ -38,21 +38,8 @@ public class DataManager {
     }
 
     public void saveBalance() {
-        BufferedWriter writer = null;
-        try {
-            writer = new BufferedWriter(new FileWriter(MONEY_BALANCE_FILE_PATH));
-            writer.write(Integer.toString(balance));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (writer != null) {
-                    writer.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        FileHandle file = Gdx.files.local(MONEY_BALANCE_FILE_PATH);
+        file.writeString(Integer.toString(balance), false);
     }
 
     public int getBalance() {
