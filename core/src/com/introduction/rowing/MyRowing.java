@@ -206,7 +206,7 @@ public class MyRowing extends ApplicationAdapter {
             laneDivider.adjustPosition(0, -2);
             batch.draw(laneDivider.getImage(), laneDivider.getPosition().getX(), laneDivider.getPosition().getY(), laneDivider.getWidth(), laneDivider.getHeight());
         }
-        if (stateTime > 3) {
+        if (stateTime > 60) {
             finishLine();
         }
         boolean crossed;
