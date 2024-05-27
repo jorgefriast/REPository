@@ -76,10 +76,6 @@ public class Lane {
                 boat.setPosition(boat.getPosition().getX(), Math.max(-230, boat.getPosition().getY() - obstacle.pushBack));
                 boat.resetNumberOfAvoidedObstacles();
                 boat.damageBoat(obstacle.getDamage());
-                if (boat.getIsPlayer() && boat.getBoatHealth() <= 0) {
-                    boat.setBoatHealth(0);
-                    System.exit(0); // Game Over
-                }
                 break;
             }
             else if (obstacle.getPosition().getY() < 0) {
