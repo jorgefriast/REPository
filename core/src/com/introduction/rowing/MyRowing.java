@@ -46,6 +46,7 @@ public class MyRowing extends ApplicationAdapter {
     Texture laneDividerTexture;
     ArrayList<LaneDivider> laneDividers;
     FinishLine finishline;
+    Texture tutorialTexture;
     Texture finishLineTexture;
     Texture tiles;
     Texture dragonHead;
@@ -57,6 +58,7 @@ public class MyRowing extends ApplicationAdapter {
     int money;
 
     GameInputProcessor gameInputProcessor;
+    TutorialInputProcessor tutorialInputProcessor;
     LobbyInputProcessor lobbyInputProcessor;
     ShopInputProcessor shopInputProcessor;
     MiniGameInputProcessor miniGameInputProcessor;
@@ -72,6 +74,7 @@ public class MyRowing extends ApplicationAdapter {
     public void create() {
         batch = new SpriteBatch();
         lobbyImage = new Texture("main-lobby.jpeg");
+        tutorialTexture = new Texture("tutorial.png");
         boatPicture = new Texture("boat-top-view-2.png");
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
@@ -96,6 +99,7 @@ public class MyRowing extends ApplicationAdapter {
         miniGameState = MiniGameState.NOT_STARTED;
 
         gameInputProcessor = new GameInputProcessor(this);
+        tutorialInputProcessor = new TutorialInputProcessor(this);
         lobbyInputProcessor = new LobbyInputProcessor(this);
         miniGameInputProcessor = new MiniGameInputProcessor(this);
         shopInputProcessor = new ShopInputProcessor(this);
@@ -125,7 +129,7 @@ public class MyRowing extends ApplicationAdapter {
 
     }
 
-    public void createNewGame() {
+    public void createNewGame(GameInputProcessor inputProcessor) {
         finishLineTexture = new Texture("arts0587-02_0.png");
         finishline = new FinishLine(new Position(0, Gdx.graphics.getHeight()), Gdx.graphics.getWidth(), 100, finishLineTexture);
         miniGameState = MiniGameState.NOT_STARTED;
@@ -135,7 +139,7 @@ public class MyRowing extends ApplicationAdapter {
         for (int i = 0; i < NUMBER_OF_LANES; i++) {
             Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), -230);
             if (i == 0) {
-                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, true, 5, 3, 5, 2, 3, 1, gameInputProcessor), currentLeftBoundary);
+                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, true, 5, 3, 5, 2, 3, 1, inputProcessor), currentLeftBoundary);
             } else {
                 lanes[i] = new Lane(new Boat(startingPosition, boatPicture, false, 5, 5, 5, 5, 5, 5, null), currentLeftBoundary);
             }
@@ -151,7 +155,7 @@ public class MyRowing extends ApplicationAdapter {
         accelerationLevel = 0;
         stateAccelerating = false;
         stateTime = 0;
-        createNewGame();
+        createNewGame(gameInputProcessor);
         System.out.println("Game reset");
     }
 
@@ -170,6 +174,10 @@ public class MyRowing extends ApplicationAdapter {
                 Gdx.input.setInputProcessor(gameInputProcessor);
                 renderGame();
                 break;
+            case TUTORIAL:
+                Gdx.input.setInputProcessor(tutorialInputProcessor);
+                renderTutorial(tutorialInputProcessor);
+                break;
             case PLAY_MINI_GAME:
                 Gdx.input.setInputProcessor(miniGameInputProcessor);
                 renderMiniGame();
@@ -184,10 +192,122 @@ public class MyRowing extends ApplicationAdapter {
         batch.end();
     }
 
+    private  void renderTutorial(TutorialInputProcessor tutorialInputProcessor) {
+        if (lanes == null) {
+            System.out.println("Creating new game");
+            createNewGame(tutorialInputProcessor);
+            //draw the lane dividers on the screen between the 4 lines
+            for (int i = 1; i < laneDividers.size(); i++) {
+                System.out.println("Drawing lane dividers");
+                batch.draw(laneDividers.get(i).getImage(), laneDividers.get(i).position.getX(), laneDividers.get(i).position.getY(), laneDividers.get(i).getWidth(), WINDOW_HEIGHT);
+            }
+        }
+        if (boatsPosition.size() == lanes.length) {
+            System.out.println("Game is finished winner is: " + boatsPosition.get(0));
+        }
+        // Water flow (GIF)
+        stateTime += Gdx.graphics.getDeltaTime();
+        int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
+        batch.draw(water[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        //boat movement & obstacle spawning
+        for (LaneDivider laneDivider : laneDividers) {
+            laneDivider.adjustPosition(0, -2);
+            batch.draw(laneDivider.getImage(), laneDivider.getPosition().getX(), laneDivider.getPosition().getY(), laneDivider.getWidth(), laneDivider.getHeight());
+        }
+        if (stateTime > 60) {
+            finishLine();
+        }
+        boolean crossed;
+        for (Lane lane : lanes) {
+            Boat currentBoat = lane.getBoat();
+            batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY(), currentBoat.getWidth(), currentBoat.getHeight());
+            if (currentBoat.getIsPlayer()) {
+                currentBoat.updateKeys(Gdx.graphics.getDeltaTime(), lane.getLeftBoundary());
+            } else {
+                currentBoat.avoidObstacles(lane.getObstacles(), lane.getLeftBoundary());
+            }
+
+            // Decrease acceleration level
+            if (currentBoat.getIsPlayer() && currentBoat.getAccelerating()) {
+                stateAccelerating = true;
+                decreaseAcceleration(Gdx.graphics.getDeltaTime(), currentBoat);
+            }
+
+            // Increase acceleration level
+            if (currentFrameIndex % 5 == 0 && accelerationLevel < FULL_ACCELERATION_BAR && !stateAccelerating) {
+                increaseAcceleration(Gdx.graphics.getDeltaTime(), currentBoat);
+            }
+
+            //update boat's y position every 5 frames
+            if (currentFrameIndex % 5 == 0) {
+                currentBoat.updateY(Gdx.graphics.getDeltaTime());
+            }
+
+            if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) {
+                lane.spawnObstacles();
+            }
+            lane.collision();
+
+            crossed = checkFinishLineCrossed(lane.getBoat());
+            if (crossed) {
+
+                if (!boatsPosition.contains(currentBoat)) {
+                    System.out.println("Boat " + currentBoat + " has crossed the finish line");
+                    boatsPosition.add(currentBoat);
+                }
+                if (boatsPosition.size() == lanes.length) {
+                    System.out.println("Game is finished winner is: " + boatsPosition.get(0));
+                    InputProcessor.setGameState(GameState.LOBBY);
+                    resetGame();
+                }
+            }
+            //make the obstacles move
+            ArrayList<Obstacle> obstacles = lane.getObstacles();
+            Iterator<Obstacle> iterator = obstacles.iterator();
+            while (iterator.hasNext()) {
+                Obstacle obstacle = iterator.next();
+                if (obstacle instanceof Gees) {
+                    float movementSpeed = 2;
+                    float deltaX = MathUtils.sinDeg(obstacle.getPosition().getY() * 5) * 5;
+                    obstacle.adjustPosition(deltaX, -movementSpeed); // Move left to right with a downward speed
+                } else if (obstacle instanceof FinishLine) {
+                    obstacle.adjustPosition(0, -3);
+                } else {
+                    obstacle.adjustPosition(0, -5);
+                }
+//                obstacle.adjustPosition((float) 0, (float) (-5));
+                batch.draw(obstacle.getImage(), obstacle.getPosition().getX(), obstacle.getPosition().getY(), obstacle.getWidth(), obstacle.getHeight());
+
+                // Remove obstacle if it's below the screen
+                if (obstacle.getPosition().getY() + obstacle.getHeight() < 0) {
+                    iterator.remove();
+                }
+            }
+        }
+        font.draw(batch, ACCELERATION_BAR_TEXT, 1400, 900);
+        batch.draw(accelerationBarRectangle, PBR_X_POS, PBR_Y_POS, accelerationBarRectangleWidth, accelerationBarRectangleHeight);
+        batch.draw(accelerationBarBackground, PBB_X_POS, PBB_Y_POS, accelerationBarBackgroundWidth, accelerationBarBackgroundHeight);
+
+        for (Lane lane : lanes) {
+            Boat currentBoat = lane.getBoat();
+            if (currentBoat.getIsPlayer()) {
+                double fatiguePercentage = currentBoat.getFatigueEffect();
+                String fatigueText = "Fatigue Effect: " + (int) (fatiguePercentage * 100) + "%";
+                String boatHealthText = "Boat Health: " + currentBoat.getBoatHealth();
+                String avoidedObstaclesText = "Avoided Obstacles: " + currentBoat.getNumberOfAvoidedObstacles();
+                String momentumText = "Momentum: " + currentBoat.getCurrentMomentum();
+                font.draw(batch, fatigueText, 1400, 750);
+                font.draw(batch, boatHealthText, 1400, 700);
+                font.draw(batch, avoidedObstaclesText, 1400, 650);
+                font.draw(batch, momentumText, 1400, 600);
+            }
+        }
+    }
+
     private void renderGame() {
         if (lanes == null) {
             System.out.println("Creating new game");
-            createNewGame();
+            createNewGame(gameInputProcessor);
             //draw the lane dividers on the screen between the 4 lines
             for (int i = 1; i < laneDividers.size(); i++) {
                 System.out.println("Drawing lane dividers");

@@ -19,6 +19,9 @@ public class LobbyInputProcessor extends InputProcessor {
             case Input.Keys.NUM_3:
                 setGameState(GameState.ENTER_SHOP);
                 break;
+            case Input.Keys.NUM_4:
+                setGameState(GameState.TUTORIAL);
+                break;
 
         }
         return false;
