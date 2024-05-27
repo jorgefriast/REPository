@@ -46,7 +46,8 @@ public class MyRowing extends ApplicationAdapter {
     Texture laneDividerTexture;
     ArrayList<LaneDivider> laneDividers;
     FinishLine finishline;
-    Texture tutorialTexture;
+    Texture keysTutorialTexture;
+    Texture UITutorialTexture;
     Texture finishLineTexture;
     Texture tiles;
     Texture dragonHead;
@@ -74,7 +75,8 @@ public class MyRowing extends ApplicationAdapter {
     public void create() {
         batch = new SpriteBatch();
         lobbyImage = new Texture("main-lobby.jpeg");
-        tutorialTexture = new Texture("tutorial.png");
+        keysTutorialTexture = new Texture("keys-tutorial.png");
+        UITutorialTexture = new Texture("ui-tutorial.png");
         boatPicture = new Texture("boat-top-view-2.png");
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
@@ -209,6 +211,8 @@ public class MyRowing extends ApplicationAdapter {
         stateTime += Gdx.graphics.getDeltaTime();
         int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
         batch.draw(water[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+
         //boat movement & obstacle spawning
         for (LaneDivider laneDivider : laneDividers) {
             laneDivider.adjustPosition(0, -2);
@@ -301,6 +305,13 @@ public class MyRowing extends ApplicationAdapter {
                 font.draw(batch, avoidedObstaclesText, 1400, 650);
                 font.draw(batch, momentumText, 1400, 600);
             }
+        }
+
+        // Draw the movement tutorial
+        if (stateTime < 5) {
+            batch.draw(keysTutorialTexture, 0, WINDOW_HEIGHT / 2, 1920, 540);
+        } else if (stateTime >= 5 && stateTime < 10) {
+            batch.draw(UITutorialTexture, 0, WINDOW_HEIGHT / 2, 1920, 540);
         }
     }
 
