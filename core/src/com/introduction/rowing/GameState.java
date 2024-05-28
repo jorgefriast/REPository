@@ -5,5 +5,6 @@ public enum GameState {
     PLAY_GAME,
     TUTORIAL,
     PLAY_MINI_GAME,
-    ENTER_SHOP
+    ENTER_SHOP,
+    LOSE_SCREEN
 }

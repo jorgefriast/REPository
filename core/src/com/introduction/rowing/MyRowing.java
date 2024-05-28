@@ -47,6 +47,7 @@ public class MyRowing extends ApplicationAdapter {
     ArrayList<LaneDivider> laneDividers;
     FinishLine finishline;
     Texture keysTutorialTexture;
+    Texture loseScreenTexture;
     Texture UITutorialTexture;
     Texture finishLineTexture;
     Texture tiles;
@@ -59,6 +60,7 @@ public class MyRowing extends ApplicationAdapter {
     int money;
 
     GameInputProcessor gameInputProcessor;
+    LoseScreenInputProcessor loseScreenInputProcessor;
     TutorialInputProcessor tutorialInputProcessor;
     LobbyInputProcessor lobbyInputProcessor;
     ShopInputProcessor shopInputProcessor;
@@ -71,6 +73,7 @@ public class MyRowing extends ApplicationAdapter {
     FreeTypeFontParameter parameter;
 
     int numberLeg = 0;
+    int minigameStage = 0;
 
 
     @Override
@@ -78,6 +81,7 @@ public class MyRowing extends ApplicationAdapter {
         batch = new SpriteBatch();
         lobbyImage = new Texture("main-lobby.jpeg");
         keysTutorialTexture = new Texture("keys-tutorial.png");
+        loseScreenTexture = new Texture("lose-screen.jpeg");
         UITutorialTexture = new Texture("ui-tutorial.png");
         boatPicture = new Texture("boat-top-view-2.png");
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
@@ -104,6 +108,7 @@ public class MyRowing extends ApplicationAdapter {
 
         gameInputProcessor = new GameInputProcessor(this);
         tutorialInputProcessor = new TutorialInputProcessor(this);
+        loseScreenInputProcessor = new LoseScreenInputProcessor(this);
         lobbyInputProcessor = new LobbyInputProcessor(this);
         miniGameInputProcessor = new MiniGameInputProcessor(this);
         shopInputProcessor = new ShopInputProcessor(this);
@@ -143,7 +148,7 @@ public class MyRowing extends ApplicationAdapter {
         for (int i = 0; i < NUMBER_OF_LANES; i++) {
             Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), -230);
             if (i == 0) {
-                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, true, 5, 3, 5, 2, 3, 1, inputProcessor), currentLeftBoundary);
+                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, true, 5, 3, 1, 2, 3, 1, inputProcessor), currentLeftBoundary);
             } else {
                 lanes[i] = new Lane(new Boat(startingPosition, boatPicture, false, 5, 5, 5, 5, 5, 5, null), currentLeftBoundary);
             }
@@ -170,7 +175,6 @@ public class MyRowing extends ApplicationAdapter {
         currentState = InputProcessor.getGameState();
         switch (currentState) {
             case LOBBY:
-                System.out.println("NUMBER LEG" + numberLeg);
                 batch.draw(lobbyImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 Gdx.input.setInputProcessor(lobbyInputProcessor);
                 font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
@@ -190,6 +194,11 @@ public class MyRowing extends ApplicationAdapter {
             case ENTER_SHOP:
                 Gdx.input.setInputProcessor(shopInputProcessor);
                 renderShop();
+                break;
+            case LOSE_SCREEN:
+                System.out.println("IM HERE");
+                Gdx.input.setInputProcessor(loseScreenInputProcessor);
+                batch.draw(loseScreenTexture, 0, 0, 1920, 1080);
                 break;
             default:
                 break;
@@ -260,10 +269,7 @@ public class MyRowing extends ApplicationAdapter {
             if (currentFrameIndex % 5 == 0) {
                 currentBoat.updateY(Gdx.graphics.getDeltaTime());
             }
-
-            if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) {
-                lane.spawnObstacles();
-            }
+if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(); }
             lane.collision();
 
             crossed = checkFinishLineCrossed(lane.getBoat());
@@ -312,7 +318,7 @@ public class MyRowing extends ApplicationAdapter {
                 // loose if the boat breaks
                 if (currentBoat.getBoatHealth() <= 0) {
                     currentBoat.setBoatHealth(0);
-                    InputProcessor.setGameState(GameState.LOBBY);
+                    InputProcessor.setGameState(GameState.LOSE_SCREEN);
                     resetGame();
                 }
                 double fatiguePercentage = currentBoat.getFatigueEffect();
@@ -359,15 +365,19 @@ public class MyRowing extends ApplicationAdapter {
                 }
                 break;
             case FINISHED:
+                minigameStage++;
+                System.out.println("MINIGAME SATATE " + minigameStage);
                 boolean correctTileClicked = checkCorrectTileClicked();
                 if (correctTileClicked) {
-                    miniGameState = MiniGameState.NOT_STARTED;
-                } else {
                     dataManager.setBalance(dataManager.getBalance() + money);
+                }
+                miniGameState = MiniGameState.NOT_STARTED;
+                if (minigameStage == 3 ) {
                     miniGameState = MiniGameState.GAME_OVER;
                 }
                 break;
             case GAME_OVER:
+                minigameStage = 0;
                 renderGameOverScreen();
                 break;
             default:
