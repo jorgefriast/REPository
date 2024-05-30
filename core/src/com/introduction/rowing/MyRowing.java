@@ -3,6 +3,7 @@ package com.introduction.rowing;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -87,7 +88,7 @@ public class MyRowing extends ApplicationAdapter {
         boatPicture = new Texture("boats/saoko.png");
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
-        laneDividerTexture = new Texture("lanedivider.jpeg");
+        laneDividerTexture = new Texture("backgrounds/lane-separator.png");
         tiles = new Texture("tile.jpg");
         dragonHead = new Texture("powerups/dragon_head.png");
         sumScreenMiniGame = new Texture("shop-background/frame_1_delay-0.1s.png");
@@ -163,8 +164,8 @@ public class MyRowing extends ApplicationAdapter {
             }
             currentLeftBoundary += laneWidth;
         }
-        for(int i = 1; i < 4; i++) {
-            laneDividers.add(new LaneDivider(new Position((int) (i * ((float) WINDOW_WIDTH / NUMBER_OF_LANES)), 0), 10, WINDOW_HEIGHT, laneDividerTexture));
+        for(int i = 1; i < NUMBER_OF_LANES; i++) {
+            laneDividers.add(new LaneDivider(new Position((int) (i * ((float) WINDOW_WIDTH / NUMBER_OF_LANES)), 0), 10, laneDividerTexture.getHeight(), laneDividerTexture));
         }
     }
 
@@ -215,10 +216,11 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private  void renderTutorial() {
+        double tutorial_scaling = 0.7;
         if (stateTime < LEG_DURATION) {
-            batch.draw(keysTutorialTexture, 0, WINDOW_HEIGHT / 2, 1920, 540);
+            batch.draw(keysTutorialTexture, (WINDOW_WIDTH / 2) - ((int) (keysTutorialTexture.getWidth() * tutorial_scaling) / 2), WINDOW_HEIGHT / 4, (int) (keysTutorialTexture.getWidth() * tutorial_scaling), (int) (keysTutorialTexture.getHeight() * tutorial_scaling));
         } else if (stateTime >= 5 && stateTime < 10) {
-            batch.draw(UITutorialTexture, 0, WINDOW_HEIGHT / 2, 1920, 540);
+            batch.draw(UITutorialTexture, 0, WINDOW_HEIGHT / 3, (int) (UITutorialTexture.getWidth() * tutorial_scaling), (int) (UITutorialTexture.getHeight() * tutorial_scaling));
         }
     }
 
@@ -228,8 +230,8 @@ public class MyRowing extends ApplicationAdapter {
             createNewGame(gameInputProcessor, numberLeg);
             //draw the lane dividers on the screen between the 4 lines
             for (int i = 1; i < laneDividers.size(); i++) {
-                System.out.println("Drawing lane dividers");
-                batch.draw(laneDividers.get(i).getImage(), laneDividers.get(i).position.getX(), laneDividers.get(i).position.getY(), laneDividers.get(i).getWidth(), WINDOW_HEIGHT);
+                LaneDivider laneDiv = laneDividers.get(i);
+                batch.draw(laneDiv.getImage(), laneDiv.position.getX(), laneDiv.position.getY(), laneDiv.getWidth(), laneDiv.getHeight());
             }
         }
         if (boatsPosition.size() == lanes.length) {
@@ -239,12 +241,10 @@ public class MyRowing extends ApplicationAdapter {
         stateTime += Gdx.graphics.getDeltaTime();
         int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
         batch.draw(water[currentFrameIndex], 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        //boat movement & obstacle spawning
         for (LaneDivider laneDivider : laneDividers) {
-            laneDivider.adjustPosition(0, -2);
-            batch.draw(laneDivider.getImage(), laneDivider.getPosition().getX(), laneDivider.getPosition().getY(), laneDivider.getWidth(), laneDivider.getHeight());
+            laneDivider.setPosition(laneDivider.position.getX(), 0);
         }
-        if (stateTime > 5) {
+        if (stateTime > 50) {
             finishLine();
         }
         boolean crossed;
@@ -320,6 +320,10 @@ public class MyRowing extends ApplicationAdapter {
                 if (obstacle.getPosition().getY() < 0) {
                     iterator.remove();
                 }
+            }
+            // Make lane dividers move
+            for (LaneDivider laneDivider : laneDividers) {
+                laneDivider.adjustPosition(0, -2);
             }
         }
         font.draw(batch, ACCELERATION_BAR_TEXT, 1400, 900);
