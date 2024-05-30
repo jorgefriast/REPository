@@ -45,6 +45,7 @@ public class MyRowing extends ApplicationAdapter {
     ArrayList<Boat> boatsPosition = new ArrayList<>();
     Texture laneDividerTexture;
     ArrayList<LaneDivider> laneDividers;
+    ArrayList<Integer> positionsRecord = new ArrayList<>();
     FinishLine finishline;
     Texture keysTutorialTexture;
     Texture loseScreenTexture;
@@ -71,6 +72,7 @@ public class MyRowing extends ApplicationAdapter {
     int currentShopBoatIndex = 0;
     FreeTypeFontGenerator generator;
     FreeTypeFontParameter parameter;
+
 
     int numberLeg = 0;
     int minigameStage = 0;
@@ -135,9 +137,12 @@ public class MyRowing extends ApplicationAdapter {
 
         dataManager = new DataManager();
 
+        for (int i = 0; i < NUMBER_OF_LANES; i++) {
+            positionsRecord.add(0);
+        }
     }
 
-    public void createNewGame(GameInputProcessor inputProcessor) {
+    public void createNewGame(GameInputProcessor inputProcessor, int numberLeg) {
         finishLineTexture = new Texture("arts0587-02_0.png");
         finishline = new FinishLine(new Position(0, Gdx.graphics.getHeight()), WINDOW_WIDTH, 100, finishLineTexture);
         miniGameState = MiniGameState.NOT_STARTED;
@@ -145,7 +150,9 @@ public class MyRowing extends ApplicationAdapter {
         int laneWidth = WINDOW_WIDTH / NUMBER_OF_LANES;
         int currentLeftBoundary = 0;
         for (int i = 0; i < NUMBER_OF_LANES; i++) {
-            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), -270);
+            float multiplier = numberLeg != NUMBER_OF_LEGS ? 1 : (positionsRecord.get(i) / ((float) NUMBER_OF_LEGS * (NUMBER_OF_LANES - 1)) + 1) / 2;
+            System.out.println("MULTIPLIER " + multiplier);
+            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2),  (int) (-270 * multiplier));
             if (i == 0) {
                 lanes[i] = new Lane(new Boat(i, startingPosition, boatPicture, true, 5, 3, 1, 2, 3, 1, inputProcessor), currentLeftBoundary);
             } else {
@@ -163,8 +170,13 @@ public class MyRowing extends ApplicationAdapter {
         accelerationLevel = 0;
         stateAccelerating = false;
         stateTime = 0;
-        createNewGame(gameInputProcessor);
+        createNewGame(gameInputProcessor, numberLeg);
         System.out.println("Game reset");
+    }
+
+    public void renderLobby() {
+        batch.draw(lobbyImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
     }
 
     @Override
@@ -174,9 +186,8 @@ public class MyRowing extends ApplicationAdapter {
         currentState = InputProcessor.getGameState();
         switch (currentState) {
             case LOBBY:
-                batch.draw(lobbyImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 Gdx.input.setInputProcessor(lobbyInputProcessor);
-                font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
+                renderLobby();
                 break;
             case PLAY_GAME:
                 Gdx.input.setInputProcessor(gameInputProcessor);
@@ -201,7 +212,7 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private  void renderTutorial() {
-        if (stateTime < 5) {
+        if (stateTime < LEG_DURATION) {
             batch.draw(keysTutorialTexture, 0, WINDOW_HEIGHT / 2, 1920, 540);
         } else if (stateTime >= 5 && stateTime < 10) {
             batch.draw(UITutorialTexture, 0, WINDOW_HEIGHT / 2, 1920, 540);
@@ -211,7 +222,7 @@ public class MyRowing extends ApplicationAdapter {
     private void renderGame(GameInputProcessor gameInputProcessor, GameSubState gameSubState) {
         if (lanes == null) {
             System.out.println("Creating new game");
-            createNewGame(gameInputProcessor);
+            createNewGame(gameInputProcessor, numberLeg);
             //draw the lane dividers on the screen between the 4 lines
             for (int i = 1; i < laneDividers.size(); i++) {
                 System.out.println("Drawing lane dividers");
@@ -224,7 +235,7 @@ public class MyRowing extends ApplicationAdapter {
         // Water flow (GIF)
         stateTime += Gdx.graphics.getDeltaTime();
         int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
-        batch.draw(water[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(water[currentFrameIndex], 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         //boat movement & obstacle spawning
         for (LaneDivider laneDivider : laneDividers) {
             laneDivider.adjustPosition(0, -2);
@@ -273,6 +284,11 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 if (gameSubState == GameSubState.RACE_LEG) {
                     InputProcessor.setGameState(GameState.PLAY_MINI_GAME);
                     numberLeg++;
+                    for (int i = 0; i < NUMBER_OF_LANES; i++) {
+                        int currentId = boatsPosition.get(i).getId();
+                        positionsRecord.set(currentId, positionsRecord.get(currentId) + i);
+                        System.out.println("Position record:" + positionsRecord);
+                    }
                 } else {
                     numberLeg = 0;
                     InputProcessor.setGameState(GameState.LOBBY);
@@ -378,7 +394,7 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 minigameStage = 0;
                 renderSumScreen();
                 InputProcessor minigameSumScreenIP;
-                if (numberLeg < 3)
+                if (numberLeg < NUMBER_OF_LEGS)
                     minigameSumScreenIP = new MinigameSumScreenInputProcessor(this, "game");
                 else {
                     minigameSumScreenIP = new MinigameSumScreenInputProcessor(this, "final-game");
@@ -387,7 +403,7 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 break;
             default:
                 break;
-        }
+    }
         if (miniGameState != MiniGameState.SUM_SCREEN) {
             renderDragonPlayer();
         }
@@ -411,8 +427,8 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
     private void renderTiles() {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                int tileWidth = Gdx.graphics.getWidth() / 4;
-                float tileHeight = (float) (Gdx.graphics.getHeight() - 100) / 4;
+                int tileWidth = WINDOW_WIDTH / 4;
+                float tileHeight = (float) (WINDOW_HEIGHT - 100) / 4;
                 float x = i * tileWidth;
                 float y = (3 - j) * tileHeight;
                 batch.draw(tiles, x, y, tileWidth, tileHeight);

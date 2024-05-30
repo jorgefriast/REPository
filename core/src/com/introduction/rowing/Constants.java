@@ -12,6 +12,8 @@ public class Constants {
     public static final int PBB_Y_POS = 804;
     public static final int PROGRESSION_BAR_OFFSET = 4;
     public static final String ACCELERATION_BAR_TEXT = "Acceleration Bar";
+    public static final int NUMBER_OF_LEGS = 1;
+    public static final int LEG_DURATION = 2;
 
 
 }

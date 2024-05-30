@@ -329,6 +329,10 @@ public class Boat extends Entity{
         boatHealth = value;
     }
 
+    public int getId() {
+        return this.id;
+    }
+
     @Override
     public String toString() {
         return "BOAT " + this.id;
