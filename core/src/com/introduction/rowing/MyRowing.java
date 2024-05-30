@@ -17,7 +17,6 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -179,17 +178,9 @@ public class MyRowing extends ApplicationAdapter {
                 Gdx.input.setInputProcessor(lobbyInputProcessor);
                 font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
                 break;
-            case FINAL_GAME:
-                Gdx.input.setInputProcessor(lobbyInputProcessor);
-                InputProcessor.setGameState(GameState.LOBBY);
-                break;
             case PLAY_GAME:
                 Gdx.input.setInputProcessor(gameInputProcessor);
-                renderGame(gameInputProcessor);
-                break;
-            case TUTORIAL:
-                Gdx.input.setInputProcessor(tutorialInputProcessor);
-                renderTutorial(tutorialInputProcessor);
+                renderGame(gameInputProcessor, InputProcessor.getGameSubState());
                 break;
             case PLAY_MINI_GAME:
                 Gdx.input.setInputProcessor(miniGameInputProcessor);
@@ -209,11 +200,7 @@ public class MyRowing extends ApplicationAdapter {
         batch.end();
     }
 
-    private  void renderTutorial(TutorialInputProcessor tutorialInputProcessor) {
-
-        renderGame(tutorialInputProcessor);
-
-        // Draw the movement tutorial
+    private  void renderTutorial() {
         if (stateTime < 5) {
             batch.draw(keysTutorialTexture, 0, WINDOW_HEIGHT / 2, 1920, 540);
         } else if (stateTime >= 5 && stateTime < 10) {
@@ -221,7 +208,7 @@ public class MyRowing extends ApplicationAdapter {
         }
     }
 
-    private void renderGame(GameInputProcessor gameInputProcessor) {
+    private void renderGame(GameInputProcessor gameInputProcessor, GameSubState gameSubState) {
         if (lanes == null) {
             System.out.println("Creating new game");
             createNewGame(gameInputProcessor);
@@ -280,11 +267,17 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 boatsPosition.add(currentBoat);
                 System.out.println(boatsPosition);
             }
+            // The game change between substates depending on the leg number
             if (boatsPosition.size() == lanes.length) {
                 System.out.println("Game is finished winner is: " + boatsPosition.get(0));
-                InputProcessor.setGameState(GameState.PLAY_MINI_GAME);
+                if (gameSubState == GameSubState.RACE_LEG) {
+                    InputProcessor.setGameState(GameState.PLAY_MINI_GAME);
+                    numberLeg++;
+                } else {
+                    numberLeg = 0;
+                    InputProcessor.setGameState(GameState.LOBBY);
+                }
                 resetGame();
-                numberLeg++;
                 System.out.println("NUMBER LEG: " + numberLeg);
             }
             //make the obstacles move
@@ -333,6 +326,9 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 font.draw(batch, avoidedObstaclesText, 1400, 650);
                 font.draw(batch, momentumText, 1400, 600);
             }
+        }
+        if (gameSubState == GameSubState.TUTORIAL) {
+            renderTutorial();
         }
     }
 
