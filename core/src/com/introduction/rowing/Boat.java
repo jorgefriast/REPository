@@ -22,9 +22,11 @@ public class Boat extends Entity{
     private double fatigueLevel = 0;
     private  float fatigueRate;
     private int boatHealth;
+    private int id;
 
-    public Boat(Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentumFactor, int fatigue, GameInputProcessor inputProcessor) {
+    public Boat(int id, Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentumFactor, int fatigue, GameInputProcessor inputProcessor) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
+        this.id = id;
         this.speedX = maneuverability * getFatigueEffect();
         this.speedY = getNewCalculatedSpeed();
         this.isPlayer = isPlayer;
@@ -325,5 +327,10 @@ public class Boat extends Entity{
 
     public void setBoatHealth(int value) {
         boatHealth = value;
+    }
+
+    @Override
+    public String toString() {
+        return "BOAT " + this.id;
     }
 }

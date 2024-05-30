@@ -6,5 +6,5 @@ public enum MiniGameState {
     SHOWING_ITEMS,
     PLAYING,
     FINISHED,
-    GAME_OVER
+    SUM_SCREEN
 }

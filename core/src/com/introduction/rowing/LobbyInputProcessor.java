@@ -12,6 +12,7 @@ public class LobbyInputProcessor extends InputProcessor {
         switch (keycode) {
             case Input.Keys.NUM_1:
                 setGameState(GameState.PLAY_GAME);
+                setGameSubState(GameSubState.RACE_LEG);
                 break;
             case Input.Keys.NUM_2:
                 setGameState(GameState.PLAY_MINI_GAME);
@@ -20,7 +21,8 @@ public class LobbyInputProcessor extends InputProcessor {
                 setGameState(GameState.ENTER_SHOP);
                 break;
             case Input.Keys.NUM_4:
-                setGameState(GameState.TUTORIAL);
+                setGameState(GameState.PLAY_GAME);
+                setGameSubState(GameSubState.TUTORIAL);
                 break;
 
         }

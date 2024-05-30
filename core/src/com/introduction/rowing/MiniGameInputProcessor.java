@@ -37,7 +37,7 @@ public class MiniGameInputProcessor extends InputProcessor {
                 myRowing.resetMiniGame();
                 break;
             case Input.Keys.ENTER:
-                if(myRowing.miniGameState == MiniGameState.GAME_OVER) {
+                if(myRowing.miniGameState == MiniGameState.SUM_SCREEN) {
                     myRowing.miniGameState = MiniGameState.NOT_STARTED;
                     myRowing.resetMiniGame();
                 }

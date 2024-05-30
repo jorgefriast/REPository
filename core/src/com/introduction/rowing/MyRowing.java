@@ -47,6 +47,7 @@ public class MyRowing extends ApplicationAdapter {
     ArrayList<LaneDivider> laneDividers;
     FinishLine finishline;
     Texture keysTutorialTexture;
+    Texture loseScreenTexture;
     Texture UITutorialTexture;
     Texture finishLineTexture;
     Texture tiles;
@@ -55,10 +56,11 @@ public class MyRowing extends ApplicationAdapter {
     CountdownTimer countdownTimer;
     int randomObstacle;
     ArrayList<Entity> itemTiles;
-    Texture gameOverMiniGame;
+    Texture sumScreenMiniGame;
     int money;
 
     GameInputProcessor gameInputProcessor;
+    LoseScreenInputProcessor loseScreenInputProcessor;
     TutorialInputProcessor tutorialInputProcessor;
     LobbyInputProcessor lobbyInputProcessor;
     ShopInputProcessor shopInputProcessor;
@@ -71,13 +73,14 @@ public class MyRowing extends ApplicationAdapter {
     FreeTypeFontParameter parameter;
 
     int numberLeg = 0;
-
+    int minigameStage = 0;
 
     @Override
     public void create() {
         batch = new SpriteBatch();
         lobbyImage = new Texture("main-lobby.jpeg");
         keysTutorialTexture = new Texture("keys-tutorial.png");
+        loseScreenTexture = new Texture("lose-screen.jpeg");
         UITutorialTexture = new Texture("ui-tutorial.png");
         boatPicture = new Texture("boat-top-view-2.png");
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
@@ -85,7 +88,7 @@ public class MyRowing extends ApplicationAdapter {
         laneDividerTexture = new Texture("lanedivider.jpeg");
         tiles = new Texture("tile.jpg");
         dragonHead = new Texture("head-removebg.png");
-        gameOverMiniGame = new Texture("GameOver_score.png");
+        sumScreenMiniGame = new Texture("R.jpeg");
         font = new BitmapFont();
         font.setColor(Color.BLACK);
         font.getData().setScale(2);
@@ -104,6 +107,7 @@ public class MyRowing extends ApplicationAdapter {
 
         gameInputProcessor = new GameInputProcessor(this);
         tutorialInputProcessor = new TutorialInputProcessor(this);
+        loseScreenInputProcessor = new LoseScreenInputProcessor(this);
         lobbyInputProcessor = new LobbyInputProcessor(this);
         miniGameInputProcessor = new MiniGameInputProcessor(this);
         shopInputProcessor = new ShopInputProcessor(this);
@@ -135,17 +139,17 @@ public class MyRowing extends ApplicationAdapter {
 
     public void createNewGame(GameInputProcessor inputProcessor) {
         finishLineTexture = new Texture("arts0587-02_0.png");
-        finishline = new FinishLine(new Position(0, Gdx.graphics.getHeight()), Gdx.graphics.getWidth(), 100, finishLineTexture);
+        finishline = new FinishLine(new Position(0, Gdx.graphics.getHeight()), WINDOW_WIDTH, 100, finishLineTexture);
         miniGameState = MiniGameState.NOT_STARTED;
         lanes = new Lane[NUMBER_OF_LANES];
         int laneWidth = WINDOW_WIDTH / NUMBER_OF_LANES;
         int currentLeftBoundary = 0;
         for (int i = 0; i < NUMBER_OF_LANES; i++) {
-            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), -230);
+            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), -270);
             if (i == 0) {
-                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, true, 5, 3, 5, 2, 3, 1, inputProcessor), currentLeftBoundary);
+                lanes[i] = new Lane(new Boat(i, startingPosition, boatPicture, true, 5, 3, 1, 2, 3, 1, inputProcessor), currentLeftBoundary);
             } else {
-                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, false, 5, 5, 5, 5, 5, 5, null), currentLeftBoundary);
+                lanes[i] = new Lane(new Boat(i, startingPosition, boatPicture, false, 5, 5, 5, 5, 5, 5, null), currentLeftBoundary);
             }
             currentLeftBoundary += laneWidth;
         }
@@ -170,18 +174,13 @@ public class MyRowing extends ApplicationAdapter {
         currentState = InputProcessor.getGameState();
         switch (currentState) {
             case LOBBY:
-                System.out.println("NUMBER LEG" + numberLeg);
                 batch.draw(lobbyImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 Gdx.input.setInputProcessor(lobbyInputProcessor);
                 font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
                 break;
             case PLAY_GAME:
                 Gdx.input.setInputProcessor(gameInputProcessor);
-                renderGame(gameInputProcessor);
-                break;
-            case TUTORIAL:
-                Gdx.input.setInputProcessor(tutorialInputProcessor);
-                renderTutorial(tutorialInputProcessor);
+                renderGame(gameInputProcessor, InputProcessor.getGameSubState());
                 break;
             case PLAY_MINI_GAME:
                 Gdx.input.setInputProcessor(miniGameInputProcessor);
@@ -191,17 +190,17 @@ public class MyRowing extends ApplicationAdapter {
                 Gdx.input.setInputProcessor(shopInputProcessor);
                 renderShop();
                 break;
+            case LOSE_SCREEN:
+                Gdx.input.setInputProcessor(loseScreenInputProcessor);
+                batch.draw(loseScreenTexture, 0, 0, 1920, 1080);
+                break;
             default:
                 break;
         }
         batch.end();
     }
 
-    private  void renderTutorial(TutorialInputProcessor tutorialInputProcessor) {
-
-        renderGame(tutorialInputProcessor);
-
-        // Draw the movement tutorial
+    private  void renderTutorial() {
         if (stateTime < 5) {
             batch.draw(keysTutorialTexture, 0, WINDOW_HEIGHT / 2, 1920, 540);
         } else if (stateTime >= 5 && stateTime < 10) {
@@ -209,9 +208,8 @@ public class MyRowing extends ApplicationAdapter {
         }
     }
 
-    private void renderGame(GameInputProcessor gameInputProcessor) {
+    private void renderGame(GameInputProcessor gameInputProcessor, GameSubState gameSubState) {
         if (lanes == null) {
-            numberLeg++;
             System.out.println("Creating new game");
             createNewGame(gameInputProcessor);
             //draw the lane dividers on the screen between the 4 lines
@@ -232,7 +230,7 @@ public class MyRowing extends ApplicationAdapter {
             laneDivider.adjustPosition(0, -2);
             batch.draw(laneDivider.getImage(), laneDivider.getPosition().getX(), laneDivider.getPosition().getY(), laneDivider.getWidth(), laneDivider.getHeight());
         }
-        if (stateTime > 20) {
+        if (stateTime > 5) {
             finishLine();
         }
         boolean crossed;
@@ -260,24 +258,27 @@ public class MyRowing extends ApplicationAdapter {
             if (currentFrameIndex % 5 == 0) {
                 currentBoat.updateY(Gdx.graphics.getDeltaTime());
             }
-
-            if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) {
-                lane.spawnObstacles();
-            }
+if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(); }
             lane.collision();
 
             crossed = checkFinishLineCrossed(lane.getBoat());
-            if (crossed) {
-
-                if (!boatsPosition.contains(currentBoat)) {
-                    System.out.println("Boat " + currentBoat + " has crossed the finish line");
-                    boatsPosition.add(currentBoat);
-                }
-                if (boatsPosition.size() == lanes.length) {
-                    System.out.println("Game is finished winner is: " + boatsPosition.get(0));
+            if (crossed && !boatsPosition.contains(currentBoat)) {
+                System.out.println("Boat " + currentBoat + " has crossed the finish line");
+                boatsPosition.add(currentBoat);
+                System.out.println(boatsPosition);
+            }
+            // The game change between substates depending on the leg number
+            if (boatsPosition.size() == lanes.length) {
+                System.out.println("Game is finished winner is: " + boatsPosition.get(0));
+                if (gameSubState == GameSubState.RACE_LEG) {
+                    InputProcessor.setGameState(GameState.PLAY_MINI_GAME);
+                    numberLeg++;
+                } else {
+                    numberLeg = 0;
                     InputProcessor.setGameState(GameState.LOBBY);
-                    resetGame();
                 }
+                resetGame();
+                System.out.println("NUMBER LEG: " + numberLeg);
             }
             //make the obstacles move
             ArrayList<Obstacle> obstacles = lane.getObstacles();
@@ -312,7 +313,7 @@ public class MyRowing extends ApplicationAdapter {
                 // loose if the boat breaks
                 if (currentBoat.getBoatHealth() <= 0) {
                     currentBoat.setBoatHealth(0);
-                    InputProcessor.setGameState(GameState.LOBBY);
+                    InputProcessor.setGameState(GameState.LOSE_SCREEN);
                     resetGame();
                 }
                 double fatiguePercentage = currentBoat.getFatigueEffect();
@@ -325,6 +326,9 @@ public class MyRowing extends ApplicationAdapter {
                 font.draw(batch, avoidedObstaclesText, 1400, 650);
                 font.draw(batch, momentumText, 1400, 600);
             }
+        }
+        if (gameSubState == GameSubState.TUTORIAL) {
+            renderTutorial();
         }
     }
 
@@ -359,21 +363,32 @@ public class MyRowing extends ApplicationAdapter {
                 }
                 break;
             case FINISHED:
+                minigameStage++;
+                System.out.println("MINIGAME SATATE " + minigameStage);
                 boolean correctTileClicked = checkCorrectTileClicked();
                 if (correctTileClicked) {
-                    miniGameState = MiniGameState.NOT_STARTED;
-                } else {
                     dataManager.setBalance(dataManager.getBalance() + money);
-                    miniGameState = MiniGameState.GAME_OVER;
+                }
+                miniGameState = MiniGameState.NOT_STARTED;
+                if (minigameStage == 1 ) {
+                    miniGameState = MiniGameState.SUM_SCREEN;
                 }
                 break;
-            case GAME_OVER:
-                renderGameOverScreen();
+            case SUM_SCREEN:
+                minigameStage = 0;
+                renderSumScreen();
+                InputProcessor minigameSumScreenIP;
+                if (numberLeg < 3)
+                    minigameSumScreenIP = new MinigameSumScreenInputProcessor(this, "game");
+                else {
+                    minigameSumScreenIP = new MinigameSumScreenInputProcessor(this, "final-game");
+                }
+                Gdx.input.setInputProcessor(minigameSumScreenIP);
                 break;
             default:
                 break;
         }
-        if (miniGameState != MiniGameState.GAME_OVER) {
+        if (miniGameState != MiniGameState.SUM_SCREEN) {
             renderDragonPlayer();
         }
     }
@@ -583,8 +598,8 @@ public class MyRowing extends ApplicationAdapter {
                 tileBounds.contains(dragonBounds.x + dragonBounds.width, dragonBounds.y + dragonBounds.height);
     }
 
-    private void renderGameOverScreen() {
-        batch.draw(gameOverMiniGame, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    private void renderSumScreen() {
+        batch.draw(sumScreenMiniGame, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         String coinsEarned = "Coins earned: " + money;
         String roundMade = "Round made: " + (money / 10);
         GlyphLayout layout = new GlyphLayout(font, coinsEarned);
