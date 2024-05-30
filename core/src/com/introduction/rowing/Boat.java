@@ -27,7 +27,7 @@ public class Boat extends Entity{
     private  float fatigueRate;
     private int boatHealth;
     private int id;
-    private int  width;
+    private int width;
     private int height;
 
     public Boat(int id, Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentumFactor, int fatigue, GameInputProcessor inputProcessor) {
@@ -345,7 +345,7 @@ public class Boat extends Entity{
 
     @Override
     public Rectangle getBounds() {
-        return new Rectangle(position.getX(), position.getY() + this.height / 2, this.width, this.height);
+        return new Rectangle(position.getX(), position.getY() - this.height, this.width, this.height);
     }
 
     @Override

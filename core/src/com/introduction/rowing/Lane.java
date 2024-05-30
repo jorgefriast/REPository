@@ -73,7 +73,7 @@ public class Lane {
         for (Obstacle obstacle : obstacles) {
             if (boat.getBounds().intersects(obstacle.getBounds())) {
                 obstacles.remove(obstacle);
-                boat.setPosition(boat.getPosition().getX(), Math.max(-230, boat.getPosition().getY() - obstacle.pushBack));
+                boat.setPosition(boat.getPosition().getX(), Math.max(boat.getHeight() / 2, boat.getPosition().getY() - obstacle.pushBack));
                 boat.resetNumberOfAvoidedObstacles();
                 boat.damageBoat(obstacle.getDamage());
                 break;

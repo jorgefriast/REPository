@@ -150,10 +150,13 @@ public class MyRowing extends ApplicationAdapter {
         lanes = new Lane[NUMBER_OF_LANES];
         int laneWidth = WINDOW_WIDTH / NUMBER_OF_LANES;
         int currentLeftBoundary = 0;
+        int boatWidth = (int) ((WINDOW_WIDTH / NUMBER_OF_LANES) * BOAT_WIDTH_FRACTION);
+        int boatHeight = (boatPicture.getHeight() * boatWidth) / boatPicture.getWidth();
         for (int i = 0; i < NUMBER_OF_LANES; i++) {
             float multiplier = numberLeg != NUMBER_OF_LEGS ? 1 : (positionsRecord.get(i) / ((float) NUMBER_OF_LEGS * (NUMBER_OF_LANES - 1)) + 1) / 2;
             System.out.println("MULTIPLIER " + multiplier);
-            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2),  (int) (-270 * multiplier));
+            // Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2),  (int) (boatHeight * 0.5 * multiplier));
+            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), (int) (boatHeight*0.5* multiplier));
             if (i == 0) {
                 lanes[i] = new Lane(
                         new Boat(i, startingPosition, boatPicture, true, 5, 3, 1, 2, 3, 1, inputProcessor),
@@ -250,7 +253,7 @@ public class MyRowing extends ApplicationAdapter {
         boolean crossed;
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
-            batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), (int) (-currentBoat.getHeight() * 0.5), currentBoat.getWidth(), currentBoat.getHeight());
+            batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY() - currentBoat.getHeight(), currentBoat.getWidth(), currentBoat.getHeight());
             if (currentBoat.getIsPlayer()) {
                 currentBoat.updateKeys(Gdx.graphics.getDeltaTime(), lane.getLeftBoundary());
             } else {
