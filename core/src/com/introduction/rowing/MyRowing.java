@@ -3,7 +3,6 @@ package com.introduction.rowing;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -89,7 +88,7 @@ public class MyRowing extends ApplicationAdapter {
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
         laneDividerTexture = new Texture("backgrounds/lane-separator.png");
-        tiles = new Texture("tile.jpg");
+        tiles = new Texture("tiles/tile.jpg");
         dragonHead = new Texture("powerups/dragon_head.png");
         sumScreenMiniGame = new Texture("shop-background/frame_1_delay-0.1s.png");
         font = new BitmapFont();
@@ -374,7 +373,7 @@ public class MyRowing extends ApplicationAdapter {
                 if (countdownTimer.getTime() <= 0) {
                     prepareShowingItems();
                 }
-                renderRandomObstacle();
+                renderRandomPowerup();
                 break;
             case SHOWING_ITEMS:
                 preparePlayingState();
@@ -457,6 +456,27 @@ public class MyRowing extends ApplicationAdapter {
         miniGameState = MiniGameState.HIDING_ITEMS;
     }
 
+    private void renderRandomPowerup() {
+        Texture texture;
+        switch (randomObstacle) {
+            case 1:
+                texture = new Texture("powerups/cat.png");
+                break;
+            case 2:
+                texture = new Texture("powerups/koi.png");
+                break;
+            case 3:
+                texture = new Texture("powerups/cookie.png");
+                break;
+            case 4:
+                texture = new Texture("powerups/sakura_flower.png");
+                break;
+            default:
+                return;
+        }
+        renderObstacle(texture);
+    }
+
     private void renderRandomObstacle() {
         Texture texture;
         switch (randomObstacle) {
@@ -517,16 +537,16 @@ public class MyRowing extends ApplicationAdapter {
         Texture texture;
         switch (randomObstacle) {
             case 1:
-                texture = new Texture("rock_tile.png");
+                texture = new Texture("tiles/cat.jpg");
                 break;
             case 2:
-                texture = new Texture("geese_tile.png");
+                texture = new Texture("tiles/koi.jpg");
                 break;
             case 3:
-                texture = new Texture("duck_tile.png");
+                texture = new Texture("tiles/cookie.jpg");
                 break;
             case 4:
-                texture = new Texture("log_tile.png");
+                texture = new Texture("tiles/sakura_flower.jpg");
                 break;
             default:
                 return null;
@@ -556,16 +576,16 @@ public class MyRowing extends ApplicationAdapter {
         Texture texture;
         switch (randomTileIncorrect) {
             case 1:
-                texture = new Texture("rock_tile.png");
+                texture = new Texture("tiles/cat.jpg");
                 break;
             case 2:
-                texture = new Texture("geese_tile.png");
+                texture = new Texture("tiles/koi.jpg");
                 break;
             case 3:
-                texture = new Texture("duck_tile.png");
+                texture = new Texture("tiles/cookie.jpg");
                 break;
             case 4:
-                texture = new Texture("log_tile.png");
+                texture = new Texture("tiles/sakura_flower.jpg");
                 break;
             default:
                 return null;
@@ -584,25 +604,25 @@ public class MyRowing extends ApplicationAdapter {
             if (isDragonPlayerInsideTile(dragonPlayer, itemTile)){
                 switch (randomObstacle) {
                     case 1:
-                        if (itemTile.getImage().toString().equals("rock_tile.png")) {
+                        if (itemTile.getImage().toString().equals("tiles/cat.jpg")) {
                             money += 10;
                             return true;
                         }
                         break;
                     case 2:
-                        if (itemTile.getImage().toString().equals("geese_tile.png")) {
+                        if (itemTile.getImage().toString().equals("tiles/koi.jpg")) {
                             money += 10;
                             return true;
                         }
                         break;
                     case 3:
-                        if (itemTile.getImage().toString().equals("duck_tile.png")) {
+                        if (itemTile.getImage().toString().equals("tiles/cookie.jpg")) {
                             money += 10;
                             return true;
                         }
                         break;
                     case 4:
-                        if (itemTile.getImage().toString().equals("log_tile.png")) {
+                        if (itemTile.getImage().toString().equals("tiles/sakura_flower.jpg")) {
                             money += 10;
                             return true;
                         }
