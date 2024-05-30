@@ -80,17 +80,17 @@ public class MyRowing extends ApplicationAdapter {
     @Override
     public void create() {
         batch = new SpriteBatch();
-        lobbyImage = new Texture("main-lobby.jpeg");
-        keysTutorialTexture = new Texture("keys-tutorial.png");
-        loseScreenTexture = new Texture("lose-screen.jpeg");
-        UITutorialTexture = new Texture("ui-tutorial.png");
-        boatPicture = new Texture("boat-top-view-2.png");
+        lobbyImage = new Texture("backgrounds/lobby.png");
+        keysTutorialTexture = new Texture("backgrounds/tutorial.png");
+        loseScreenTexture = new Texture("backgrounds/loose-screen.png");
+        UITutorialTexture = new Texture("backgrounds/ui-tutorial.png");
+        boatPicture = new Texture("boats/saoko.png");
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
         laneDividerTexture = new Texture("lanedivider.jpeg");
         tiles = new Texture("tile.jpg");
-        dragonHead = new Texture("head-removebg.png");
-        sumScreenMiniGame = new Texture("R.jpeg");
+        dragonHead = new Texture("powerups/dragon_head.png");
+        sumScreenMiniGame = new Texture("shop-background/frame_1_delay-0.1s.png");
         font = new BitmapFont();
         font.setColor(Color.BLACK);
         font.getData().setScale(2);
@@ -154,7 +154,10 @@ public class MyRowing extends ApplicationAdapter {
             System.out.println("MULTIPLIER " + multiplier);
             Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2),  (int) (-270 * multiplier));
             if (i == 0) {
-                lanes[i] = new Lane(new Boat(i, startingPosition, boatPicture, true, 5, 3, 1, 2, 3, 1, inputProcessor), currentLeftBoundary);
+                lanes[i] = new Lane(
+                        new Boat(i, startingPosition, boatPicture, true, 5, 3, 1, 2, 3, 1, inputProcessor),
+                        currentLeftBoundary
+                );
             } else {
                 lanes[i] = new Lane(new Boat(i, startingPosition, boatPicture, false, 5, 5, 5, 5, 5, 5, null), currentLeftBoundary);
             }
@@ -175,7 +178,7 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     public void renderLobby() {
-        batch.draw(lobbyImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(lobbyImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
     }
 
@@ -203,7 +206,7 @@ public class MyRowing extends ApplicationAdapter {
                 break;
             case LOSE_SCREEN:
                 Gdx.input.setInputProcessor(loseScreenInputProcessor);
-                batch.draw(loseScreenTexture, 0, 0, 1920, 1080);
+                batch.draw(loseScreenTexture, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
                 break;
             default:
                 break;
@@ -247,7 +250,7 @@ public class MyRowing extends ApplicationAdapter {
         boolean crossed;
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
-            batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY(), currentBoat.getWidth(), currentBoat.getHeight());
+            batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), (int) (-currentBoat.getHeight() * 0.5), currentBoat.getWidth(), currentBoat.getHeight());
             if (currentBoat.getIsPlayer()) {
                 currentBoat.updateKeys(Gdx.graphics.getDeltaTime(), lane.getLeftBoundary());
             } else {
@@ -269,7 +272,7 @@ public class MyRowing extends ApplicationAdapter {
             if (currentFrameIndex % 5 == 0) {
                 currentBoat.updateY(Gdx.graphics.getDeltaTime());
             }
-if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(); }
+            if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(); }
             lane.collision();
 
             crossed = checkFinishLineCrossed(lane.getBoat());
@@ -310,11 +313,11 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 } else {
                     obstacle.adjustPosition(0, -5);
                 }
-//                obstacle.adjustPosition((float) 0, (float) (-5));
+                // obstacle.adjustPosition((float) 0, (float) (-5));
                 batch.draw(obstacle.getImage(), obstacle.getPosition().getX(), obstacle.getPosition().getY(), obstacle.getWidth(), obstacle.getHeight());
 
                 // Remove obstacle if it's below the screen
-                if (obstacle.getPosition().getY() + obstacle.getHeight() < 0) {
+                if (obstacle.getPosition().getY() < 0) {
                     iterator.remove();
                 }
             }

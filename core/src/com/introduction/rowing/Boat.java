@@ -2,7 +2,11 @@ package com.introduction.rowing;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+
+import java.awt.*;
 import java.util.ArrayList;
+
+import static com.introduction.rowing.Constants.*;
 
 public class Boat extends Entity{
     private final int speedFactor;
@@ -23,6 +27,8 @@ public class Boat extends Entity{
     private  float fatigueRate;
     private int boatHealth;
     private int id;
+    private int  width;
+    private int height;
 
     public Boat(int id, Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentumFactor, int fatigue, GameInputProcessor inputProcessor) {
         super(position, image.getWidth()/2, image.getHeight()/2, image);
@@ -38,6 +44,9 @@ public class Boat extends Entity{
         this.fatigue = fatigue;
         this.fatigueRate = calculateFatigueRate(fatigue);
         this.boatHealth = determineBoatHealth();
+        this.width = (int) ((WINDOW_WIDTH / NUMBER_OF_LANES) * BOAT_WIDTH_FRACTION);
+        this.height = (image.getHeight() * this.width) / image.getWidth();
+        System.out.println("WIDTH: " + this.width + ", HEIGHT" + this.height);
     }
 
     public void updateKeys(float delta, int leftBoundary) {
@@ -66,7 +75,8 @@ public class Boat extends Entity{
         }
         // Update boat position
         int laneWidth = Constants.WINDOW_WIDTH / Constants.NUMBER_OF_LANES;
-        position.setX(Math.round(Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - image.getWidth()/2, newX))));
+        int boatWidth = (int) (WINDOW_WIDTH * BOAT_WIDTH_FRACTION / NUMBER_OF_LANES);
+        position.setX(Math.round(Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - boatWidth, newX))));
     }
 
     public void updateY(float delta) {
@@ -331,6 +341,21 @@ public class Boat extends Entity{
 
     public int getId() {
         return this.id;
+    }
+
+    @Override
+    public Rectangle getBounds() {
+        return new Rectangle(position.getX(), position.getY() + this.height / 2, this.width, this.height);
+    }
+
+    @Override
+    public int getWidth() {
+        return this.width;
+    }
+
+    @Override
+    public int getHeight() {
+        return this.height;
     }
 
     @Override
