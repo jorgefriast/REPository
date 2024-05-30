@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -56,7 +57,7 @@ public class MyRowing extends ApplicationAdapter {
     CountdownTimer countdownTimer;
     int randomObstacle;
     ArrayList<Entity> itemTiles;
-    Texture gameOverMiniGame;
+    Texture sumScreenMiniGame;
     int money;
 
     GameInputProcessor gameInputProcessor;
@@ -75,7 +76,6 @@ public class MyRowing extends ApplicationAdapter {
     int numberLeg = 0;
     int minigameStage = 0;
 
-
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -89,7 +89,7 @@ public class MyRowing extends ApplicationAdapter {
         laneDividerTexture = new Texture("lanedivider.jpeg");
         tiles = new Texture("tile.jpg");
         dragonHead = new Texture("head-removebg.png");
-        gameOverMiniGame = new Texture("GameOver_score.png");
+        sumScreenMiniGame = new Texture("R.jpeg");
         font = new BitmapFont();
         font.setColor(Color.BLACK);
         font.getData().setScale(2);
@@ -140,17 +140,17 @@ public class MyRowing extends ApplicationAdapter {
 
     public void createNewGame(GameInputProcessor inputProcessor) {
         finishLineTexture = new Texture("arts0587-02_0.png");
-        finishline = new FinishLine(new Position(0, Gdx.graphics.getHeight()), Gdx.graphics.getWidth(), 100, finishLineTexture);
+        finishline = new FinishLine(new Position(0, Gdx.graphics.getHeight()), WINDOW_WIDTH, 100, finishLineTexture);
         miniGameState = MiniGameState.NOT_STARTED;
         lanes = new Lane[NUMBER_OF_LANES];
         int laneWidth = WINDOW_WIDTH / NUMBER_OF_LANES;
         int currentLeftBoundary = 0;
         for (int i = 0; i < NUMBER_OF_LANES; i++) {
-            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), -230);
+            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), -270);
             if (i == 0) {
-                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, true, 5, 3, 1, 2, 3, 1, inputProcessor), currentLeftBoundary);
+                lanes[i] = new Lane(new Boat(i, startingPosition, boatPicture, true, 5, 3, 1, 2, 3, 1, inputProcessor), currentLeftBoundary);
             } else {
-                lanes[i] = new Lane(new Boat(startingPosition, boatPicture, false, 5, 5, 5, 5, 5, 5, null), currentLeftBoundary);
+                lanes[i] = new Lane(new Boat(i, startingPosition, boatPicture, false, 5, 5, 5, 5, 5, 5, null), currentLeftBoundary);
             }
             currentLeftBoundary += laneWidth;
         }
@@ -179,6 +179,10 @@ public class MyRowing extends ApplicationAdapter {
                 Gdx.input.setInputProcessor(lobbyInputProcessor);
                 font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
                 break;
+            case FINAL_GAME:
+                Gdx.input.setInputProcessor(lobbyInputProcessor);
+                InputProcessor.setGameState(GameState.LOBBY);
+                break;
             case PLAY_GAME:
                 Gdx.input.setInputProcessor(gameInputProcessor);
                 renderGame(gameInputProcessor);
@@ -196,7 +200,6 @@ public class MyRowing extends ApplicationAdapter {
                 renderShop();
                 break;
             case LOSE_SCREEN:
-                System.out.println("IM HERE");
                 Gdx.input.setInputProcessor(loseScreenInputProcessor);
                 batch.draw(loseScreenTexture, 0, 0, 1920, 1080);
                 break;
@@ -220,7 +223,6 @@ public class MyRowing extends ApplicationAdapter {
 
     private void renderGame(GameInputProcessor gameInputProcessor) {
         if (lanes == null) {
-            numberLeg++;
             System.out.println("Creating new game");
             createNewGame(gameInputProcessor);
             //draw the lane dividers on the screen between the 4 lines
@@ -241,7 +243,7 @@ public class MyRowing extends ApplicationAdapter {
             laneDivider.adjustPosition(0, -2);
             batch.draw(laneDivider.getImage(), laneDivider.getPosition().getX(), laneDivider.getPosition().getY(), laneDivider.getWidth(), laneDivider.getHeight());
         }
-        if (stateTime > 20) {
+        if (stateTime > 5) {
             finishLine();
         }
         boolean crossed;
@@ -273,17 +275,17 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
             lane.collision();
 
             crossed = checkFinishLineCrossed(lane.getBoat());
-            if (crossed) {
-
-                if (!boatsPosition.contains(currentBoat)) {
-                    System.out.println("Boat " + currentBoat + " has crossed the finish line");
-                    boatsPosition.add(currentBoat);
-                }
-                if (boatsPosition.size() == lanes.length) {
-                    System.out.println("Game is finished winner is: " + boatsPosition.get(0));
-                    InputProcessor.setGameState(GameState.LOBBY);
-                    resetGame();
-                }
+            if (crossed && !boatsPosition.contains(currentBoat)) {
+                System.out.println("Boat " + currentBoat + " has crossed the finish line");
+                boatsPosition.add(currentBoat);
+                System.out.println(boatsPosition);
+            }
+            if (boatsPosition.size() == lanes.length) {
+                System.out.println("Game is finished winner is: " + boatsPosition.get(0));
+                InputProcessor.setGameState(GameState.PLAY_MINI_GAME);
+                resetGame();
+                numberLeg++;
+                System.out.println("NUMBER LEG: " + numberLeg);
             }
             //make the obstacles move
             ArrayList<Obstacle> obstacles = lane.getObstacles();
@@ -372,18 +374,25 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                     dataManager.setBalance(dataManager.getBalance() + money);
                 }
                 miniGameState = MiniGameState.NOT_STARTED;
-                if (minigameStage == 3 ) {
-                    miniGameState = MiniGameState.GAME_OVER;
+                if (minigameStage == 1 ) {
+                    miniGameState = MiniGameState.SUM_SCREEN;
                 }
                 break;
-            case GAME_OVER:
+            case SUM_SCREEN:
                 minigameStage = 0;
-                renderGameOverScreen();
+                renderSumScreen();
+                InputProcessor minigameSumScreenIP;
+                if (numberLeg < 3)
+                    minigameSumScreenIP = new MinigameSumScreenInputProcessor(this, "game");
+                else {
+                    minigameSumScreenIP = new MinigameSumScreenInputProcessor(this, "final-game");
+                }
+                Gdx.input.setInputProcessor(minigameSumScreenIP);
                 break;
             default:
                 break;
         }
-        if (miniGameState != MiniGameState.GAME_OVER) {
+        if (miniGameState != MiniGameState.SUM_SCREEN) {
             renderDragonPlayer();
         }
     }
@@ -593,8 +602,8 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 tileBounds.contains(dragonBounds.x + dragonBounds.width, dragonBounds.y + dragonBounds.height);
     }
 
-    private void renderGameOverScreen() {
-        batch.draw(gameOverMiniGame, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    private void renderSumScreen() {
+        batch.draw(sumScreenMiniGame, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         String coinsEarned = "Coins earned: " + money;
         String roundMade = "Round made: " + (money / 10);
         GlyphLayout layout = new GlyphLayout(font, coinsEarned);
