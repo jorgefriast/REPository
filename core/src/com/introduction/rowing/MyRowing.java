@@ -114,7 +114,7 @@ public class MyRowing extends ApplicationAdapter {
         lobbyInputProcessor = new LobbyInputProcessor(this);
         miniGameInputProcessor = new MiniGameInputProcessor(this);
         shopInputProcessor = new ShopInputProcessor(this);
-        dragonPlayer = new DragonHead(new Position((Gdx.graphics.getWidth() - dragonHead.getWidth()/2) / 2, (Gdx.graphics.getHeight() - dragonHead.getHeight()/2) / 2 -50), dragonHead.getWidth() /2, dragonHead.getHeight()/2, dragonHead, miniGameInputProcessor);
+        dragonPlayer = new DragonHead(new Position((Gdx.graphics.getWidth() - dragonHead.getWidth()/2) / 2, (Gdx.graphics.getHeight() - dragonHead.getHeight()/2) / 2 -50), dragonHead.getWidth() /6, dragonHead.getHeight()/6, dragonHead, miniGameInputProcessor);
         countdownTimer = new CountdownTimer(3);
         randomObstacle = 1;
         money = 0;
