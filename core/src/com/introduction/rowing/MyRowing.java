@@ -220,9 +220,9 @@ public class MyRowing extends ApplicationAdapter {
     private  void renderTutorial() {
         double tutorial_scaling = 0.7;
         if (stateTime < LEG_DURATION) {
-            batch.draw(keysTutorialTexture, (WINDOW_WIDTH / 2) - ((int) (keysTutorialTexture.getWidth() * tutorial_scaling) / 2), WINDOW_HEIGHT / 4, (int) (keysTutorialTexture.getWidth() * tutorial_scaling), (int) (keysTutorialTexture.getHeight() * tutorial_scaling));
+            batch.draw(keysTutorialTexture, ((float) WINDOW_WIDTH / 2) - ((float) (int) (keysTutorialTexture.getWidth() * tutorial_scaling) / 2), (float) WINDOW_HEIGHT / 4, (int) (keysTutorialTexture.getWidth() * tutorial_scaling), (int) (keysTutorialTexture.getHeight() * tutorial_scaling));
         } else if (stateTime >= 5 && stateTime < 10) {
-            batch.draw(UITutorialTexture, 0, WINDOW_HEIGHT / 3, (int) (UITutorialTexture.getWidth() * tutorial_scaling), (int) (UITutorialTexture.getHeight() * tutorial_scaling));
+            batch.draw(UITutorialTexture, 0, (int) WINDOW_HEIGHT / 3, (int) (UITutorialTexture.getWidth() * tutorial_scaling), (int) (UITutorialTexture.getHeight() * tutorial_scaling));
         }
     }
 
@@ -477,26 +477,6 @@ public class MyRowing extends ApplicationAdapter {
         renderObstacle(texture);
     }
 
-    private void renderRandomObstacle() {
-        Texture texture;
-        switch (randomObstacle) {
-            case 1:
-                texture = new Texture("rock.png");
-                break;
-            case 2:
-                texture = new Texture("geese-bg.png");
-                break;
-            case 3:
-                texture = new Texture("duck-bg.png");
-                break;
-            case 4:
-                texture = new Texture("wood.png");
-                break;
-            default:
-                return;
-        }
-        renderObstacle(texture);
-    }
 
     private void renderObstacle(Texture texture) {
         float centeredX = ((float) WINDOW_WIDTH / 2) - ((float) texture.getWidth() / 2);
@@ -702,18 +682,18 @@ public class MyRowing extends ApplicationAdapter {
         currentShopBoatIndex = (currentShopBoatIndex - 1 + dataManager.boats.size()) % dataManager.boats.size();
     }
 
-    public void buyOrSelectBoat() {
-        ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
-        if (!shopBoat.isUnlocked() && dataManager.getBalance() >= shopBoat.getPrice()) {
-            shopBoat.setSelected(true);
-            dataManager.setBalance(dataManager.getBalance() - shopBoat.getPrice());
-        } else if (shopBoat.isSelected()) {
-            for (ShopBoat b : dataManager.boats) {
-                b.setSelected(false);
-            }
-            shopBoat.setSelected(true);
-        }
-    }
+    // public void buyOrSelectBoat() {
+    //     ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
+    //     if (!shopBoat.isUnlocked() && dataManager.getBalance() >= shopBoat.getPrice()) {
+    //         shopBoat.setSelected(true);
+    //         dataManager.setBalance(dataManager.getBalance() - shopBoat.getPrice());
+    //     } else if (shopBoat.isSelected()) {
+    //         for (ShopBoat b : dataManager.boats) {
+    //             b.setSelected(false);
+    //         }
+    //         shopBoat.setSelected(true);
+    //     }
+    // }
 
     @Override
     public void dispose() {
@@ -754,8 +734,7 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private void decreaseAcceleration(float delta, Boat boat) {
-        float decreaseRate = FULL_ACCELERATION_BAR;
-        accelerationLevel -= decreaseRate * delta;
+        accelerationLevel -= FULL_ACCELERATION_BAR * delta;
         if (accelerationLevel <= 0) {
             accelerationLevel = 0;
             boat.setIsAcceleratorAvailable(false);
