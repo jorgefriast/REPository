@@ -241,20 +241,19 @@ public class MyRowing extends ApplicationAdapter {
         int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
         batch.draw(water[currentFrameIndex], 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
+        //draw the lane dividers on the screen between the 4 lines
         for (LaneDivider laneDivider : laneDividers) {
             laneDivider.adjustPosition(0,-2 );
             batch.draw(laneDivider.getImage(), laneDivider.getPosition().getX(), laneDivider.getPosition().getY(), laneDivider.getWidth(), laneDivider.getHeight());
+            if (laneDivider.getPosition().getY() < -laneDivider.getHeight()/2) {
+                laneDivider.adjustPosition(0,laneDivider.getHeight()/2);
+            }
         }
         if (stateTime > 50) {
             finishLine();
         }
-        boolean crossed;
 
-        //draw the lane dividers on the screen between the 4 lines
-        for (LaneDivider laneDivider : laneDividers) {
-            laneDivider.adjustPosition(0, -5);
-            batch.draw(laneDivider.getImage(), laneDivider.position.getX() , laneDivider.position.getY() , laneDivider.getWidth(), laneDivider.getHeight());
-        }
+        boolean crossed;
 
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
