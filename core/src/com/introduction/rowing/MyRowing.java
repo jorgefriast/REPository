@@ -230,11 +230,8 @@ public class MyRowing extends ApplicationAdapter {
         if (lanes == null) {
             System.out.println("Creating new game");
             createNewGame(gameInputProcessor, numberLeg);
-            //draw the lane dividers on the screen between the 4 lines
-            for (int i = 1; i < laneDividers.size(); i++) {
-                LaneDivider laneDiv = laneDividers.get(i);
-                batch.draw(laneDiv.getImage(), laneDiv.position.getX(), laneDiv.position.getY(), laneDiv.getWidth(), laneDiv.getHeight());
-            }
+
+
         }
         if (boatsPosition.size() == lanes.length) {
             System.out.println("Game is finished winner is: " + boatsPosition.get(0));
@@ -243,13 +240,22 @@ public class MyRowing extends ApplicationAdapter {
         stateTime += Gdx.graphics.getDeltaTime();
         int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
         batch.draw(water[currentFrameIndex], 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
         for (LaneDivider laneDivider : laneDividers) {
-            laneDivider.setPosition(laneDivider.position.getX(), 0);
+            laneDivider.adjustPosition(0,-2 );
+            batch.draw(laneDivider.getImage(), laneDivider.getPosition().getX(), laneDivider.getPosition().getY(), laneDivider.getWidth(), laneDivider.getHeight());
         }
         if (stateTime > 50) {
             finishLine();
         }
         boolean crossed;
+
+        //draw the lane dividers on the screen between the 4 lines
+        for (LaneDivider laneDivider : laneDividers) {
+            laneDivider.adjustPosition(0, -5);
+            batch.draw(laneDivider.getImage(), laneDivider.position.getX() , laneDivider.position.getY() , laneDivider.getWidth(), laneDivider.getHeight());
+        }
+
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
             batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY() - currentBoat.getHeight(), currentBoat.getWidth(), currentBoat.getHeight());
@@ -323,10 +329,9 @@ public class MyRowing extends ApplicationAdapter {
                     iterator.remove();
                 }
             }
+
             // Make lane dividers move
-            for (LaneDivider laneDivider : laneDividers) {
-                laneDivider.adjustPosition(0, -2);
-            }
+
         }
         font.draw(batch, ACCELERATION_BAR_TEXT, 1400, 900);
         batch.draw(accelerationBarRectangle, PBR_X_POS, PBR_Y_POS, accelerationBarRectangleWidth, accelerationBarRectangleHeight);
@@ -651,6 +656,7 @@ public class MyRowing extends ApplicationAdapter {
 
     private void renderShop() {
         ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
+
 
         // Background GIF
         stateTime += Gdx.graphics.getDeltaTime();
