@@ -3,6 +3,7 @@ package com.introduction.rowing;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 
+import static com.introduction.rowing.Constants.*;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -51,21 +52,21 @@ public class Lane {
     public void spawnObstacles() {
         Random rnd = new Random();
         int random = rnd.nextInt(4);
-        int LANE_WIDTH = Gdx.graphics.getWidth() / 4;
+        int LANE_WIDTH = WINDOW_WIDTH / 4;
         int randomWidth = rnd.nextInt(LANE_WIDTH) - 50;
-        Texture gees = new Texture("geese-bg.png");
+        Texture gees = new Texture("obstacles/duck.png");
         Texture ducks = new Texture("duck-bg.png");
-        Texture branch = new Texture("wood.png");
-        Texture rock = new Texture("rock.png");
+        Texture branch = new Texture("obstacles/log.png");
+        Texture rock = new Texture("obstacles/rock.png");
 
         if (random == 0) {
             obstacles.add(new Gees(new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight()), 100, 100, gees));
         } else if (random == 1) {
-            obstacles.add(new Ducks(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, ducks));
-        } else if (random == 2) {
-            obstacles.add(new Branch(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, branch));
-        } else {
             obstacles.add(new Rock(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, rock));
+        } else {
+            obstacles.add(new Branch(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, branch));
+        //} else {
+            //  obstacles.add(new Ducks(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, ducks));
         }
     }
 

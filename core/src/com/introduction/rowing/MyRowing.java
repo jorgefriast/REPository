@@ -35,6 +35,8 @@ public class MyRowing extends ApplicationAdapter {
     float frameDuration = 0.1f;
     Texture boatPicture;
     Texture accelerationBarRectangle;
+    Texture correct;
+    Texture error;
     float accelerationBarRectangleWidth = 204;
     float accelerationBarRectangleHeight = 54;
     Texture accelerationBarBackground;
@@ -42,6 +44,14 @@ public class MyRowing extends ApplicationAdapter {
     float accelerationBarBackgroundHeight = 46;
     float accelerationLevel = 0;
     boolean stateAccelerating = false;
+    Texture progressBarRectangle;
+    Texture progressBarBackground;
+    float progressBarRectangleWidth = 204;
+    float progressBarRectangleHeight = 54;
+    float progressBarBackgroundWidth = 196;
+    float progressBarBackgroundHeight = 46;
+    float progressLevel = 0;
+    float finishLineY;
     ArrayList<Boat> boatsPosition = new ArrayList<>();
     Texture laneDividerTexture;
     ArrayList<LaneDivider> laneDividers;
@@ -87,7 +97,11 @@ public class MyRowing extends ApplicationAdapter {
         boatPicture = new Texture("boats/saoko.png");
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
+        progressBarRectangle = new Texture("accelerationBarRectangle.png");
+        progressBarBackground = new Texture("acceleration_bar_background.png");
         laneDividerTexture = new Texture("backgrounds/lane-separator.png");
+        correct = new Texture("tick.png");
+        error = new Texture("error.png");
         tiles = new Texture("tiles/tile.jpg");
         dragonHead = new Texture("powerups/dragon_head.png");
         sumScreenMiniGame = new Texture("shop-background/frame_1_delay-0.1s.png");
@@ -230,8 +244,6 @@ public class MyRowing extends ApplicationAdapter {
         if (lanes == null) {
             System.out.println("Creating new game");
             createNewGame(gameInputProcessor, numberLeg);
-
-
         }
         if (boatsPosition.size() == lanes.length) {
             System.out.println("Game is finished winner is: " + boatsPosition.get(0));
@@ -260,6 +272,7 @@ public class MyRowing extends ApplicationAdapter {
             batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY() - currentBoat.getHeight(), currentBoat.getWidth(), currentBoat.getHeight());
             if (currentBoat.getIsPlayer()) {
                 currentBoat.updateKeys(Gdx.graphics.getDeltaTime(), lane.getLeftBoundary());
+                updateProgressBar(currentBoat);
             } else {
                 currentBoat.avoidObstacles(lane.getObstacles(), lane.getLeftBoundary());
             }
@@ -328,13 +341,15 @@ public class MyRowing extends ApplicationAdapter {
                     iterator.remove();
                 }
             }
-
-            // Make lane dividers move
-
         }
         font.draw(batch, ACCELERATION_BAR_TEXT, 1400, 900);
         batch.draw(accelerationBarRectangle, PBR_X_POS, PBR_Y_POS, accelerationBarRectangleWidth, accelerationBarRectangleHeight);
         batch.draw(accelerationBarBackground, PBB_X_POS, PBB_Y_POS, accelerationBarBackgroundWidth, accelerationBarBackgroundHeight);
+
+        batch.draw(progressBarRectangle, 1400, 800, progressBarRectangleWidth, progressBarRectangleHeight);
+        batch.draw(progressBarBackground, 1404, 804, progressBarBackgroundWidth, progressBarBackgroundHeight);
+
+
 
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
@@ -370,6 +385,7 @@ public class MyRowing extends ApplicationAdapter {
                 if (countdownTimer.getTime() <= 0) {
                     prepareHidingItems();
                 }
+
                 break;
             case HIDING_ITEMS:
                 renderTiles();
@@ -397,6 +413,7 @@ public class MyRowing extends ApplicationAdapter {
                 boolean correctTileClicked = checkCorrectTileClicked();
                 if (correctTileClicked) {
                     dataManager.setBalance(dataManager.getBalance() + money);
+                    //batch.draw(correct, WINDOW_WIDTH, WINDOW_HEIGHT , correct.getWidth(), correct.getHeight());
                 }
                 miniGameState = MiniGameState.NOT_STARTED;
                 if (minigameStage >= NUMBER_OF_MINIGAMES) {
@@ -441,7 +458,7 @@ public class MyRowing extends ApplicationAdapter {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 int tileWidth = WINDOW_WIDTH / 4;
-                float tileHeight = (float) (WINDOW_HEIGHT - 100) / 4;
+                float tileHeight = (float) (WINDOW_HEIGHT ) / 4;
                 float x = i * tileWidth;
                 float y = (3 - j) * tileHeight;
                 batch.draw(tiles, x, y, tileWidth, tileHeight);
@@ -512,8 +529,9 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private Entity createCorrectTile(int index) {
-        int tileWidth = Gdx.graphics.getWidth() / 4;
-        float tileHeight = (float) (Gdx.graphics.getHeight() - 100) / 4;
+        //int tileWidth = Gdx.graphics.getWidth() / 4;
+        int tileWidth = WINDOW_WIDTH / 4;
+        float tileHeight = (float)  WINDOW_HEIGHT / 4;
         int row = index % 4;
         int column = index / 4;
         float x = column * tileWidth;
@@ -547,8 +565,8 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private Entity createIncorrectTile(int index) {
-        int tileWidth = Gdx.graphics.getWidth() / 4;
-        float tileHeight = (float) (Gdx.graphics.getHeight() - 100) / 4;
+        int tileWidth = WINDOW_WIDTH / 4;
+        float tileHeight = (float) (WINDOW_HEIGHT) / 4;
         int row = index % 4;
         int column = index / 4;
         float x = column * tileWidth;
@@ -629,7 +647,7 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private void renderSumScreen() {
-        batch.draw(sumScreenMiniGame, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(sumScreenMiniGame, 0, 0, WINDOW_WIDTH, WINDOW_WIDTH);
         String coinsEarned = "Coins earned: " + money;
         String roundMade = "Round made: " + (money / 10);
         GlyphLayout layout = new GlyphLayout(font, coinsEarned);
@@ -757,4 +775,14 @@ public class MyRowing extends ApplicationAdapter {
             accelerationBarBackgroundWidth = 0;
         }
     }
+
+    private void updateProgressBar(Boat boat) {
+        float boatY = boat.getPosition().getY();
+        finishLineY = finishline.getPosition().getY();
+        progressLevel = 1 - ((finishLineY - boatY) / (finishLineY - 0));  // Assuming the boat starts at y=0
+        if (progressLevel < 0) progressLevel = 0;
+        if (progressLevel > 1) progressLevel = 1;
+        progressBarBackgroundWidth = 196 * progressLevel;
+    }
+
 }
