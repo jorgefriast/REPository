@@ -395,7 +395,7 @@ public class MyRowing extends ApplicationAdapter {
                     dataManager.setBalance(dataManager.getBalance() + money);
                 }
                 miniGameState = MiniGameState.NOT_STARTED;
-                if (minigameStage == 1 ) {
+                if (minigameStage >= NUMBER_OF_MINIGAMES) {
                     miniGameState = MiniGameState.SUM_SCREEN;
                 }
                 break;
@@ -727,7 +727,7 @@ public class MyRowing extends ApplicationAdapter {
 
     private void increaseAcceleration(float deltaTime, Boat boat) {
         accelerationLevel += ACCELERATION_BAR_INCREASE_RATE * deltaTime;
-        if (accelerationLevel >= FULL_ACCELERATION_BAR - 1) {
+        if (accelerationLevel >= FULL_ACCELERATION_BAR * 0.1) {
             boat.setIsAcceleratorAvailable(true);
         }
         updateAccelerationBar();

@@ -66,10 +66,10 @@ public class Boat extends Entity{
                     }
                     break;
                 case 1: // Left
-                    newX -= speedX * getFatigueEffect() * 2;
+                    newX -= (float) (speedX * getFatigueEffect() * 2);
                     break;
                 case 3: // Right
-                    newX += speedX * getFatigueEffect() * 2;
+                    newX += (float) (speedX * getFatigueEffect() * 2);
                     break;
             }
         }
@@ -89,8 +89,8 @@ public class Boat extends Entity{
         speedY = getNewCalculatedSpeed();
 
         // Boat cannot go higher than the middle of the screen
-        if (position.getY() > Gdx.graphics.getHeight()/6) {
-            position.setY(Gdx.graphics.getHeight()/6);
+        if (position.getY() > WINDOW_HEIGHT/2) {
+            position.setY(WINDOW_HEIGHT/2);
         }
         else {
             // Update boat position
@@ -116,23 +116,22 @@ public class Boat extends Entity{
             // Calculate desired position to steer away from the obstacle
             int desiredX = position.getX();
             int laneWidth = Constants.WINDOW_WIDTH / Constants.NUMBER_OF_LANES;
-            int boatWidth = image.getWidth();
             int obstacleWidth = nearestObstacle.getWidth();
             int buffer = 20;
-            int safeDistance = boatWidth / 2 + obstacleWidth / 2 + buffer;
+            int safeDistance = this.width / 2 + obstacleWidth / 2 + buffer;
 
             if (nearestObstacle.getPosition().getX() < position.getX()) {
                 // Steer to the right if there's enough space; otherwise, steer to the left
                 desiredX = Math.max(leftBoundary, nearestObstacle.getPosition().getX() + obstacleWidth / 2 + safeDistance);
             } else {
                 // Steer to the left if there's enough space; otherwise, steer to the right
-                desiredX = Math.min(leftBoundary + laneWidth - boatWidth, nearestObstacle.getPosition().getX() - obstacleWidth / 2 - safeDistance);
+                desiredX = Math.min(leftBoundary + laneWidth - this.width, nearestObstacle.getPosition().getX() - obstacleWidth / 2 - safeDistance);
             }
 
             int newX = position.getX() + Math.round((desiredX - position.getX()) * 0.1f);
 
             // ensure the boat stays within the lane
-            int positionInLane = Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - boatWidth/2, newX));
+            int positionInLane = Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - this.width/2, newX));
             position.setX(positionInLane);
         }
     }

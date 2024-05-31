@@ -14,6 +14,7 @@ public class Constants {
     public static final String ACCELERATION_BAR_TEXT = "Acceleration Bar";
     public static final int NUMBER_OF_LEGS = 1;
     public static final int LEG_DURATION = 2;
+    public static final int NUMBER_OF_MINIGAMES = 5;
     public static final double BOAT_WIDTH_FRACTION = 0.3;
 
 }
