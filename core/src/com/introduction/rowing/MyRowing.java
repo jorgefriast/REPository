@@ -192,6 +192,8 @@ public class MyRowing extends ApplicationAdapter {
         stateAccelerating = false;
         stateTime = 0;
         createNewGame(gameInputProcessor, numberLeg);
+        lanes = null;
+        laneDividers.clear();
         System.out.println("Game reset");
     }
 
@@ -704,14 +706,18 @@ public class MyRowing extends ApplicationAdapter {
      public void buyOrSelectBoat() {
          ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
          if (!shopBoat.isUnlocked() && dataManager.getBalance() >= shopBoat.getPrice()) {
+             dataManager.getSelectedBoat().setSelected(false);
              shopBoat.setSelected(true);
+             shopBoat.setUnlocked(true);
              dataManager.setBalance(dataManager.getBalance() - shopBoat.getPrice());
-         } else if (shopBoat.isSelected()) {
-             for (ShopBoat b : dataManager.boats) {
-                 b.setSelected(false);
-             }
+
+         } else if (shopBoat.isUnlocked()) {
+             dataManager.getSelectedBoat().setSelected(false);
              shopBoat.setSelected(true);
          }
+         System.err.println(shopBoat.isSelected());
+         System.err.println(dataManager.boats.get(1).isSelected());
+         dataManager.saveShopBoats();
      }
 
     @Override
@@ -746,7 +752,7 @@ public class MyRowing extends ApplicationAdapter {
 
     private void increaseAcceleration(float deltaTime, Boat boat) {
         accelerationLevel += ACCELERATION_BAR_INCREASE_RATE * deltaTime;
-        if (accelerationLevel >= FULL_ACCELERATION_BAR * 0.1) {
+        if (accelerationLevel >= FULL_ACCELERATION_BAR - 1) {
             boat.setIsAcceleratorAvailable(true);
         }
         updateAccelerationBar();

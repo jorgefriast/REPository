@@ -13,7 +13,7 @@ public class DataManager {
     private int balance;
     public List<ShopBoat> boats;
     private static final String MONEY_BALANCE_FILE_PATH = "core/data/money_balance.txt";
-    private static final String BOATS_FILE_PATH = "data/boats.csv";
+    private static final String BOATS_FILE_PATH = "core/data/boats.csv";
 
     public DataManager() {
         this.balance = readBalance();
@@ -53,14 +53,11 @@ public class DataManager {
 
     private List<ShopBoat> readShopBoats() {
         List<ShopBoat> boats = new ArrayList<ShopBoat>();
-        InputStream is = null;
+        FileHandle fileHandle = null;
         BufferedReader reader = null;
         try {
-            is = getClass().getClassLoader().getResourceAsStream(BOATS_FILE_PATH);
-            if (is == null) {
-                throw new IOException("File not found: " + BOATS_FILE_PATH);
-            }
-            reader = new BufferedReader(new InputStreamReader(is));
+            fileHandle = new FileHandle(BOATS_FILE_PATH);
+            reader = new BufferedReader(new FileReader(fileHandle.file()));
             String line;
             reader.readLine(); // Skip the header
             while ((line = reader.readLine()) != null) {
@@ -83,15 +80,34 @@ public class DataManager {
                 if (reader != null) {
                     reader.close();
                 }
-                if (is != null) {
-                    is.close();
-                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         System.out.println(boats);
         return boats;
+    }
+
+
+    public void saveShopBoats() {
+        FileHandle file = Gdx.files.local(BOATS_FILE_PATH);
+        StringBuilder sb = new StringBuilder();
+        sb.append("id,name,price,imageName,speedFactor,acceleration,robustness,maneuverability,momentumFactor,fatigue,unlocked,selected\n");
+        for (ShopBoat boat : boats) {
+            sb.append(boat.getId()).append(",");
+            sb.append(boat.getName()).append(",");
+            sb.append(boat.getPrice()).append(",");
+            sb.append(boat.getImageName()).append(",");
+            sb.append(boat.getSpeedFactor()).append(",");
+            sb.append(boat.getAcceleration()).append(",");
+            sb.append(boat.getRobustness()).append(",");
+            sb.append(boat.getManeuverability()).append(",");
+            sb.append(boat.getMomentumFactor()).append(",");
+            sb.append(boat.getFatigue()).append(",");
+            sb.append(boat.isUnlocked()).append(",");
+            sb.append(boat.isSelected()).append("\n");
+        }
+        file.writeString(sb.toString(), false);
     }
 
 

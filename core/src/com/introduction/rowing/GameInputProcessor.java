@@ -33,6 +33,7 @@ public class GameInputProcessor extends InputProcessor {
 				this.moving = true;
 				break;
 			case Input.Keys.ESCAPE:
+				myRowing.resetGame();
 				setGameState(GameState.LOBBY);
 				break;
 		}

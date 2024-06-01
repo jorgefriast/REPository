@@ -81,4 +81,6 @@ public class ShopBoat {
     public void setSelected(boolean selected) {
         this.selected = selected;
     }
+
+    public void setUnlocked(boolean b) { this.unlocked = b; }
 }
