@@ -172,10 +172,10 @@ public class MyRowing extends ApplicationAdapter {
             // Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2),  (int) (boatHeight * 0.5 * multiplier));
             Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), (int) (boatHeight*0.5* multiplier));
             if (i == 0) {
-                lanes[i] = new Lane(new Boat(i, 1, startingPosition, 1, true, inputProcessor), currentLeftBoundary);
+                lanes[i] = new Lane(new Boat(i, 0, startingPosition, 1, true, inputProcessor), currentLeftBoundary);
             } else {
                 Random random = new Random();
-                lanes[i] = new Lane(new Boat(i, random.nextInt(), startingPosition, 1, false, inputProcessor), currentLeftBoundary);
+                lanes[i] = new Lane(new Boat(i, 0, startingPosition, 1, false, inputProcessor), currentLeftBoundary);
             }
             currentLeftBoundary += laneWidth;
         }
@@ -334,11 +334,6 @@ public class MyRowing extends ApplicationAdapter {
                 }
                 // obstacle.adjustPosition((float) 0, (float) (-5));
                 batch.draw(obstacle.getImage(), obstacle.getPosition().getX(), obstacle.getPosition().getY(), obstacle.getWidth(), obstacle.getHeight());
-
-                // Remove obstacle if it's below the screen
-                if (obstacle.getPosition().getY() < 0) {
-                    iterator.remove();
-                }
             }
         }
         font.draw(batch, ACCELERATION_BAR_TEXT, 1400, 900);
