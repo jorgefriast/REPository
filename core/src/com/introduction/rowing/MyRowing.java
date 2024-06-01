@@ -61,6 +61,7 @@ public class MyRowing extends ApplicationAdapter {
     FinishLine finishline;
     Texture keysTutorialTexture;
     Texture loseScreenTexture;
+    Texture powerupSlot;
     Texture UITutorialTexture;
     Texture finishLineTexture;
     Texture tiles;
@@ -107,6 +108,7 @@ public class MyRowing extends ApplicationAdapter {
         tiles = new Texture("tiles/tile.jpg");
         dragonHead = new Texture("powerups/dragon_head.png");
         sumScreenMiniGame = new Texture("shop-background/frame_1_delay-0.1s.png");
+        powerupSlot = new Texture("powerups/powerup-slot.png");
         font = new BitmapFont();
         font.setColor(Color.BLACK);
         font.getData().setScale(2);
@@ -169,8 +171,6 @@ public class MyRowing extends ApplicationAdapter {
         int boatHeight = (boatPicture.getHeight() * boatWidth) / boatPicture.getWidth();
         for (int i = 0; i < NUMBER_OF_LANES; i++) {
             float multiplier = numberLeg != NUMBER_OF_LEGS ? 1 : (positionsRecord.get(i) / ((float) NUMBER_OF_LEGS * (NUMBER_OF_LANES - 1)) + 1) / 2;
-            System.out.println("MULTIPLIER " + multiplier);
-            // Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2),  (int) (boatHeight * 0.5 * multiplier));
             Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), (int) (boatHeight*0.5* multiplier));
             if (i == 0) {
                 lanes[i] = new Lane(new Boat(i, startingPosition, true, inputProcessor, dataManager.getSelectedBoat()), currentLeftBoundary);
@@ -295,6 +295,8 @@ public class MyRowing extends ApplicationAdapter {
             if (currentFrameIndex % 5 == 0) {
                 currentBoat.updateY(Gdx.graphics.getDeltaTime());
             }
+
+            // Generate obstacles
             if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(); }
             lane.collision();
 
@@ -346,6 +348,16 @@ public class MyRowing extends ApplicationAdapter {
 
         batch.draw(progressBarRectangle, 1400, 800, progressBarRectangleWidth, progressBarRectangleHeight);
         batch.draw(progressBarBackground, 1404, 804, progressBarBackgroundWidth, progressBarBackgroundHeight);
+        float powerUpSlotFactor = 3;
+        int space = (int) (WINDOW_HEIGHT * 0.01);
+        System.err.println("SAPCE: " + space);
+        batch.draw(
+                powerupSlot,
+                space,
+                Math.round((WINDOW_HEIGHT - space) - powerupSlot.getHeight() * powerUpSlotFactor),
+                powerUpSlotFactor * powerupSlot.getHeight(),
+                powerUpSlotFactor * powerupSlot.getWidth()
+        );
 
 
 
