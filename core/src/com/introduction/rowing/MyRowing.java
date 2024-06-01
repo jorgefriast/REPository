@@ -347,6 +347,8 @@ public class MyRowing extends ApplicationAdapter {
                 batch.draw(obstacle.getImage(), obstacle.getPosition().getX(), obstacle.getPosition().getY(), obstacle.getWidth(), obstacle.getHeight());
             }
         }
+
+        batch.draw(vertical_scroll,1300, 500, (float) (vertical_scroll.getWidth() * 2), (float) (vertical_scroll.getHeight()* 1.5));
         font.draw(batch, ACCELERATION_BAR_TEXT, 1400, 900);
         batch.draw(accelerationBarRectangle, PBR_X_POS, PBR_Y_POS, accelerationBarRectangleWidth, accelerationBarRectangleHeight);
         batch.draw(accelerationBarBackground, PBB_X_POS, PBB_Y_POS, accelerationBarBackgroundWidth, accelerationBarBackgroundHeight);
@@ -370,10 +372,9 @@ public class MyRowing extends ApplicationAdapter {
                 String boatHealthText = "Boat Health: " + currentBoat.getBoatHealth();
                 String avoidedObstaclesText = "Avoided Obstacles: " + currentBoat.getNumberOfAvoidedObstacles();
                 String momentumText = "Momentum: " + currentBoat.getCurrentMomentum();
-                font.draw(batch, fatigueText, 1400, 750);
+                font.draw(batch, fatigueText, 1400, 760);
                 font.draw(batch, boatHealthText, 1400, 700);
-                font.draw(batch, avoidedObstaclesText, 1400, 650);
-                font.draw(batch, momentumText, 1400, 600);
+                font.draw(batch, momentumText, 1400, 640);
             }
         }
         if (gameSubState == GameSubState.TUTORIAL) {
