@@ -38,33 +38,21 @@ public class Boat extends Entity{
     private int width;
     private int height;
 
-    public Boat(int id, int boat_id, Position position, int fatigue, boolean isPlayer, GameInputProcessor inputProcessor) {
-        super(position, 10, 10, new Texture("boats/saoko.png"));
+    public Boat(int id, Position position, boolean isPlayer, GameInputProcessor inputProcessor, ShopBoat shopBoat) {
+        super(position, 10, 10, new Texture(shopBoat.getImageName()));
         this.speedY = getNewCalculatedSpeed();
-        this.fatigue = fatigue;
+        this.fatigue = shopBoat.getFatigue();
         this.isPlayer = isPlayer;
         this.inputProcessor = inputProcessor;
         this.fatigueRate = calculateFatigueRate(fatigue);
         this.boatHealth = determineBoatHealth();
         this.id = id;
-        try {
-            FileReader boatsFileReader = new FileReader("core/data/boats.csv");
-            CSVParser csvParser = new CSVParser(boatsFileReader);
-            Map<String, Integer> attributes = csvParser.getBoatAttributes(boat_id);
-            this.speedFactor = attributes.get("speed_factor");
-            this.robustness = attributes.get("robustness");
-            this.acceleration = attributes.get("acceleration");
-            this.momentumFactor = attributes.get("momentum_factor");
-            this.speedX = attributes.get("maneuverability") * 0.5;
-            this.image = csvParser.getBoatTexture(boat_id);
-        } catch (FileNotFoundException e) {
-            System.err.println("Could not find boats file.");
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Something went wrong reading the lines of boats file");
-            e.printStackTrace();
-            System.exit(1);
-        }
+        this.speedFactor = shopBoat.getSpeedFactor();
+        this.robustness = shopBoat.getRobustness();
+        this.acceleration = shopBoat.getAcceleration();
+        this.momentumFactor = shopBoat.getMomentumFactor();
+        this.speedX = shopBoat.getManeuverability();
+
         this.width = (int) ((WINDOW_WIDTH / NUMBER_OF_LANES) * BOAT_WIDTH_FRACTION);
         this.height = (image.getHeight() * this.width) / image.getWidth();
         super.height = this.height;

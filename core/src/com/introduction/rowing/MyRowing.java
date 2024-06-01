@@ -19,6 +19,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 import static com.introduction.rowing.Constants.*;
@@ -172,10 +173,11 @@ public class MyRowing extends ApplicationAdapter {
             // Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2),  (int) (boatHeight * 0.5 * multiplier));
             Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), (int) (boatHeight*0.5* multiplier));
             if (i == 0) {
-                lanes[i] = new Lane(new Boat(i, 0, startingPosition, 1, true, inputProcessor), currentLeftBoundary);
+                lanes[i] = new Lane(new Boat(i, startingPosition, true, inputProcessor, dataManager.getSelectedBoat()), currentLeftBoundary);
             } else {
                 Random random = new Random();
-                lanes[i] = new Lane(new Boat(i, 0, startingPosition, 1, false, inputProcessor), currentLeftBoundary);
+                int randomInt = random.nextInt(4);
+                lanes[i] = new Lane(new Boat(i, startingPosition,  false, inputProcessor, dataManager.boats.get(randomInt)), currentLeftBoundary);
             }
             currentLeftBoundary += laneWidth;
         }
@@ -699,18 +701,18 @@ public class MyRowing extends ApplicationAdapter {
         currentShopBoatIndex = (currentShopBoatIndex - 1 + dataManager.boats.size()) % dataManager.boats.size();
     }
 
-    // public void buyOrSelectBoat() {
-    //     ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
-    //     if (!shopBoat.isUnlocked() && dataManager.getBalance() >= shopBoat.getPrice()) {
-    //         shopBoat.setSelected(true);
-    //         dataManager.setBalance(dataManager.getBalance() - shopBoat.getPrice());
-    //     } else if (shopBoat.isSelected()) {
-    //         for (ShopBoat b : dataManager.boats) {
-    //             b.setSelected(false);
-    //         }
-    //         shopBoat.setSelected(true);
-    //     }
-    // }
+     public void buyOrSelectBoat() {
+         ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
+         if (!shopBoat.isUnlocked() && dataManager.getBalance() >= shopBoat.getPrice()) {
+             shopBoat.setSelected(true);
+             dataManager.setBalance(dataManager.getBalance() - shopBoat.getPrice());
+         } else if (shopBoat.isSelected()) {
+             for (ShopBoat b : dataManager.boats) {
+                 b.setSelected(false);
+             }
+             shopBoat.setSelected(true);
+         }
+     }
 
     @Override
     public void dispose() {

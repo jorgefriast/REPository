@@ -94,4 +94,13 @@ public class DataManager {
         return boats;
     }
 
+
+    public ShopBoat getSelectedBoat() {
+        for (ShopBoat boat : boats) {
+            if (boat.isSelected()) {
+                return boat;
+            }
+        }
+        return null;
+    }
 }

@@ -1,11 +1,5 @@
 id,name,price,imageName,speedFactor,acceleration,robustness,maneuverability,momentumFactor,fatigue,unlocked,selected
-1,Beginner Boat,0,beginner_boat.png,1,1,1,1,1,1,true,true
-2,Swift Sail,500,swift_sail.png,2,2,2,2,2,2,false,false
-3,Steady Stream,800,steady_stream.png,2,3,3,2,3,2,false,false
-4,Wave Rider,1200,wave_rider.png,3,3,2,3,3,3,false,false
-5,Speedster,1500,speedster.png,4,4,2,3,4,3,false,false
-6,Fire Dragon,1800,fire_dragon.png,3,3,4,2,4,4,false,false
-7,Agile Arrow,2100,agile_arrow.png,3,4,3,4,3,4,false,false
-8,Marathoner,2500,marathoner.png,4,3,4,3,4,4,false,false
-9,Blazing Boat,3000,blazing_boat.png,4,4,4,4,4,4,false,false
-10,Endurance Explorer,3500,endurance_explorer.png,5,5,5,5,5,5,false,false
+0,Saoko,500,saoko.png,5,3,5,3,3,1,true,true
+1,Sakura,600,sakura.png,7,2,4,6,4,2,false,false
+2,Houdini,800,houdini.png,4,1,8,2,2,4,false,false
+3,Ryojin,1000,ryojin.png,6,5,3,4,3,5,false,false
