@@ -79,7 +79,7 @@ public class Lane {
                 boat.damageBoat(obstacle.getDamage());
                 break;
             }
-            else if (obstacle.getPosition().getY() < 0) {
+            else if (obstacle.getPosition().getY() + obstacle.getHeight() < 0) {
                 obstacles.remove(obstacle);
                 boat.increaseNumberOfAvoidedObstacles();
                 break;
