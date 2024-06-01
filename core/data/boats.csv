@@ -1,0 +1,5 @@
+id,texture,speed_factor,acceleration,robustness,maneuverability,momentum_factor,bought,selected
+0,boats/saoko.png,5,3,5,3,3,1,1
+1,boats/sakura.png,7,2,4,6,4,0,0
+2,boats/houdini.png,4,1,8,2,2,0,0
+3,boats/ryojin.png,6,5,3,4,3,0,0

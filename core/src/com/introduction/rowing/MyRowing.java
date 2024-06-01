@@ -19,6 +19,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Random;
 
 import static com.introduction.rowing.Constants.*;
 
@@ -171,12 +172,10 @@ public class MyRowing extends ApplicationAdapter {
             // Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2),  (int) (boatHeight * 0.5 * multiplier));
             Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), (int) (boatHeight*0.5* multiplier));
             if (i == 0) {
-                lanes[i] = new Lane(
-                        new Boat(i, startingPosition, boatPicture, true, 5, 3, 1, 2, 3, 1, inputProcessor),
-                        currentLeftBoundary
-                );
+                lanes[i] = new Lane(new Boat(i, 1, startingPosition, 1, true, inputProcessor), currentLeftBoundary);
             } else {
-                lanes[i] = new Lane(new Boat(i, startingPosition, boatPicture, false, 5, 5, 5, 5, 5, 5, null), currentLeftBoundary);
+                Random random = new Random();
+                lanes[i] = new Lane(new Boat(i, random.nextInt(), startingPosition, 1, false, inputProcessor), currentLeftBoundary);
             }
             currentLeftBoundary += laneWidth;
         }

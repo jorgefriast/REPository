@@ -1,19 +1,27 @@
 package com.introduction.rowing;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.sun.tools.jdeprscan.CSV;
+import tools.CSVParser;
 
 import java.awt.*;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 
 import static com.introduction.rowing.Constants.*;
 
 public class Boat extends Entity{
-    private final int speedFactor;
-    private final int acceleration;
-    private final int robustness;
-    private final int momentumFactor;
-    private final int fatigue;
+    private int speedFactor;
+    private int acceleration;
+    private int robustness;
+    private int momentumFactor;
+    private int fatigue;
     private double speedX;
     private double speedY;
     private final GameInputProcessor inputProcessor;
@@ -30,23 +38,38 @@ public class Boat extends Entity{
     private int width;
     private int height;
 
-    public Boat(int id, Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentumFactor, int fatigue, GameInputProcessor inputProcessor) {
-        super(position, image.getWidth()/2, image.getHeight()/2, image);
-        this.id = id;
-        this.speedX = maneuverability * getFatigueEffect();
+    public Boat(int id, int boat_id, Position position, int fatigue, boolean isPlayer, GameInputProcessor inputProcessor) {
+        super(position, 10, 10, new Texture("boats/saoko.png"));
         this.speedY = getNewCalculatedSpeed();
+        this.fatigue = fatigue;
         this.isPlayer = isPlayer;
         this.inputProcessor = inputProcessor;
-        this.speedFactor = speedFactor;
-        this.acceleration = acceleration;
-        this.robustness = robustness;
-        this.momentumFactor = momentumFactor;
-        this.fatigue = fatigue;
         this.fatigueRate = calculateFatigueRate(fatigue);
         this.boatHealth = determineBoatHealth();
+        this.id = id;
+        try {
+            FileReader boatsFileReader = new FileReader("core/data/boats.csv");
+            CSVParser csvParser = new CSVParser(boatsFileReader);
+            Map<String, Integer> attributes = csvParser.getBoatAttributes(boat_id);
+            this.speedFactor = attributes.get("speed_factor");
+            this.robustness = attributes.get("robustness");
+            this.acceleration = attributes.get("acceleration");
+            this.momentumFactor = attributes.get("momentum_factor");
+            this.speedX = attributes.get("maneuverability") * 0.5;
+            this.image = csvParser.getBoatTexture(boat_id);
+        } catch (FileNotFoundException e) {
+            System.err.println("Could not find boats file.");
+            System.exit(1);
+        } catch (IOException e) {
+            System.err.println("Something went wrong reading the lines of boats file");
+            e.printStackTrace();
+            System.exit(1);
+        }
         this.width = (int) ((WINDOW_WIDTH / NUMBER_OF_LANES) * BOAT_WIDTH_FRACTION);
         this.height = (image.getHeight() * this.width) / image.getWidth();
-        System.out.println("WIDTH: " + this.width + ", HEIGHT" + this.height);
+        super.height = this.height;
+        super.width = this.width;
+
     }
 
     public void updateKeys(float delta, int leftBoundary) {
@@ -75,8 +98,8 @@ public class Boat extends Entity{
         }
         // Update boat position
         int laneWidth = Constants.WINDOW_WIDTH / Constants.NUMBER_OF_LANES;
-        int boatWidth = (int) (WINDOW_WIDTH * BOAT_WIDTH_FRACTION / NUMBER_OF_LANES);
-        position.setX(Math.round(Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - boatWidth, newX))));
+        newX = Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - this.width, newX));
+        position.setX(Math.round(newX));
     }
 
     public void updateY(float delta) {
@@ -186,20 +209,7 @@ public class Boat extends Entity{
     }
 
     private int determineBoatHealth() {
-        switch (robustness) {
-            case 1:
-                return 50;
-            case 2:
-                return 75;
-            case 3:
-                return 100;
-            case 4:
-                return 125;
-            case 5:
-                return 150;
-            default:
-                return 0;
-        }
+        return 50 + robustness * 25;
     }
 
     /**
