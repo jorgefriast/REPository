@@ -30,7 +30,7 @@ public class MyRowing extends ApplicationAdapter {
     MiniGameState miniGameState;
     Texture lobbyImage;
     TextureRegion[] water;
-    TextureRegion[] shopBackground;
+    Texture shopBackground;
     BitmapFont font;
     Lane[] lanes;
     float stateTime = 0;
@@ -39,6 +39,11 @@ public class MyRowing extends ApplicationAdapter {
     Texture accelerationBarRectangle;
     Texture correct;
     Texture error;
+    Texture horizontal_scroll;
+    Texture vertical_scroll;
+    Texture right_arrow;
+    Texture left_arrow;
+    Texture shop_description;
     float accelerationBarRectangleWidth = 204;
     float accelerationBarRectangleHeight = 54;
     Texture accelerationBarBackground;
@@ -96,6 +101,12 @@ public class MyRowing extends ApplicationAdapter {
         keysTutorialTexture = new Texture("backgrounds/tutorial.png");
         loseScreenTexture = new Texture("backgrounds/loose-screen.png");
         UITutorialTexture = new Texture("backgrounds/ui-tutorial.png");
+        shopBackground = new Texture("backgrounds/shop.png");
+        horizontal_scroll = new Texture("backgrounds/horizontal_scroll.png");
+        vertical_scroll = new Texture("backgrounds/vertical_scroll.png");
+        right_arrow = new Texture("backgrounds/right_arrow.png");
+        left_arrow = new Texture("backgrounds/left_arrow.png");
+        shop_description = new Texture("backgrounds/shop_description.png");
         boatPicture = new Texture("boats/saoko.png");
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
@@ -142,10 +153,6 @@ public class MyRowing extends ApplicationAdapter {
         for (int i = 0; i < water.length; i++)
             water[i] = new TextureRegion(new Texture("water-frames//frame_" + i + "_delay-0.1s.png"));
 
-        // Shop Background GIF
-        shopBackground = new TextureRegion[6];
-        for (int i = 0; i < shopBackground.length; i++)
-            shopBackground[i] = new TextureRegion(new Texture("shop-background//frame_" + i + "_delay-0.1s.png"));
 
         // Initialize the stage and viewport
         viewport = new ScreenViewport();
@@ -671,27 +678,35 @@ public class MyRowing extends ApplicationAdapter {
 
     private void renderShop() {
         ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
-
-
-        // Background GIF
-        stateTime += Gdx.graphics.getDeltaTime();
-        int currentFrameIndex = (int) (stateTime / frameDuration) % 6;
-        batch.draw(shopBackground[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
         Texture boatTexture = new Texture(Gdx.files.internal("boats/" + shopBoat.getImageName()));
-        batch.draw(boatTexture, 0, 0, 200, 200);
-        font.draw(batch, "Boat Name: " + shopBoat.getName(), 250, 1000);
-        font.draw(batch, "Speed Factor: " + shopBoat.getSpeedFactor(), 250, 800);
-        font.draw(batch, "Acceleration: " + shopBoat.getAcceleration(), 250, 700);
-        font.draw(batch, "Robustness: " + shopBoat.getRobustness(), 250, 600);
-        font.draw(batch, "Maneuverability: " + shopBoat.getManeuverability(), 250, 500);
-        font.draw(batch, "Momentum Factor: " + shopBoat.getMomentumFactor(), 250, 400);
-        font.draw(batch, "Fatigue: " + shopBoat.getFatigue(), 250, 300);
+
+        batch.draw(shopBackground,0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        batch.draw(vertical_scroll,(float) (WINDOW_WIDTH*0.1), (float) (WINDOW_HEIGHT*0.28), (float) (vertical_scroll.getWidth() * 2.15), (float) (vertical_scroll.getHeight()* 2.18));
+        batch.draw(shop_description, (float) (WINDOW_WIDTH*0.6), (float) (WINDOW_HEIGHT*0.1), (float) (shop_description.getWidth()*4), (float) (shop_description.getHeight()*4));
+
+        batch.draw(boatTexture,(float) (WINDOW_WIDTH*0.20), (float) (WINDOW_HEIGHT*0.38),(float) (boatTexture.getWidth()*0.25), (float) (boatTexture.getHeight()*0.25));
+
+        batch.draw(left_arrow, (float) (WINDOW_WIDTH*0.05), (float) (WINDOW_HEIGHT*0.1), left_arrow.getWidth(), left_arrow.getHeight());
+        batch.draw(right_arrow, (float) (WINDOW_WIDTH*0.38), (float) (WINDOW_HEIGHT*0.1), right_arrow.getWidth(), right_arrow.getHeight());
+
+        batch.draw(horizontal_scroll, (float) (WINDOW_WIDTH*0.12), (float) (WINDOW_HEIGHT*0.12), horizontal_scroll.getWidth(), (float) (horizontal_scroll.getHeight()*0.3));
+
+        font.draw(batch, shopBoat.getName(), (float) (WINDOW_WIDTH*0.22), (float) (WINDOW_HEIGHT*0.18));
+        font.draw(batch, "STATS", (float) (WINDOW_WIDTH*0.74), (float) (WINDOW_HEIGHT*0.85));
+        font.draw(batch, "Speed Factor: " + shopBoat.getSpeedFactor(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.75));
+        font.draw(batch, "Acceleration: " + shopBoat.getAcceleration(),(float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.68));
+        font.draw(batch, "Robustness: " + shopBoat.getRobustness(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.61));
+        font.draw(batch, "Maneuverability: " + shopBoat.getManeuverability(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.54));
+        font.draw(batch, "Momentum Factor: " + shopBoat.getMomentumFactor(),  (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.46));
+        font.draw(batch, "Fatigue: " + shopBoat.getFatigue(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.39));
         if (!shopBoat.isUnlocked()) {
-            font.draw(batch, "Price: " + shopBoat.getPrice(), 250, 200);
+            font.draw(batch, "Price: " + shopBoat.getPrice(), (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.21));
         } else {
-            font.draw(batch, "Unlocked", 250, 200);
-            font.draw(batch, "Selected: " + shopBoat.isSelected(), 250, 100);
+                font.draw(batch, "Unlocked", (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.25));
+            if (shopBoat.isSelected())
+                font.draw(batch, "Selected", (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.17));
+            else
+                font.draw(batch, "Not Selected", (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.17));
         }
     }
 
@@ -715,6 +730,7 @@ public class MyRowing extends ApplicationAdapter {
              dataManager.getSelectedBoat().setSelected(false);
              shopBoat.setSelected(true);
          }
+
          System.err.println(shopBoat.isSelected());
          System.err.println(dataManager.boats.get(1).isSelected());
          dataManager.saveShopBoats();
