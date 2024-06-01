@@ -1,15 +1,27 @@
 package com.introduction.rowing;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.sun.tools.jdeprscan.CSV;
+import tools.CSVParser;
+
+import java.awt.*;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+
+import static com.introduction.rowing.Constants.*;
 
 public class Boat extends Entity{
-    private final int speedFactor;
-    private final int acceleration;
-    private final int robustness;
-    private final int momentumFactor;
-    private final int fatigue;
+    private int speedFactor;
+    private int acceleration;
+    private int robustness;
+    private int momentumFactor;
+    private int fatigue;
     private double speedX;
     private double speedY;
     private final GameInputProcessor inputProcessor;
@@ -23,21 +35,29 @@ public class Boat extends Entity{
     private  float fatigueRate;
     private int boatHealth;
     private int id;
+    private int width;
+    private int height;
 
-    public Boat(int id, Position position, Texture image, boolean isPlayer, int speedFactor, int acceleration, int robustness, int maneuverability, int momentumFactor, int fatigue, GameInputProcessor inputProcessor) {
-        super(position, image.getWidth()/2, image.getHeight()/2, image);
-        this.id = id;
-        this.speedX = maneuverability * getFatigueEffect();
+    public Boat(int id, Position position, boolean isPlayer, GameInputProcessor inputProcessor, ShopBoat shopBoat) {
+        super(position, 10, 10, new Texture(shopBoat.getImageName()));
         this.speedY = getNewCalculatedSpeed();
+        this.fatigue = shopBoat.getFatigue();
         this.isPlayer = isPlayer;
         this.inputProcessor = inputProcessor;
-        this.speedFactor = speedFactor;
-        this.acceleration = acceleration;
-        this.robustness = robustness;
-        this.momentumFactor = momentumFactor;
-        this.fatigue = fatigue;
         this.fatigueRate = calculateFatigueRate(fatigue);
         this.boatHealth = determineBoatHealth();
+        this.id = id;
+        this.speedFactor = shopBoat.getSpeedFactor();
+        this.robustness = shopBoat.getRobustness();
+        this.acceleration = shopBoat.getAcceleration();
+        this.momentumFactor = shopBoat.getMomentumFactor();
+        this.speedX = shopBoat.getManeuverability();
+
+        this.width = (int) ((WINDOW_WIDTH / NUMBER_OF_LANES) * BOAT_WIDTH_FRACTION);
+        this.height = (image.getHeight() * this.width) / image.getWidth();
+        super.height = this.height;
+        super.width = this.width;
+
     }
 
     public void updateKeys(float delta, int leftBoundary) {
@@ -57,16 +77,17 @@ public class Boat extends Entity{
                     }
                     break;
                 case 1: // Left
-                    newX -= speedX * getFatigueEffect() * 2;
+                    newX -= (float) (speedX * getFatigueEffect() * 2);
                     break;
                 case 3: // Right
-                    newX += speedX * getFatigueEffect() * 2;
+                    newX += (float) (speedX * getFatigueEffect() * 2);
                     break;
             }
         }
         // Update boat position
         int laneWidth = Constants.WINDOW_WIDTH / Constants.NUMBER_OF_LANES;
-        position.setX(Math.round(Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - image.getWidth()/2, newX))));
+        newX = Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - this.width, newX));
+        position.setX(Math.round(newX));
     }
 
     public void updateY(float delta) {
@@ -79,8 +100,8 @@ public class Boat extends Entity{
         speedY = getNewCalculatedSpeed();
 
         // Boat cannot go higher than the middle of the screen
-        if (position.getY() > Gdx.graphics.getHeight()/6) {
-            position.setY(Gdx.graphics.getHeight()/6);
+        if (position.getY() > WINDOW_HEIGHT/2) {
+            position.setY(WINDOW_HEIGHT/2);
         }
         else {
             // Update boat position
@@ -106,23 +127,22 @@ public class Boat extends Entity{
             // Calculate desired position to steer away from the obstacle
             int desiredX = position.getX();
             int laneWidth = Constants.WINDOW_WIDTH / Constants.NUMBER_OF_LANES;
-            int boatWidth = image.getWidth();
             int obstacleWidth = nearestObstacle.getWidth();
             int buffer = 20;
-            int safeDistance = boatWidth / 2 + obstacleWidth / 2 + buffer;
+            int safeDistance = this.width / 2 + obstacleWidth / 2 + buffer;
 
             if (nearestObstacle.getPosition().getX() < position.getX()) {
                 // Steer to the right if there's enough space; otherwise, steer to the left
                 desiredX = Math.max(leftBoundary, nearestObstacle.getPosition().getX() + obstacleWidth / 2 + safeDistance);
             } else {
                 // Steer to the left if there's enough space; otherwise, steer to the right
-                desiredX = Math.min(leftBoundary + laneWidth - boatWidth, nearestObstacle.getPosition().getX() - obstacleWidth / 2 - safeDistance);
+                desiredX = Math.min(leftBoundary + laneWidth - this.width, nearestObstacle.getPosition().getX() - obstacleWidth / 2 - safeDistance);
             }
 
             int newX = position.getX() + Math.round((desiredX - position.getX()) * 0.1f);
 
             // ensure the boat stays within the lane
-            int positionInLane = Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - boatWidth/2, newX));
+            int positionInLane = Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - this.width/2, newX));
             position.setX(positionInLane);
         }
     }
@@ -177,20 +197,7 @@ public class Boat extends Entity{
     }
 
     private int determineBoatHealth() {
-        switch (robustness) {
-            case 1:
-                return 50;
-            case 2:
-                return 75;
-            case 3:
-                return 100;
-            case 4:
-                return 125;
-            case 5:
-                return 150;
-            default:
-                return 0;
-        }
+        return 50 + robustness * 25;
     }
 
     /**
@@ -327,6 +334,25 @@ public class Boat extends Entity{
 
     public void setBoatHealth(int value) {
         boatHealth = value;
+    }
+
+    public int getId() {
+        return this.id;
+    }
+
+    @Override
+    public Rectangle getBounds() {
+        return new Rectangle(position.getX(), position.getY() - this.height, this.width, this.height);
+    }
+
+    @Override
+    public int getWidth() {
+        return this.width;
+    }
+
+    @Override
+    public int getHeight() {
+        return this.height;
     }
 
     @Override

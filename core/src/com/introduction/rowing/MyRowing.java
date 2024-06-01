@@ -19,6 +19,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 import static com.introduction.rowing.Constants.*;
 
@@ -35,6 +37,8 @@ public class MyRowing extends ApplicationAdapter {
     float frameDuration = 0.1f;
     Texture boatPicture;
     Texture accelerationBarRectangle;
+    Texture correct;
+    Texture error;
     float accelerationBarRectangleWidth = 204;
     float accelerationBarRectangleHeight = 54;
     Texture accelerationBarBackground;
@@ -42,9 +46,18 @@ public class MyRowing extends ApplicationAdapter {
     float accelerationBarBackgroundHeight = 46;
     float accelerationLevel = 0;
     boolean stateAccelerating = false;
+    Texture progressBarRectangle;
+    Texture progressBarBackground;
+    float progressBarRectangleWidth = 204;
+    float progressBarRectangleHeight = 54;
+    float progressBarBackgroundWidth = 196;
+    float progressBarBackgroundHeight = 46;
+    float progressLevel = 0;
+    float finishLineY;
     ArrayList<Boat> boatsPosition = new ArrayList<>();
     Texture laneDividerTexture;
     ArrayList<LaneDivider> laneDividers;
+    ArrayList<Integer> positionsRecord = new ArrayList<>();
     FinishLine finishline;
     Texture keysTutorialTexture;
     Texture loseScreenTexture;
@@ -72,23 +85,28 @@ public class MyRowing extends ApplicationAdapter {
     FreeTypeFontGenerator generator;
     FreeTypeFontParameter parameter;
 
+
     int numberLeg = 0;
     int minigameStage = 0;
 
     @Override
     public void create() {
         batch = new SpriteBatch();
-        lobbyImage = new Texture("main-lobby.jpeg");
-        keysTutorialTexture = new Texture("keys-tutorial.png");
-        loseScreenTexture = new Texture("lose-screen.jpeg");
-        UITutorialTexture = new Texture("ui-tutorial.png");
-        boatPicture = new Texture("boat-top-view-2.png");
+        lobbyImage = new Texture("backgrounds/lobby.png");
+        keysTutorialTexture = new Texture("backgrounds/tutorial.png");
+        loseScreenTexture = new Texture("backgrounds/loose-screen.png");
+        UITutorialTexture = new Texture("backgrounds/ui-tutorial.png");
+        boatPicture = new Texture("boats/saoko.png");
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
-        laneDividerTexture = new Texture("lanedivider.jpeg");
-        tiles = new Texture("tile.jpg");
-        dragonHead = new Texture("head-removebg.png");
-        sumScreenMiniGame = new Texture("R.jpeg");
+        progressBarRectangle = new Texture("accelerationBarRectangle.png");
+        progressBarBackground = new Texture("acceleration_bar_background.png");
+        laneDividerTexture = new Texture("backgrounds/lane-separator.png");
+        correct = new Texture("tick.png");
+        error = new Texture("error.png");
+        tiles = new Texture("tiles/tile.jpg");
+        dragonHead = new Texture("powerups/dragon_head.png");
+        sumScreenMiniGame = new Texture("shop-background/frame_1_delay-0.1s.png");
         font = new BitmapFont();
         font.setColor(Color.BLACK);
         font.getData().setScale(2);
@@ -111,7 +129,7 @@ public class MyRowing extends ApplicationAdapter {
         lobbyInputProcessor = new LobbyInputProcessor(this);
         miniGameInputProcessor = new MiniGameInputProcessor(this);
         shopInputProcessor = new ShopInputProcessor(this);
-        dragonPlayer = new DragonHead(new Position((Gdx.graphics.getWidth() - dragonHead.getWidth()/2) / 2, (Gdx.graphics.getHeight() - dragonHead.getHeight()/2) / 2 -50), dragonHead.getWidth() /2, dragonHead.getHeight()/2, dragonHead, miniGameInputProcessor);
+        dragonPlayer = new DragonHead(new Position((Gdx.graphics.getWidth() - dragonHead.getWidth()/2) / 2, (Gdx.graphics.getHeight() - dragonHead.getHeight()/2) / 2 -50), dragonHead.getWidth() /6, dragonHead.getHeight()/6, dragonHead, miniGameInputProcessor);
         countdownTimer = new CountdownTimer(3);
         randomObstacle = 1;
         money = 0;
@@ -135,26 +153,36 @@ public class MyRowing extends ApplicationAdapter {
 
         dataManager = new DataManager();
 
+        for (int i = 0; i < NUMBER_OF_LANES; i++) {
+            positionsRecord.add(0);
+        }
     }
 
-    public void createNewGame(GameInputProcessor inputProcessor) {
+    public void createNewGame(GameInputProcessor inputProcessor, int numberLeg) {
         finishLineTexture = new Texture("arts0587-02_0.png");
         finishline = new FinishLine(new Position(0, Gdx.graphics.getHeight()), WINDOW_WIDTH, 100, finishLineTexture);
         miniGameState = MiniGameState.NOT_STARTED;
         lanes = new Lane[NUMBER_OF_LANES];
         int laneWidth = WINDOW_WIDTH / NUMBER_OF_LANES;
         int currentLeftBoundary = 0;
+        int boatWidth = (int) ((WINDOW_WIDTH / NUMBER_OF_LANES) * BOAT_WIDTH_FRACTION);
+        int boatHeight = (boatPicture.getHeight() * boatWidth) / boatPicture.getWidth();
         for (int i = 0; i < NUMBER_OF_LANES; i++) {
-            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), -270);
+            float multiplier = numberLeg != NUMBER_OF_LEGS ? 1 : (positionsRecord.get(i) / ((float) NUMBER_OF_LEGS * (NUMBER_OF_LANES - 1)) + 1) / 2;
+            System.out.println("MULTIPLIER " + multiplier);
+            // Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2),  (int) (boatHeight * 0.5 * multiplier));
+            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), (int) (boatHeight*0.5* multiplier));
             if (i == 0) {
-                lanes[i] = new Lane(new Boat(i, startingPosition, boatPicture, true, 5, 3, 1, 2, 3, 1, inputProcessor), currentLeftBoundary);
+                lanes[i] = new Lane(new Boat(i, startingPosition, true, inputProcessor, dataManager.getSelectedBoat()), currentLeftBoundary);
             } else {
-                lanes[i] = new Lane(new Boat(i, startingPosition, boatPicture, false, 5, 5, 5, 5, 5, 5, null), currentLeftBoundary);
+                Random random = new Random();
+                int randomInt = random.nextInt(4);
+                lanes[i] = new Lane(new Boat(i, startingPosition,  false, inputProcessor, dataManager.boats.get(randomInt)), currentLeftBoundary);
             }
             currentLeftBoundary += laneWidth;
         }
-        for(int i = 1; i < 4; i++) {
-            laneDividers.add(new LaneDivider(new Position((int) (i * ((float) WINDOW_WIDTH / NUMBER_OF_LANES)), 0), 10, WINDOW_HEIGHT, laneDividerTexture));
+        for(int i = 1; i < NUMBER_OF_LANES; i++) {
+            laneDividers.add(new LaneDivider(new Position((int) (i * ((float) WINDOW_WIDTH / NUMBER_OF_LANES)), 0), 10, laneDividerTexture.getHeight(), laneDividerTexture));
         }
     }
 
@@ -163,8 +191,15 @@ public class MyRowing extends ApplicationAdapter {
         accelerationLevel = 0;
         stateAccelerating = false;
         stateTime = 0;
-        createNewGame(gameInputProcessor);
+        createNewGame(gameInputProcessor, numberLeg);
+        lanes = null;
+        laneDividers.clear();
         System.out.println("Game reset");
+    }
+
+    public void renderLobby() {
+        batch.draw(lobbyImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
     }
 
     @Override
@@ -174,9 +209,8 @@ public class MyRowing extends ApplicationAdapter {
         currentState = InputProcessor.getGameState();
         switch (currentState) {
             case LOBBY:
-                batch.draw(lobbyImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 Gdx.input.setInputProcessor(lobbyInputProcessor);
-                font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
+                renderLobby();
                 break;
             case PLAY_GAME:
                 Gdx.input.setInputProcessor(gameInputProcessor);
@@ -192,7 +226,7 @@ public class MyRowing extends ApplicationAdapter {
                 break;
             case LOSE_SCREEN:
                 Gdx.input.setInputProcessor(loseScreenInputProcessor);
-                batch.draw(loseScreenTexture, 0, 0, 1920, 1080);
+                batch.draw(loseScreenTexture, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
                 break;
             default:
                 break;
@@ -201,22 +235,18 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private  void renderTutorial() {
-        if (stateTime < 5) {
-            batch.draw(keysTutorialTexture, 0, WINDOW_HEIGHT / 2, 1920, 540);
+        double tutorial_scaling = 0.7;
+        if (stateTime < LEG_DURATION) {
+            batch.draw(keysTutorialTexture, ((float) WINDOW_WIDTH / 2) - ((float) (int) (keysTutorialTexture.getWidth() * tutorial_scaling) / 2), (float) WINDOW_HEIGHT / 4, (int) (keysTutorialTexture.getWidth() * tutorial_scaling), (int) (keysTutorialTexture.getHeight() * tutorial_scaling));
         } else if (stateTime >= 5 && stateTime < 10) {
-            batch.draw(UITutorialTexture, 0, WINDOW_HEIGHT / 2, 1920, 540);
+            batch.draw(UITutorialTexture, 0, (float) WINDOW_HEIGHT / 3, (int) (UITutorialTexture.getWidth() * tutorial_scaling), (int) (UITutorialTexture.getHeight() * tutorial_scaling));
         }
     }
 
     private void renderGame(GameInputProcessor gameInputProcessor, GameSubState gameSubState) {
         if (lanes == null) {
             System.out.println("Creating new game");
-            createNewGame(gameInputProcessor);
-            //draw the lane dividers on the screen between the 4 lines
-            for (int i = 1; i < laneDividers.size(); i++) {
-                System.out.println("Drawing lane dividers");
-                batch.draw(laneDividers.get(i).getImage(), laneDividers.get(i).position.getX(), laneDividers.get(i).position.getY(), laneDividers.get(i).getWidth(), WINDOW_HEIGHT);
-            }
+            createNewGame(gameInputProcessor, numberLeg);
         }
         if (boatsPosition.size() == lanes.length) {
             System.out.println("Game is finished winner is: " + boatsPosition.get(0));
@@ -224,21 +254,28 @@ public class MyRowing extends ApplicationAdapter {
         // Water flow (GIF)
         stateTime += Gdx.graphics.getDeltaTime();
         int currentFrameIndex = (int) (stateTime / frameDuration) % water.length;
-        batch.draw(water[currentFrameIndex], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        //boat movement & obstacle spawning
+        batch.draw(water[currentFrameIndex], 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+        //draw the lane dividers on the screen between the 4 lines
         for (LaneDivider laneDivider : laneDividers) {
-            laneDivider.adjustPosition(0, -2);
+            laneDivider.adjustPosition(0,-2 );
             batch.draw(laneDivider.getImage(), laneDivider.getPosition().getX(), laneDivider.getPosition().getY(), laneDivider.getWidth(), laneDivider.getHeight());
+            if (laneDivider.getPosition().getY() < -laneDivider.getHeight()/2) {
+                laneDivider.adjustPosition(0,laneDivider.getHeight()/2);
+            }
         }
-        if (stateTime > 5) {
+        if (stateTime > 50) {
             finishLine();
         }
+
         boolean crossed;
+
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
-            batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY(), currentBoat.getWidth(), currentBoat.getHeight());
+            batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY() - currentBoat.getHeight(), currentBoat.getWidth(), currentBoat.getHeight());
             if (currentBoat.getIsPlayer()) {
                 currentBoat.updateKeys(Gdx.graphics.getDeltaTime(), lane.getLeftBoundary());
+                updateProgressBar(currentBoat);
             } else {
                 currentBoat.avoidObstacles(lane.getObstacles(), lane.getLeftBoundary());
             }
@@ -258,7 +295,7 @@ public class MyRowing extends ApplicationAdapter {
             if (currentFrameIndex % 5 == 0) {
                 currentBoat.updateY(Gdx.graphics.getDeltaTime());
             }
-if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(); }
+            if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(); }
             lane.collision();
 
             crossed = checkFinishLineCrossed(lane.getBoat());
@@ -273,6 +310,11 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 if (gameSubState == GameSubState.RACE_LEG) {
                     InputProcessor.setGameState(GameState.PLAY_MINI_GAME);
                     numberLeg++;
+                    for (int i = 0; i < NUMBER_OF_LANES; i++) {
+                        int currentId = boatsPosition.get(i).getId();
+                        positionsRecord.set(currentId, positionsRecord.get(currentId) + i);
+                        System.out.println("Position record:" + positionsRecord);
+                    }
                 } else {
                     numberLeg = 0;
                     InputProcessor.setGameState(GameState.LOBBY);
@@ -294,18 +336,18 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 } else {
                     obstacle.adjustPosition(0, -5);
                 }
-//                obstacle.adjustPosition((float) 0, (float) (-5));
+                // obstacle.adjustPosition((float) 0, (float) (-5));
                 batch.draw(obstacle.getImage(), obstacle.getPosition().getX(), obstacle.getPosition().getY(), obstacle.getWidth(), obstacle.getHeight());
-
-                // Remove obstacle if it's below the screen
-                if (obstacle.getPosition().getY() + obstacle.getHeight() < 0) {
-                    iterator.remove();
-                }
             }
         }
         font.draw(batch, ACCELERATION_BAR_TEXT, 1400, 900);
         batch.draw(accelerationBarRectangle, PBR_X_POS, PBR_Y_POS, accelerationBarRectangleWidth, accelerationBarRectangleHeight);
         batch.draw(accelerationBarBackground, PBB_X_POS, PBB_Y_POS, accelerationBarBackgroundWidth, accelerationBarBackgroundHeight);
+
+        batch.draw(progressBarRectangle, 1400, 800, progressBarRectangleWidth, progressBarRectangleHeight);
+        batch.draw(progressBarBackground, 1404, 804, progressBarBackgroundWidth, progressBarBackgroundHeight);
+
+
 
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
@@ -341,6 +383,7 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 if (countdownTimer.getTime() <= 0) {
                     prepareHidingItems();
                 }
+
                 break;
             case HIDING_ITEMS:
                 renderTiles();
@@ -348,7 +391,7 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 if (countdownTimer.getTime() <= 0) {
                     prepareShowingItems();
                 }
-                renderRandomObstacle();
+                renderRandomPowerup();
                 break;
             case SHOWING_ITEMS:
                 preparePlayingState();
@@ -368,9 +411,10 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 boolean correctTileClicked = checkCorrectTileClicked();
                 if (correctTileClicked) {
                     dataManager.setBalance(dataManager.getBalance() + money);
+                    //batch.draw(correct, WINDOW_WIDTH, WINDOW_HEIGHT , correct.getWidth(), correct.getHeight());
                 }
                 miniGameState = MiniGameState.NOT_STARTED;
-                if (minigameStage == 1 ) {
+                if (minigameStage >= NUMBER_OF_MINIGAMES) {
                     miniGameState = MiniGameState.SUM_SCREEN;
                 }
                 break;
@@ -378,7 +422,7 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 minigameStage = 0;
                 renderSumScreen();
                 InputProcessor minigameSumScreenIP;
-                if (numberLeg < 3)
+                if (numberLeg < NUMBER_OF_LEGS)
                     minigameSumScreenIP = new MinigameSumScreenInputProcessor(this, "game");
                 else {
                     minigameSumScreenIP = new MinigameSumScreenInputProcessor(this, "final-game");
@@ -387,7 +431,7 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
                 break;
             default:
                 break;
-        }
+    }
         if (miniGameState != MiniGameState.SUM_SCREEN) {
             renderDragonPlayer();
         }
@@ -411,8 +455,8 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
     private void renderTiles() {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                int tileWidth = Gdx.graphics.getWidth() / 4;
-                float tileHeight = (float) (Gdx.graphics.getHeight() - 100) / 4;
+                int tileWidth = WINDOW_WIDTH / 4;
+                float tileHeight = (float) (WINDOW_HEIGHT ) / 4;
                 float x = i * tileWidth;
                 float y = (3 - j) * tileHeight;
                 batch.draw(tiles, x, y, tileWidth, tileHeight);
@@ -431,26 +475,27 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
         miniGameState = MiniGameState.HIDING_ITEMS;
     }
 
-    private void renderRandomObstacle() {
+    private void renderRandomPowerup() {
         Texture texture;
         switch (randomObstacle) {
             case 1:
-                texture = new Texture("rock.png");
+                texture = new Texture("powerups/cat.png");
                 break;
             case 2:
-                texture = new Texture("geese-bg.png");
+                texture = new Texture("powerups/koi.png");
                 break;
             case 3:
-                texture = new Texture("duck-bg.png");
+                texture = new Texture("powerups/cookie.png");
                 break;
             case 4:
-                texture = new Texture("wood.png");
+                texture = new Texture("powerups/sakura_flower.png");
                 break;
             default:
                 return;
         }
         renderObstacle(texture);
     }
+
 
     private void renderObstacle(Texture texture) {
         float centeredX = ((float) WINDOW_WIDTH / 2) - ((float) texture.getWidth() / 2);
@@ -482,8 +527,9 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
     }
 
     private Entity createCorrectTile(int index) {
-        int tileWidth = Gdx.graphics.getWidth() / 4;
-        float tileHeight = (float) (Gdx.graphics.getHeight() - 100) / 4;
+        //int tileWidth = Gdx.graphics.getWidth() / 4;
+        int tileWidth = WINDOW_WIDTH / 4;
+        float tileHeight = (float)  WINDOW_HEIGHT / 4;
         int row = index % 4;
         int column = index / 4;
         float x = column * tileWidth;
@@ -491,16 +537,16 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
         Texture texture;
         switch (randomObstacle) {
             case 1:
-                texture = new Texture("rock_tile.png");
+                texture = new Texture("tiles/cat.jpg");
                 break;
             case 2:
-                texture = new Texture("geese_tile.png");
+                texture = new Texture("tiles/koi.jpg");
                 break;
             case 3:
-                texture = new Texture("duck_tile.png");
+                texture = new Texture("tiles/cookie.jpg");
                 break;
             case 4:
-                texture = new Texture("log_tile.png");
+                texture = new Texture("tiles/sakura_flower.jpg");
                 break;
             default:
                 return null;
@@ -517,8 +563,8 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
     }
 
     private Entity createIncorrectTile(int index) {
-        int tileWidth = Gdx.graphics.getWidth() / 4;
-        float tileHeight = (float) (Gdx.graphics.getHeight() - 100) / 4;
+        int tileWidth = WINDOW_WIDTH / 4;
+        float tileHeight = (float) (WINDOW_HEIGHT) / 4;
         int row = index % 4;
         int column = index / 4;
         float x = column * tileWidth;
@@ -530,16 +576,16 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
         Texture texture;
         switch (randomTileIncorrect) {
             case 1:
-                texture = new Texture("rock_tile.png");
+                texture = new Texture("tiles/cat.jpg");
                 break;
             case 2:
-                texture = new Texture("geese_tile.png");
+                texture = new Texture("tiles/koi.jpg");
                 break;
             case 3:
-                texture = new Texture("duck_tile.png");
+                texture = new Texture("tiles/cookie.jpg");
                 break;
             case 4:
-                texture = new Texture("log_tile.png");
+                texture = new Texture("tiles/sakura_flower.jpg");
                 break;
             default:
                 return null;
@@ -558,25 +604,25 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
             if (isDragonPlayerInsideTile(dragonPlayer, itemTile)){
                 switch (randomObstacle) {
                     case 1:
-                        if (itemTile.getImage().toString().equals("rock_tile.png")) {
+                        if (itemTile.getImage().toString().equals("tiles/cat.jpg")) {
                             money += 10;
                             return true;
                         }
                         break;
                     case 2:
-                        if (itemTile.getImage().toString().equals("geese_tile.png")) {
+                        if (itemTile.getImage().toString().equals("tiles/koi.jpg")) {
                             money += 10;
                             return true;
                         }
                         break;
                     case 3:
-                        if (itemTile.getImage().toString().equals("duck_tile.png")) {
+                        if (itemTile.getImage().toString().equals("tiles/cookie.jpg")) {
                             money += 10;
                             return true;
                         }
                         break;
                     case 4:
-                        if (itemTile.getImage().toString().equals("log_tile.png")) {
+                        if (itemTile.getImage().toString().equals("tiles/sakura_flower.jpg")) {
                             money += 10;
                             return true;
                         }
@@ -599,7 +645,7 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
     }
 
     private void renderSumScreen() {
-        batch.draw(sumScreenMiniGame, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(sumScreenMiniGame, 0, 0, WINDOW_WIDTH, WINDOW_WIDTH);
         String coinsEarned = "Coins earned: " + money;
         String roundMade = "Round made: " + (money / 10);
         GlyphLayout layout = new GlyphLayout(font, coinsEarned);
@@ -625,6 +671,7 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
 
     private void renderShop() {
         ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
+
 
         // Background GIF
         stateTime += Gdx.graphics.getDeltaTime();
@@ -656,18 +703,22 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
         currentShopBoatIndex = (currentShopBoatIndex - 1 + dataManager.boats.size()) % dataManager.boats.size();
     }
 
-    public void buyOrSelectBoat() {
-        ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
-        if (!shopBoat.isUnlocked() && dataManager.getBalance() >= shopBoat.getPrice()) {
-            shopBoat.setSelected(true);
-            dataManager.setBalance(dataManager.getBalance() - shopBoat.getPrice());
-        } else if (shopBoat.isSelected()) {
-            for (ShopBoat b : dataManager.boats) {
-                b.setSelected(false);
-            }
-            shopBoat.setSelected(true);
-        }
-    }
+     public void buyOrSelectBoat() {
+         ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
+         if (!shopBoat.isUnlocked() && dataManager.getBalance() >= shopBoat.getPrice()) {
+             dataManager.getSelectedBoat().setSelected(false);
+             shopBoat.setSelected(true);
+             shopBoat.setUnlocked(true);
+             dataManager.setBalance(dataManager.getBalance() - shopBoat.getPrice());
+
+         } else if (shopBoat.isUnlocked()) {
+             dataManager.getSelectedBoat().setSelected(false);
+             shopBoat.setSelected(true);
+         }
+         System.err.println(shopBoat.isSelected());
+         System.err.println(dataManager.boats.get(1).isSelected());
+         dataManager.saveShopBoats();
+     }
 
     @Override
     public void dispose() {
@@ -708,8 +759,7 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
     }
 
     private void decreaseAcceleration(float delta, Boat boat) {
-        float decreaseRate = FULL_ACCELERATION_BAR;
-        accelerationLevel -= decreaseRate * delta;
+        accelerationLevel -= FULL_ACCELERATION_BAR * delta;
         if (accelerationLevel <= 0) {
             accelerationLevel = 0;
             boat.setIsAcceleratorAvailable(false);
@@ -727,4 +777,14 @@ if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(
             accelerationBarBackgroundWidth = 0;
         }
     }
+
+    private void updateProgressBar(Boat boat) {
+        float boatY = boat.getPosition().getY();
+        finishLineY = finishline.getPosition().getY();
+        progressLevel = 1 - ((finishLineY - boatY) / (finishLineY - 0));  // Assuming the boat starts at y=0
+        if (progressLevel < 0) progressLevel = 0;
+        if (progressLevel > 1) progressLevel = 1;
+        progressBarBackgroundWidth = 196 * progressLevel;
+    }
+
 }
