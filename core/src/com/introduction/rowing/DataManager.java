@@ -14,6 +14,7 @@ public class DataManager {
     public List<ShopBoat> boats;
     private static final String MONEY_BALANCE_FILE_PATH = "core/data/money_balance.txt";
     private static final String BOATS_FILE_PATH = "core/data/boats.csv";
+    private static final String INVENTORY_FILE_PATH = "core/data/inventory";
 
     public DataManager() {
         this.balance = readBalance();
@@ -110,7 +111,6 @@ public class DataManager {
         file.writeString(sb.toString(), false);
     }
 
-
     public ShopBoat getSelectedBoat() {
         for (ShopBoat boat : boats) {
             if (boat.isSelected()) {
@@ -118,5 +118,23 @@ public class DataManager {
             }
         }
         return null;
+    }
+
+    public Powerup getPowerup(MyRowing myRowing) {
+        FileHandle file = Gdx.files.local(INVENTORY_FILE_PATH);
+        if (!file.exists()) {
+            return null;
+        }
+        int id = Integer.parseInt(file.readString());
+        switch (id) {
+            case 0:
+                return new FishPowerup(myRowing);
+            case 1:
+                return new CookiePowerup(myRowing);
+            case 2:
+            case 3:
+            default:
+                return null;
+        }
     }
 }

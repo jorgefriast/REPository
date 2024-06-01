@@ -36,6 +36,8 @@ public class GameInputProcessor extends InputProcessor {
 				myRowing.resetGame();
 				setGameState(GameState.LOBBY);
 				break;
+			case Input.Keys.SPACE:
+				myRowing.usePowerup();
 		}
 		return false;
 	}

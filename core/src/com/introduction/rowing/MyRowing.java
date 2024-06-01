@@ -54,6 +54,7 @@ public class MyRowing extends ApplicationAdapter {
     float progressBarBackgroundHeight = 46;
     float progressLevel = 0;
     float finishLineY;
+    Powerup availablePowerup;
     ArrayList<Boat> boatsPosition = new ArrayList<>();
     Texture laneDividerTexture;
     ArrayList<LaneDivider> laneDividers;
@@ -184,6 +185,7 @@ public class MyRowing extends ApplicationAdapter {
         for(int i = 1; i < NUMBER_OF_LANES; i++) {
             laneDividers.add(new LaneDivider(new Position((int) (i * ((float) WINDOW_WIDTH / NUMBER_OF_LANES)), 0), 10, laneDividerTexture.getHeight(), laneDividerTexture));
         }
+        availablePowerup = dataManager.getPowerup(this);
     }
 
     public void resetGame() {
@@ -268,6 +270,7 @@ public class MyRowing extends ApplicationAdapter {
             finishLine();
         }
 
+
         boolean crossed;
 
         for (Lane lane : lanes) {
@@ -348,16 +351,32 @@ public class MyRowing extends ApplicationAdapter {
 
         batch.draw(progressBarRectangle, 1400, 800, progressBarRectangleWidth, progressBarRectangleHeight);
         batch.draw(progressBarBackground, 1404, 804, progressBarBackgroundWidth, progressBarBackgroundHeight);
+
+        // Render powerup
         float powerUpSlotFactor = 3;
         int space = (int) (WINDOW_HEIGHT * 0.01);
-        System.err.println("SAPCE: " + space);
+        float powerUpSlotHeight = (WINDOW_HEIGHT - space) - powerupSlot.getHeight() * powerUpSlotFactor;
         batch.draw(
                 powerupSlot,
                 space,
-                Math.round((WINDOW_HEIGHT - space) - powerupSlot.getHeight() * powerUpSlotFactor),
+                Math.round(powerUpSlotHeight),
                 powerUpSlotFactor * powerupSlot.getHeight(),
                 powerUpSlotFactor * powerupSlot.getWidth()
         );
+        if (this.availablePowerup != null) { // If there's a powerup show it in the slot
+            // The mathematical expression is used to scale the image to fit in the slot without altering its proportions
+            batch.draw(
+                    availablePowerup.getTexture(),
+                    space,
+                    Math.round(powerUpSlotHeight),
+                    Math.round(availablePowerup.getTexture().getWidth()
+                            * powerUpSlotFactor
+                            * powerupSlot.getHeight()
+                            / availablePowerup.getTexture().getHeight()
+                            * 0.9),
+                    Math.round(powerUpSlotFactor * powerupSlot.getHeight() * 0.9)
+            );
+        }
 
 
 
@@ -722,7 +741,6 @@ public class MyRowing extends ApplicationAdapter {
              shopBoat.setSelected(true);
              shopBoat.setUnlocked(true);
              dataManager.setBalance(dataManager.getBalance() - shopBoat.getPrice());
-
          } else if (shopBoat.isUnlocked()) {
              dataManager.getSelectedBoat().setSelected(false);
              shopBoat.setSelected(true);
@@ -797,6 +815,20 @@ public class MyRowing extends ApplicationAdapter {
         if (progressLevel < 0) progressLevel = 0;
         if (progressLevel > 1) progressLevel = 1;
         progressBarBackgroundWidth = 196 * progressLevel;
+    }
+
+    public Boat getPlayerBoat() {
+        return lanes[0].getBoat();
+    }
+
+    public void maxAccelerationLevel() {
+        // Get which is the player boat
+        this.increaseAcceleration(1, getPlayerBoat());
+    }
+
+    public void usePowerup() {
+        this.availablePowerup.use();
+        this.availablePowerup = null;
     }
 
 }
