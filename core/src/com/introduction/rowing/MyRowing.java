@@ -59,6 +59,8 @@ public class MyRowing extends ApplicationAdapter {
     float progressBarBackgroundHeight = 46;
     float progressLevel = 0;
     float finishLineY;
+    float invulnerabilityTimer = 0;
+    Powerup availablePowerup;
     ArrayList<Boat> boatsPosition = new ArrayList<>();
     Texture laneDividerTexture;
     ArrayList<LaneDivider> laneDividers;
@@ -66,6 +68,7 @@ public class MyRowing extends ApplicationAdapter {
     FinishLine finishline;
     Texture keysTutorialTexture;
     Texture loseScreenTexture;
+    Texture powerupSlot;
     Texture UITutorialTexture;
     Texture finishLineTexture;
     Texture tiles;
@@ -118,6 +121,7 @@ public class MyRowing extends ApplicationAdapter {
         tiles = new Texture("tiles/tile.jpg");
         dragonHead = new Texture("powerups/dragon_head.png");
         sumScreenMiniGame = new Texture("shop-background/frame_1_delay-0.1s.png");
+        powerupSlot = new Texture("powerups/powerup-slot.png");
         font = new BitmapFont();
         font.setColor(Color.BLACK);
         font.getData().setScale(2);
@@ -176,8 +180,6 @@ public class MyRowing extends ApplicationAdapter {
         int boatHeight = (boatPicture.getHeight() * boatWidth) / boatPicture.getWidth();
         for (int i = 0; i < NUMBER_OF_LANES; i++) {
             float multiplier = numberLeg != NUMBER_OF_LEGS ? 1 : (positionsRecord.get(i) / ((float) NUMBER_OF_LEGS * (NUMBER_OF_LANES - 1)) + 1) / 2;
-            System.out.println("MULTIPLIER " + multiplier);
-            // Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2),  (int) (boatHeight * 0.5 * multiplier));
             Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), (int) (boatHeight*0.5* multiplier));
             if (i == 0) {
                 lanes[i] = new Lane(new Boat(i, startingPosition, true, inputProcessor, dataManager.getSelectedBoat()), currentLeftBoundary);
@@ -191,9 +193,10 @@ public class MyRowing extends ApplicationAdapter {
         for(int i = 1; i < NUMBER_OF_LANES; i++) {
             laneDividers.add(new LaneDivider(new Position((int) (i * ((float) WINDOW_WIDTH / NUMBER_OF_LANES)), 0), 10, laneDividerTexture.getHeight(), laneDividerTexture));
         }
+        availablePowerup = dataManager.getPowerup(this);
     }
 
-    public void resetGame() {
+    public void resetGame(GameSubState gameSubState) {
         boatsPosition.clear();
         accelerationLevel = 0;
         stateAccelerating = false;
@@ -202,6 +205,9 @@ public class MyRowing extends ApplicationAdapter {
         lanes = null;
         laneDividers.clear();
         System.out.println("Game reset");
+        if (gameSubState == GameSubState.FINAL_LEG) {
+            dataManager.setPowerup(-1);
+        }
     }
 
     public void renderLobby() {
@@ -271,9 +277,10 @@ public class MyRowing extends ApplicationAdapter {
                 laneDivider.adjustPosition(0,laneDivider.getHeight()/2);
             }
         }
-        if (stateTime > 50) {
+        if (stateTime > LEG_DURATION) {
             finishLine();
         }
+
 
         boolean crossed;
 
@@ -302,6 +309,8 @@ public class MyRowing extends ApplicationAdapter {
             if (currentFrameIndex % 5 == 0) {
                 currentBoat.updateY(Gdx.graphics.getDeltaTime());
             }
+
+            // Generate obstacles
             if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(); }
             lane.collision();
 
@@ -310,24 +319,6 @@ public class MyRowing extends ApplicationAdapter {
                 System.out.println("Boat " + currentBoat + " has crossed the finish line");
                 boatsPosition.add(currentBoat);
                 System.out.println(boatsPosition);
-            }
-            // The game change between substates depending on the leg number
-            if (boatsPosition.size() == lanes.length) {
-                System.out.println("Game is finished winner is: " + boatsPosition.get(0));
-                if (gameSubState == GameSubState.RACE_LEG) {
-                    InputProcessor.setGameState(GameState.PLAY_MINI_GAME);
-                    numberLeg++;
-                    for (int i = 0; i < NUMBER_OF_LANES; i++) {
-                        int currentId = boatsPosition.get(i).getId();
-                        positionsRecord.set(currentId, positionsRecord.get(currentId) + i);
-                        System.out.println("Position record:" + positionsRecord);
-                    }
-                } else {
-                    numberLeg = 0;
-                    InputProcessor.setGameState(GameState.LOBBY);
-                }
-                resetGame();
-                System.out.println("NUMBER LEG: " + numberLeg);
             }
             //make the obstacles move
             ArrayList<Obstacle> obstacles = lane.getObstacles();
@@ -356,8 +347,41 @@ public class MyRowing extends ApplicationAdapter {
         batch.draw(progressBarRectangle, 1400, 800, progressBarRectangleWidth, progressBarRectangleHeight);
         batch.draw(progressBarBackground, 1404, 804, progressBarBackgroundWidth, progressBarBackgroundHeight);
 
+        // Render powerup
+        float powerUpSlotFactor = 3;
+        int space = (int) (WINDOW_HEIGHT * 0.01);
+        float powerUpSlotHeight = (WINDOW_HEIGHT - space) - powerupSlot.getHeight() * powerUpSlotFactor;
+        batch.draw(
+                powerupSlot,
+                space,
+                Math.round(powerUpSlotHeight),
+                powerUpSlotFactor * powerupSlot.getHeight(),
+                powerUpSlotFactor * powerupSlot.getWidth()
+        );
+        if (this.availablePowerup != null) { // If there's a powerup show it in the slot
+            // The mathematical expression is used to scale the image to fit in the slot without altering its proportions
+            batch.draw(
+                    availablePowerup.getTexture(),
+                    space,
+                    Math.round(powerUpSlotHeight),
+                    Math.round(availablePowerup.getTexture().getWidth()
+                            * powerUpSlotFactor
+                            * powerupSlot.getHeight()
+                            / availablePowerup.getTexture().getHeight()
+                            * 0.9),
+                    Math.round(powerUpSlotFactor * powerupSlot.getHeight() * 0.9)
+            );
+        }
 
-
+        // Invulnerability  powerup logic
+        invulnerabilityTimer += Gdx.graphics.getDeltaTime();
+        if (this.getPlayerBoat().isInvulnerable() && invulnerabilityTimer >= 1) {
+            invulnerabilityTimer = 0;
+            this.getPlayerBoat().decreaseInvulnerabilityTime();
+        }
+        if (gameSubState == GameSubState.TUTORIAL) {
+            renderTutorial();
+        }
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
             if (currentBoat.getIsPlayer()) {
@@ -365,7 +389,7 @@ public class MyRowing extends ApplicationAdapter {
                 if (currentBoat.getBoatHealth() <= 0) {
                     currentBoat.setBoatHealth(0);
                     InputProcessor.setGameState(GameState.LOSE_SCREEN);
-                    resetGame();
+                    resetGame(gameSubState);
                 }
                 double fatiguePercentage = currentBoat.getFatigueEffect();
                 String fatigueText = "Fatigue Effect: " + (int) (fatiguePercentage * 100) + "%";
@@ -377,8 +401,23 @@ public class MyRowing extends ApplicationAdapter {
                 font.draw(batch, momentumText, 1400, 640);
             }
         }
-        if (gameSubState == GameSubState.TUTORIAL) {
-            renderTutorial();
+        // The game change between substates depending on the leg number
+        if (boatsPosition.size() == lanes.length) {
+            System.out.println("Game is finished winner is: " + boatsPosition.get(0));
+            if (gameSubState == GameSubState.RACE_LEG) {
+                InputProcessor.setGameState(GameState.PLAY_MINI_GAME);
+                numberLeg++;
+                for (int i = 0; i < NUMBER_OF_LANES; i++) {
+                    int currentId = boatsPosition.get(i).getId();
+                    positionsRecord.set(currentId, positionsRecord.get(currentId) + i);
+                    System.out.println("Position record:" + positionsRecord);
+                }
+            } else {
+                numberLeg = 0;
+                InputProcessor.setGameState(GameState.LOBBY);
+            }
+            resetGame(gameSubState);
+            System.out.println("NUMBER LEG: " + numberLeg);
         }
     }
 
@@ -726,7 +765,6 @@ public class MyRowing extends ApplicationAdapter {
              shopBoat.setSelected(true);
              shopBoat.setUnlocked(true);
              dataManager.setBalance(dataManager.getBalance() - shopBoat.getPrice());
-
          } else if (shopBoat.isUnlocked()) {
              dataManager.getSelectedBoat().setSelected(false);
              shopBoat.setSelected(true);
@@ -803,5 +841,20 @@ public class MyRowing extends ApplicationAdapter {
         if (progressLevel > 1) progressLevel = 1;
         progressBarBackgroundWidth = 196 * progressLevel;
     }
+
+    public Boat getPlayerBoat() {
+        return lanes[0].getBoat();
+    }
+
+    public void maxAccelerationLevel() {
+        // Get which is the player boat
+        this.increaseAcceleration(1, getPlayerBoat());
+    }
+
+    public void usePowerup() {
+        this.availablePowerup.use();
+        this.availablePowerup = null;
+    }
+
 
 }
