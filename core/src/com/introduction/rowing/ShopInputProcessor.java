@@ -14,19 +14,22 @@ public class ShopInputProcessor extends InputProcessor {
         switch (keycode) {
             case Input.Keys.LEFT:
                 myRowing.previousBoat();
+                myRowing.previousShopPowerup();
                 break;
             case Input.Keys.RIGHT:
                 myRowing.nextBoat();
+                myRowing.nextShopPowerup();
                 break;
             case Input.Keys.ESCAPE:
                 setGameState(GameState.LOBBY);
                 break;
             case Input.Keys.ENTER:
                 myRowing.buyOrSelectBoat();
+                break;
             case Input.Keys.DOWN:
-                InputProcessor.setShopSubState(ShopSubState.POWEUPS);
             case Input.Keys.UP:
-                InputProcessor.setShopSubState(ShopSubState.BOATS);
+                InputProcessor.switchGameSubState();
+                break;
 
 
         }

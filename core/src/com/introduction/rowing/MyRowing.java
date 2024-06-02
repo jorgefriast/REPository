@@ -38,11 +38,13 @@ public class MyRowing extends ApplicationAdapter {
     Texture accelerationBarRectangle;
     Texture correct;
     Texture error;
-    Texture horizontal_scroll;
-    Texture vertical_scroll;
-    Texture right_arrow;
-    Texture left_arrow;
-    Texture shop_description;
+    Texture horizontalScroll;
+    Texture verticalScroll;
+    Texture rightArrow;
+    Texture upperArrow;
+    Texture bottomArrow;
+    Texture leftArrow;
+    Texture shopDescription;
     float accelerationBarRectangleWidth = 204;
     float accelerationBarRectangleHeight = 54;
     Texture accelerationBarBackground;
@@ -104,11 +106,13 @@ public class MyRowing extends ApplicationAdapter {
         loseScreenTexture = new Texture("backgrounds/loose-screen.png");
         UITutorialTexture = new Texture("backgrounds/ui-tutorial.png");
         shopBackground = new Texture("backgrounds/shop.png");
-        horizontal_scroll = new Texture("backgrounds/horizontal_scroll.png");
-        vertical_scroll = new Texture("backgrounds/vertical_scroll.png");
-        right_arrow = new Texture("backgrounds/right_arrow.png");
-        left_arrow = new Texture("backgrounds/left_arrow.png");
-        shop_description = new Texture("backgrounds/shop_description.png");
+        horizontalScroll = new Texture("backgrounds/horizontal_scroll.png");
+        verticalScroll = new Texture("backgrounds/vertical_scroll.png");
+        rightArrow = new Texture("backgrounds/right_arrow.png");
+        leftArrow = new Texture("backgrounds/left_arrow.png");
+        upperArrow = new Texture("backgrounds/upper_arrow.png");
+        bottomArrow = new Texture("backgrounds/bottom_arrow.png");
+        shopDescription = new Texture("backgrounds/shop_description.png");
         boatPicture = new Texture("boats/saoko.png");
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
@@ -234,7 +238,7 @@ public class MyRowing extends ApplicationAdapter {
                 break;
             case ENTER_SHOP:
                 Gdx.input.setInputProcessor(shopInputProcessor);
-                renderShop(ShopSubState.BOATS);
+                renderShop();
                 break;
             case LOSE_SCREEN:
                 Gdx.input.setInputProcessor(loseScreenInputProcessor);
@@ -338,7 +342,7 @@ public class MyRowing extends ApplicationAdapter {
             }
         }
 
-        batch.draw(vertical_scroll,1300, 470, (float) (vertical_scroll.getWidth() * 2), (float) (vertical_scroll.getHeight()* 1.7));
+        batch.draw(verticalScroll,1300, 470, (float) (verticalScroll.getWidth() * 2), (float) (verticalScroll.getHeight()* 1.7));
         font.draw(batch, ACCELERATION_BAR_TEXT, 1400, 900);
         batch.draw(accelerationBarRectangle, PBR_X_POS, PBR_Y_POS, accelerationBarRectangleWidth, accelerationBarRectangleHeight);
         batch.draw(accelerationBarBackground, PBB_X_POS, PBB_Y_POS, accelerationBarBackgroundWidth, accelerationBarBackgroundHeight);
@@ -721,20 +725,23 @@ public class MyRowing extends ApplicationAdapter {
         batch.draw(dragonPlayer.getImage(), dragonPlayer.position.getX(), dragonPlayer.position.getY(), dragonPlayer.getWidth(), dragonPlayer.getHeight());
     }
 
+    private void renderShopLayout() {
+        batch.draw(shopBackground,0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        batch.draw(verticalScroll,(float) (WINDOW_WIDTH*0.1), (float) (WINDOW_HEIGHT*0.28), (float) (verticalScroll.getWidth() * 2.15), (float) (verticalScroll.getHeight()* 2.18));
+        batch.draw(shopDescription, (float) (WINDOW_WIDTH*0.6), (float) (WINDOW_HEIGHT*0.1), (float) (shopDescription.getWidth()*4), (float) (shopDescription.getHeight()*4));
+        batch.draw(leftArrow, (float) (WINDOW_WIDTH*0.05), (float) (WINDOW_HEIGHT*0.1), leftArrow.getWidth(), leftArrow.getHeight());
+        batch.draw(rightArrow, (float) (WINDOW_WIDTH*0.38), (float) (WINDOW_HEIGHT*0.1), rightArrow.getWidth(), rightArrow.getHeight());
+        batch.draw(horizontalScroll, (float) (WINDOW_WIDTH*0.12), (float) (WINDOW_HEIGHT*0.12), horizontalScroll.getWidth(), (float) (horizontalScroll.getHeight()*0.3));
+        batch.draw(upperArrow, (float) (WINDOW_WIDTH * 0.03), (float) (WINDOW_HEIGHT * 0.6), (float) (horizontalScroll.getWidth() * 0.3), (float) (horizontalScroll.getHeight() * 0.3));
+        batch.draw(bottomArrow, (float) (WINDOW_WIDTH*0.03), (float) (WINDOW_HEIGHT*0.4), (float) (horizontalScroll.getWidth() * 0.3), (float) (horizontalScroll.getHeight()*0.3));
+    }
     private void renderBoatsShop() {
         ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
         Texture boatTexture = new Texture(Gdx.files.internal("boats/" + shopBoat.getImageName()));
 
-        batch.draw(shopBackground,0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        batch.draw(vertical_scroll,(float) (WINDOW_WIDTH*0.1), (float) (WINDOW_HEIGHT*0.28), (float) (vertical_scroll.getWidth() * 2.15), (float) (vertical_scroll.getHeight()* 2.18));
-        batch.draw(shop_description, (float) (WINDOW_WIDTH*0.6), (float) (WINDOW_HEIGHT*0.1), (float) (shop_description.getWidth()*4), (float) (shop_description.getHeight()*4));
+        this.renderShopLayout();
 
         batch.draw(boatTexture,(float) (WINDOW_WIDTH*0.20), (float) (WINDOW_HEIGHT*0.38),(float) (boatTexture.getWidth()*0.25), (float) (boatTexture.getHeight()*0.25));
-
-        batch.draw(left_arrow, (float) (WINDOW_WIDTH*0.05), (float) (WINDOW_HEIGHT*0.1), left_arrow.getWidth(), left_arrow.getHeight());
-        batch.draw(right_arrow, (float) (WINDOW_WIDTH*0.38), (float) (WINDOW_HEIGHT*0.1), right_arrow.getWidth(), right_arrow.getHeight());
-
-        batch.draw(horizontal_scroll, (float) (WINDOW_WIDTH*0.12), (float) (WINDOW_HEIGHT*0.12), horizontal_scroll.getWidth(), (float) (horizontal_scroll.getHeight()*0.3));
 
         font.draw(batch, shopBoat.getName(), (float) (WINDOW_WIDTH*0.22), (float) (WINDOW_HEIGHT*0.18));
         font.draw(batch, "STATS", (float) (WINDOW_WIDTH*0.74), (float) (WINDOW_HEIGHT*0.85));
@@ -753,38 +760,34 @@ public class MyRowing extends ApplicationAdapter {
             else
                 font.draw(batch, "Not Selected", (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.17));
         }
+        boatTexture.dispose();
     }
 
     int currentShopPowerup = 0;
     private void renderPowerupsShop() {
-        Powerup powerup = this.nextShopPowerup();
+        Powerup powerup = dataManager.getPowerupById(currentShopPowerup, this);
         Texture powerupTexture = powerup.getTexture();
 
-        batch.draw(shopBackground,0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        batch.draw(vertical_scroll,(float) (WINDOW_WIDTH*0.1), (float) (WINDOW_HEIGHT*0.28), (float) (vertical_scroll.getWidth() * 2.15), (float) (vertical_scroll.getHeight()* 2.18));
-        batch.draw(shop_description, (float) (WINDOW_WIDTH*0.6), (float) (WINDOW_HEIGHT*0.1), (float) (shop_description.getWidth()*4), (float) (shop_description.getHeight()*4));
+        this.renderShopLayout();
 
         batch.draw(powerupTexture,(float) (WINDOW_WIDTH*0.20), (float) (WINDOW_HEIGHT*0.38),(float) (powerupTexture.getWidth()*0.25), (float) (powerupTexture.getHeight()*0.25));
-
-        batch.draw(left_arrow, (float) (WINDOW_WIDTH*0.05), (float) (WINDOW_HEIGHT*0.1), left_arrow.getWidth(), left_arrow.getHeight());
-        batch.draw(right_arrow, (float) (WINDOW_WIDTH*0.38), (float) (WINDOW_HEIGHT*0.1), right_arrow.getWidth(), right_arrow.getHeight());
-
-        batch.draw(horizontal_scroll, (float) (WINDOW_WIDTH*0.12), (float) (WINDOW_HEIGHT*0.12), horizontal_scroll.getWidth(), (float) (horizontal_scroll.getHeight()*0.3));
 
         font.draw(batch, powerup.getName(), (float) (WINDOW_WIDTH*0.22), (float) (WINDOW_HEIGHT*0.18));
         font.draw(batch, "Description: " + powerup.getDescription(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.39));
         font.draw(batch, "Price: " + powerup.getPrice(), (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.21));
-        if (this.availablePowerup.getName().equals(powerup.getName())) {
+        if (this.availablePowerup != null && this.availablePowerup.getName().equals(powerup.getName())) {
             font.draw(batch, "Acquired", (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.21));
         }
     }
 
-    private void renderShop(ShopSubState shopSubState) {
-        switch (shopSubState) {
+    private void renderShop() {
+        switch (InputProcessor.getShopSubStates()) {
             case BOATS:
                 this.renderBoatsShop();
-            case POWEUPS:
+                break;
+            case POWERUPS:
                 this.renderPowerupsShop();
+                break;
         }
     }
 
@@ -894,8 +897,14 @@ public class MyRowing extends ApplicationAdapter {
         this.availablePowerup = null;
     }
 
-    private Powerup nextShopPowerup() {
-        this.currentShopPowerup = (this.currentShopPowerup + 1) % dataManager.getPowerups();
+    public void nextShopPowerup() {
+        this.currentShopPowerup = (this.currentShopPowerup + 1) % 4;
+        System.err.println("CURRENT: " + this.currentShopPowerup);
+    }
+
+    public void previousShopPowerup() {
+        this.currentShopPowerup = (this.currentShopPowerup - 1) % 4;
+        System.err.println("CURRENT: " + this.currentShopPowerup);
     }
 
 }

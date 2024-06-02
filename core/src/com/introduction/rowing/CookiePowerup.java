@@ -6,6 +6,8 @@ public class CookiePowerup implements Powerup {
     private MyRowing myRowing;
     private final Texture texture = new Texture("powerups/cookie.png");
     private final String description = "Increase the boat health by 25 points.";
+    private final String name = "Fortune Cookie";
+    private final int price = 150;
 
     public CookiePowerup(MyRowing myRowing) {
         this.myRowing = myRowing;
@@ -25,5 +27,15 @@ public class CookiePowerup implements Powerup {
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public int getPrice() {
+        return price;
     }
 }

@@ -157,12 +157,7 @@ public class DataManager {
         return lineCounter;
     }
 
-    public Powerup getPowerup(MyRowing myRowing) {
-        FileHandle file = Gdx.files.local(INVENTORY_FILE_PATH);
-        if (!file.exists()) {
-            return null;
-        }
-        int id = Integer.parseInt(file.readString());
+    public Powerup getPowerupById(int id, MyRowing myRowing) {
         switch (id) {
             case 0:
                 return new FishPowerup(myRowing);
@@ -175,5 +170,14 @@ public class DataManager {
             default:
                 return null;
         }
+    }
+
+    public Powerup getPowerup(MyRowing myRowing) {
+        FileHandle file = Gdx.files.local(INVENTORY_FILE_PATH);
+        if (!file.exists()) {
+            return null;
+        }
+        int id = Integer.parseInt(file.readString());
+        return getPowerupById(id, myRowing);
     }
 }

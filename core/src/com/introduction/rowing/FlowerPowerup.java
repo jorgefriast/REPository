@@ -6,6 +6,8 @@ public class FlowerPowerup implements Powerup {
 
     private MyRowing myRowing;
     private final String description = "Set the momemtum to 3 until your boat collides with an obstacle.";
+    private final String name = "Sakura Flower";
+    private final int price = 150;
     private final Texture texture = new Texture("powerups/sakura_flower.png");
 
     public FlowerPowerup(MyRowing myRowing) {
@@ -25,5 +27,15 @@ public class FlowerPowerup implements Powerup {
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    @Override
+    public String getName() {
+        return  this.name;
+    }
+
+    @Override
+    public int getPrice() {
+        return this.price;
     }
 }

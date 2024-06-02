@@ -6,6 +6,8 @@ public class CatPowerup implements Powerup {
     private MyRowing myRowing;
     private final Texture texture = new Texture("powerups/cat.png");
     private final String description = "Gives invulnerability to obstacles collisions for 5 seconds.";
+    private final String name = "Maneki Neko (Fortune Cat)";
+    private final int price = 201;
 
 
     public CatPowerup(MyRowing myRowing) {
@@ -25,5 +27,15 @@ public class CatPowerup implements Powerup {
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    @Override
+    public int getPrice() {
+        return price;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 }
