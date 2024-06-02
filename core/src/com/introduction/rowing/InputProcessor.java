@@ -10,7 +10,6 @@ public class InputProcessor extends InputAdapter {
     private static GameState gameState = GameState.LOBBY;
     private static GameSubState gameSubState = GameSubState.RACE_LEG;
     private static ShopSubState shopSubState = ShopSubState.BOATS;
-
     public static void setGameState(GameState gameState) {
         InputProcessor.gameState = gameState;
     }

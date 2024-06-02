@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 public class CookiePowerup implements Powerup {
     private MyRowing myRowing;
     private final Texture texture = new Texture("powerups/cookie.png");
-    private final String description = "Increase the boat health by 25 points.";
+    private final String description = "Increase the boat health by\n25 points.";
     private final String name = "Fortune Cookie";
     private final int price = 150;
 

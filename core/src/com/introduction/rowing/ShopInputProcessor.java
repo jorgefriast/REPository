@@ -24,6 +24,14 @@ public class ShopInputProcessor extends InputProcessor {
                 setGameState(GameState.LOBBY);
                 break;
             case Input.Keys.ENTER:
+                switch (InputProcessor.getShopSubStates()) {
+                    case POWERUPS:
+                        myRowing.buyPowerup();
+                        break;
+                    case BOATS:
+                        myRowing.buyOrSelectBoat();
+                        break;
+                }
                 myRowing.buyOrSelectBoat();
                 break;
             case Input.Keys.DOWN:

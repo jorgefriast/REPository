@@ -54,9 +54,9 @@ public class MyRowing extends ApplicationAdapter {
     boolean stateAccelerating = false;
     Texture progressBarRectangle;
     Texture progressBarBackground;
-    float progressBarRectangleWidth = 204;
+    float progressBarRectangleWidth = WINDOW_WIDTH / 2;
     float progressBarRectangleHeight = 54;
-    float progressBarBackgroundWidth = 196;
+    float progressBarBackgroundWidth = WINDOW_WIDTH / 2;
     float progressBarBackgroundHeight = 46;
     float progressLevel = 0;
     float finishLineY;
@@ -117,7 +117,7 @@ public class MyRowing extends ApplicationAdapter {
         accelerationBarRectangle = new Texture("accelerationBarRectangle.png");
         accelerationBarBackground = new Texture("acceleration_bar_background.png");
         progressBarRectangle = new Texture("accelerationBarRectangle.png");
-        progressBarBackground = new Texture("acceleration_bar_background.png");
+        progressBarBackground = new Texture("progress_bar.png");
         laneDividerTexture = new Texture("backgrounds/lane-separator.png");
         correct = new Texture("tick.png");
         error = new Texture("error.png");
@@ -207,7 +207,7 @@ public class MyRowing extends ApplicationAdapter {
         createNewGame(gameInputProcessor, numberLeg);
         lanes = null;
         laneDividers.clear();
-        System.out.println("Game reset");
+        System.err.println("Game reset");
         if (gameSubState == GameSubState.FINAL_LEG) {
             dataManager.setPowerup(-1);
         }
@@ -292,7 +292,6 @@ public class MyRowing extends ApplicationAdapter {
             batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY() - currentBoat.getHeight(), currentBoat.getWidth(), currentBoat.getHeight());
             if (currentBoat.getIsPlayer()) {
                 currentBoat.updateKeys(Gdx.graphics.getDeltaTime(), lane.getLeftBoundary());
-                updateProgressBar(currentBoat);
             } else {
                 currentBoat.avoidObstacles(lane.getObstacles(), lane.getLeftBoundary());
             }
@@ -347,8 +346,9 @@ public class MyRowing extends ApplicationAdapter {
         batch.draw(accelerationBarRectangle, PBR_X_POS, PBR_Y_POS, accelerationBarRectangleWidth, accelerationBarRectangleHeight);
         batch.draw(accelerationBarBackground, PBB_X_POS, PBB_Y_POS, accelerationBarBackgroundWidth, accelerationBarBackgroundHeight);
 
-        batch.draw(progressBarRectangle, 1400, 800, progressBarRectangleWidth, progressBarRectangleHeight);
-        batch.draw(progressBarBackground, 1404, 804, progressBarBackgroundWidth, progressBarBackgroundHeight);
+        batch.draw(progressBarBackground, (float) (WINDOW_WIDTH / 3.97) + 5, (float) (WINDOW_HEIGHT * 0.905), progressBarRectangleWidth * this.getProgress(this.getPlayerBoat(), stateTime) - 15, progressBarBackgroundHeight);
+        batch.draw(progressBarRectangle, (float) WINDOW_WIDTH / 2 - progressBarBackgroundWidth / 2, (float) (WINDOW_HEIGHT * 0.9), progressBarRectangleWidth, progressBarRectangleHeight);
+        System.err.println("PBRW: " + progressBarBackgroundWidth);
 
         // Render powerup
         float powerUpSlotFactor = 3;
@@ -404,6 +404,10 @@ public class MyRowing extends ApplicationAdapter {
             System.out.println("NUMBER LEG: " + numberLeg);
         }
         if (lanes != null) {
+            String invulnerableText = "Invulnerable";
+            if (this.getPlayerBoat().isInvulnerable()) {
+                font.draw(batch, invulnerableText, 1400, 580);
+            }
             for (Lane lane : lanes) {
                 Boat currentBoat = lane.getBoat();
                 if (currentBoat.getIsPlayer()) {
@@ -411,6 +415,7 @@ public class MyRowing extends ApplicationAdapter {
                     if (currentBoat.getBoatHealth() <= 0) {
                         currentBoat.setBoatHealth(0);
                         InputProcessor.setGameState(GameState.LOSE_SCREEN);
+                        this.resetPowerup();
                         resetGame(gameSubState);
                     }
                     double fatiguePercentage = currentBoat.getFatigueEffect();
@@ -418,13 +423,9 @@ public class MyRowing extends ApplicationAdapter {
                     String boatHealthText = "Boat Health: " + currentBoat.getBoatHealth();
                     String avoidedObstaclesText = "Avoided Obstacles: " + currentBoat.getNumberOfAvoidedObstacles();
                     String momentumText = "Momentum: " + currentBoat.getCurrentMomentum();
-                    String invulnerableText = "Invulnerable";
                     font.draw(batch, fatigueText, 1400, 760);
                     font.draw(batch, boatHealthText, 1400, 700);
                     font.draw(batch, momentumText, 1400, 640);
-                    if (this.getPlayerBoat().isInvulnerable()) {
-                        font.draw(batch, invulnerableText, 1400, 580);
-                    }
                 }
             }
         }
@@ -765,6 +766,8 @@ public class MyRowing extends ApplicationAdapter {
 
     int currentShopPowerup = 0;
     private void renderPowerupsShop() {
+        // Update powerup
+        this.availablePowerup = dataManager.getPowerup(this);
         Powerup powerup = dataManager.getPowerupById(currentShopPowerup, this);
         Texture powerupTexture = powerup.getTexture();
 
@@ -773,10 +776,10 @@ public class MyRowing extends ApplicationAdapter {
         batch.draw(powerupTexture,(float) (WINDOW_WIDTH*0.20), (float) (WINDOW_HEIGHT*0.38),(float) (powerupTexture.getWidth()*0.25), (float) (powerupTexture.getHeight()*0.25));
 
         font.draw(batch, powerup.getName(), (float) (WINDOW_WIDTH*0.22), (float) (WINDOW_HEIGHT*0.18));
-        font.draw(batch, "Description: " + powerup.getDescription(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.39));
+        font.draw(batch, "Description: " + powerup.getDescription(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.6));
         font.draw(batch, "Price: " + powerup.getPrice(), (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.21));
         if (this.availablePowerup != null && this.availablePowerup.getName().equals(powerup.getName())) {
-            font.draw(batch, "Acquired", (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.21));
+            font.draw(batch, "Acquired", (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.18));
         }
     }
 
@@ -874,14 +877,10 @@ public class MyRowing extends ApplicationAdapter {
         }
     }
 
-    private void updateProgressBar(Boat boat) {
-        float boatY = boat.getPosition().getY();
-        finishLineY = finishline.getPosition().getY();
-        progressLevel = 1 - ((finishLineY - boatY) / (finishLineY - 0));  // Assuming the boat starts at y=0
-        if (progressLevel < 0) progressLevel = 0;
-        if (progressLevel > 1) progressLevel = 1;
-        progressBarBackgroundWidth = 196 * progressLevel;
-    }
+    private float getProgress(Boat boat, float currentTime) {
+        float progress = currentTime / LEG_DURATION;
+        return progress >= 1 ? 1 : progress;
+        }
 
     public Boat getPlayerBoat() {
         return lanes[0].getBoat();
@@ -899,12 +898,27 @@ public class MyRowing extends ApplicationAdapter {
 
     public void nextShopPowerup() {
         this.currentShopPowerup = (this.currentShopPowerup + 1) % 4;
-        System.err.println("CURRENT: " + this.currentShopPowerup);
     }
 
     public void previousShopPowerup() {
-        this.currentShopPowerup = (this.currentShopPowerup - 1) % 4;
-        System.err.println("CURRENT: " + this.currentShopPowerup);
+        this.currentShopPowerup--;
+        if (this.currentShopPowerup < 0) {
+            this.currentShopPowerup = 3;
+        }
+    }
+
+    public void resetPowerup() {
+        this.availablePowerup = null;
+        dataManager.setPowerup(-1);
+    }
+
+    public void buyPowerup() {
+        Powerup selected = dataManager.getPowerupById(this.currentShopPowerup, this);
+        if (this.availablePowerup == null && selected.getPrice() <= dataManager.getBalance()) {
+            dataManager.setPowerup(this.currentShopPowerup);
+            this.availablePowerup = selected;
+            dataManager.setBalance(dataManager.getBalance() - selected.getPrice());
+        }
     }
 
 }
