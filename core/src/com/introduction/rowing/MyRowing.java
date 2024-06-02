@@ -96,6 +96,11 @@ public class MyRowing extends ApplicationAdapter {
     FreeTypeFontParameter parameter;
 
     Sound crash;
+    Sound lobbyMusic;
+    Sound gameMusic;
+    Sound shopMusic;
+    Sound win;
+    Sound lose;
 
     int numberLeg = 0;
     int minigameStage = 0;
@@ -104,6 +109,11 @@ public class MyRowing extends ApplicationAdapter {
     public void create() {
         batch = new SpriteBatch();
         crash = Gdx.audio.newSound(Gdx.files.local("music/crash.mp3"));
+        lobbyMusic = Gdx.audio.newSound(Gdx.files.local("music/menu_theme.mp3"));
+        gameMusic = Gdx.audio.newSound(Gdx.files.local("music/main_theme.mp3"));
+        shopMusic = Gdx.audio.newSound(Gdx.files.local("music/shop_menu.mp3"));
+        win = Gdx.audio.newSound(Gdx.files.local("music/win.mp3"));
+        lose = Gdx.audio.newSound(Gdx.files.local("music/lose.mp3"));
         lobbyImage = new Texture("backgrounds/lobby.png");
         keysTutorialTexture = new Texture("backgrounds/tutorial.png");
         loseScreenTexture = new Texture("backgrounds/loose-screen.png");
@@ -214,12 +224,19 @@ public class MyRowing extends ApplicationAdapter {
         if (gameSubState == GameSubState.FINAL_LEG) {
             dataManager.setPowerup(-1);
         }
+        gameMusic.pause();
     }
 
+    boolean lobbyEntered = false;
     public void renderLobby() {
+        if (!lobbyEntered) {
+            lobbyEntered = true;
+            lobbyMusic.loop();
+        }
         batch.draw(lobbyImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
     }
+
 
     @Override
     public void render() {
@@ -228,24 +245,41 @@ public class MyRowing extends ApplicationAdapter {
         currentState = InputProcessor.getGameState();
         switch (currentState) {
             case LOBBY:
+                enteredShop = false;
+                shopMusic.pause();
                 Gdx.input.setInputProcessor(lobbyInputProcessor);
                 renderLobby();
                 break;
             case PLAY_GAME:
+                lobbyEntered = false;
+                enteredShop = false;
                 Gdx.input.setInputProcessor(gameInputProcessor);
+                shopMusic.pause();
+                lobbyMusic.pause();
                 renderGame(gameInputProcessor, InputProcessor.getGameSubState());
                 break;
             case PLAY_MINI_GAME:
+                lobbyEntered = false;
+                enteredShop = false;
                 Gdx.input.setInputProcessor(miniGameInputProcessor);
+                shopMusic.pause();
+                lobbyMusic.pause();
                 renderMiniGame();
                 break;
             case ENTER_SHOP:
                 Gdx.input.setInputProcessor(shopInputProcessor);
+                lobbyEntered = false;
+                lobbyMusic.pause();
                 renderShop();
                 break;
             case LOSE_SCREEN:
+                enteredShop = false;
+                lobbyEntered = false;
                 Gdx.input.setInputProcessor(loseScreenInputProcessor);
+                lobbyMusic.pause();
+                shopMusic.pause();
                 batch.draw(loseScreenTexture, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+                lose.play();
                 break;
             default:
                 break;
@@ -265,6 +299,7 @@ public class MyRowing extends ApplicationAdapter {
     private void renderGame(GameInputProcessor gameInputProcessor, GameSubState gameSubState) {
         if (lanes == null) {
             System.out.println("Creating new game");
+            gameMusic.loop();
             createNewGame(gameInputProcessor, numberLeg);
         }
         if (boatsPosition.size() == lanes.length) {
@@ -287,9 +322,7 @@ public class MyRowing extends ApplicationAdapter {
             finishLine();
         }
 
-
         boolean crossed;
-
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
             batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY() - currentBoat.getHeight(), currentBoat.getWidth(), currentBoat.getHeight());
@@ -324,6 +357,9 @@ public class MyRowing extends ApplicationAdapter {
                 System.out.println("Boat " + currentBoat + " has crossed the finish line");
                 boatsPosition.add(currentBoat);
                 System.out.println(boatsPosition);
+                if (boatsPosition.get(0).getId() == 0) {
+                    win.play();
+                }
             }
             //make the obstacles move
             ArrayList<Obstacle> obstacles = lane.getObstacles();
@@ -351,7 +387,6 @@ public class MyRowing extends ApplicationAdapter {
 
         batch.draw(progressBarBackground, (float) (WINDOW_WIDTH / 3.97) + 5, (float) (WINDOW_HEIGHT * 0.905), progressBarRectangleWidth * this.getProgress(this.getPlayerBoat(), stateTime) - 15, progressBarBackgroundHeight);
         batch.draw(progressBarRectangle, (float) WINDOW_WIDTH / 2 - progressBarBackgroundWidth / 2, (float) (WINDOW_HEIGHT * 0.9), progressBarRectangleWidth, progressBarRectangleHeight);
-        System.err.println("PBRW: " + progressBarBackgroundWidth);
 
         // Render powerup
         float powerUpSlotFactor = 3;
@@ -786,7 +821,12 @@ public class MyRowing extends ApplicationAdapter {
         }
     }
 
+    boolean enteredShop = false;
     private void renderShop() {
+        if (!enteredShop) {
+            enteredShop = true;
+            shopMusic.loop();
+        }
         switch (InputProcessor.getShopSubStates()) {
             case BOATS:
                 this.renderBoatsShop();
