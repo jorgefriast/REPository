@@ -189,7 +189,7 @@ public class MyRowing extends ApplicationAdapter {
         availablePowerup = dataManager.getPowerup(this);
     }
 
-    public void resetGame() {
+    public void resetGame(GameSubState gameSubState) {
         boatsPosition.clear();
         accelerationLevel = 0;
         stateAccelerating = false;
@@ -198,6 +198,9 @@ public class MyRowing extends ApplicationAdapter {
         lanes = null;
         laneDividers.clear();
         System.out.println("Game reset");
+        if (gameSubState == GameSubState.FINAL_LEG) {
+            dataManager.setPowerup(-1);
+        }
     }
 
     public void renderLobby() {
@@ -267,7 +270,7 @@ public class MyRowing extends ApplicationAdapter {
                 laneDivider.adjustPosition(0,laneDivider.getHeight()/2);
             }
         }
-        if (stateTime > 50) {
+        if (stateTime > LEG_DURATION) {
             finishLine();
         }
 
@@ -325,7 +328,7 @@ public class MyRowing extends ApplicationAdapter {
                     numberLeg = 0;
                     InputProcessor.setGameState(GameState.LOBBY);
                 }
-                resetGame();
+                resetGame(gameSubState);
                 System.out.println("NUMBER LEG: " + numberLeg);
             }
             //make the obstacles move
@@ -395,7 +398,7 @@ public class MyRowing extends ApplicationAdapter {
                 if (currentBoat.getBoatHealth() <= 0) {
                     currentBoat.setBoatHealth(0);
                     InputProcessor.setGameState(GameState.LOSE_SCREEN);
-                    resetGame();
+                    resetGame(gameSubState);
                 }
                 double fatiguePercentage = currentBoat.getFatigueEffect();
                 String fatigueText = "Fatigue Effect: " + (int) (fatiguePercentage * 100) + "%";
@@ -838,5 +841,6 @@ public class MyRowing extends ApplicationAdapter {
         this.availablePowerup.use();
         this.availablePowerup = null;
     }
+
 
 }

@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.FileHandler;
 
@@ -118,6 +119,17 @@ public class DataManager {
             }
         }
         return null;
+    }
+
+    public void setPowerup(int powerupId) {
+        FileHandle fh = Gdx.files.local(INVENTORY_FILE_PATH);
+        int[] availablePowerups = new int[]{0, 1, 2, 3};
+        if (Arrays.stream(availablePowerups).anyMatch(e -> e == powerupId)) {
+            // If the powerup id in the argument is available
+            fh.writeString(Integer.toString(powerupId), false);
+        } else {
+            fh.writeString("-1", false);
+        }
     }
 
     public Powerup getPowerup(MyRowing myRowing) {
