@@ -37,6 +37,8 @@ public class Boat extends Entity{
     private int id;
     private int width;
     private int height;
+    private boolean invulnerable = false;
+    private int invulnerabilityTime = 0;
 
     public Boat(int id, Position position, boolean isPlayer, GameInputProcessor inputProcessor, ShopBoat shopBoat) {
         super(position, 10, 10, new Texture(shopBoat.getImageName()));
@@ -358,5 +360,21 @@ public class Boat extends Entity{
     @Override
     public String toString() {
         return "BOAT " + this.id;
+    }
+
+    public boolean isInvulnerable() {
+        return this.invulnerable;
+    }
+
+    public void setInvulnerable(boolean b) {
+        this.invulnerable = b;
+    }
+
+    public int getInvulnerabilityTime() {
+        return invulnerabilityTime;
+    }
+
+    public void setInvulnerabilityTime(int invulnerabilityTime) {
+        this.invulnerabilityTime = invulnerabilityTime;
     }
 }

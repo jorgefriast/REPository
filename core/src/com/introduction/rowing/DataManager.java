@@ -132,6 +132,7 @@ public class DataManager {
             case 1:
                 return new CookiePowerup(myRowing);
             case 2:
+                return new FlowerPowerup(myRowing);
             case 3:
             default:
                 return null;
