@@ -70,7 +70,7 @@ public class Lane {
         }
     }
 
-    public void collision(){
+    public void collision(MyRowing myRowing){
         for (Obstacle obstacle : obstacles) {
             if (boat.getBounds().intersects(obstacle.getBounds()) && !boat.isInvulnerable()) {
                 obstacles.remove(obstacle);
@@ -78,6 +78,7 @@ public class Lane {
                 boat.resetNumberOfAvoidedObstacles();
                 boat.deactivateMomemtumPowerup();
                 boat.damageBoat(obstacle.getDamage());
+                myRowing.crash.play();
                 break;
             }
             else if (obstacle.getPosition().getY() + obstacle.getHeight() < 0) {

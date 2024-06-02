@@ -2,6 +2,7 @@ package com.introduction.rowing;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -94,6 +95,7 @@ public class MyRowing extends ApplicationAdapter {
     FreeTypeFontGenerator generator;
     FreeTypeFontParameter parameter;
 
+    Sound crash;
 
     int numberLeg = 0;
     int minigameStage = 0;
@@ -101,6 +103,7 @@ public class MyRowing extends ApplicationAdapter {
     @Override
     public void create() {
         batch = new SpriteBatch();
+        crash = Gdx.audio.newSound(Gdx.files.local("music/crash.mp3"));
         lobbyImage = new Texture("backgrounds/lobby.png");
         keysTutorialTexture = new Texture("backgrounds/tutorial.png");
         loseScreenTexture = new Texture("backgrounds/loose-screen.png");
@@ -314,7 +317,7 @@ public class MyRowing extends ApplicationAdapter {
 
             // Generate obstacles
             if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(); }
-            lane.collision();
+            lane.collision(this);
 
             crossed = checkFinishLineCrossed(lane.getBoat());
             if (crossed && !boatsPosition.contains(currentBoat)) {
