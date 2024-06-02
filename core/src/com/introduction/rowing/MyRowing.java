@@ -313,24 +313,6 @@ public class MyRowing extends ApplicationAdapter {
                 boatsPosition.add(currentBoat);
                 System.out.println(boatsPosition);
             }
-            // The game change between substates depending on the leg number
-            if (boatsPosition.size() == lanes.length) {
-                System.out.println("Game is finished winner is: " + boatsPosition.get(0));
-                if (gameSubState == GameSubState.RACE_LEG) {
-                    InputProcessor.setGameState(GameState.PLAY_MINI_GAME);
-                    numberLeg++;
-                    for (int i = 0; i < NUMBER_OF_LANES; i++) {
-                        int currentId = boatsPosition.get(i).getId();
-                        positionsRecord.set(currentId, positionsRecord.get(currentId) + i);
-                        System.out.println("Position record:" + positionsRecord);
-                    }
-                } else {
-                    numberLeg = 0;
-                    InputProcessor.setGameState(GameState.LOBBY);
-                }
-                resetGame(gameSubState);
-                System.out.println("NUMBER LEG: " + numberLeg);
-            }
             //make the obstacles move
             ArrayList<Obstacle> obstacles = lane.getObstacles();
             Iterator<Obstacle> iterator = obstacles.iterator();
@@ -388,9 +370,9 @@ public class MyRowing extends ApplicationAdapter {
             invulnerabilityTimer = 0;
             this.getPlayerBoat().decreaseInvulnerabilityTime();
         }
-
-
-
+        if (gameSubState == GameSubState.TUTORIAL) {
+            renderTutorial();
+        }
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
             if (currentBoat.getIsPlayer()) {
@@ -411,8 +393,23 @@ public class MyRowing extends ApplicationAdapter {
                 font.draw(batch, momentumText, 1400, 600);
             }
         }
-        if (gameSubState == GameSubState.TUTORIAL) {
-            renderTutorial();
+        // The game change between substates depending on the leg number
+        if (boatsPosition.size() == lanes.length) {
+            System.out.println("Game is finished winner is: " + boatsPosition.get(0));
+            if (gameSubState == GameSubState.RACE_LEG) {
+                InputProcessor.setGameState(GameState.PLAY_MINI_GAME);
+                numberLeg++;
+                for (int i = 0; i < NUMBER_OF_LANES; i++) {
+                    int currentId = boatsPosition.get(i).getId();
+                    positionsRecord.set(currentId, positionsRecord.get(currentId) + i);
+                    System.out.println("Position record:" + positionsRecord);
+                }
+            } else {
+                numberLeg = 0;
+                InputProcessor.setGameState(GameState.LOBBY);
+            }
+            resetGame(gameSubState);
+            System.out.println("NUMBER LEG: " + numberLeg);
         }
     }
 
