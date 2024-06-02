@@ -132,6 +132,31 @@ public class DataManager {
         }
     }
 
+    public int getPowerups() {
+        FileHandle fh = Gdx.files.local(INVENTORY_FILE_PATH);
+        int lineCounter = 0;
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(fh.reader());
+            while (reader.readLine() != null) {
+                lineCounter++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
+            }
+        }
+        return lineCounter;
+    }
+
     public Powerup getPowerup(MyRowing myRowing) {
         FileHandle file = Gdx.files.local(INVENTORY_FILE_PATH);
         if (!file.exists()) {

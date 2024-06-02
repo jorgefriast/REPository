@@ -21,8 +21,13 @@ public class ShopInputProcessor extends InputProcessor {
             case Input.Keys.ESCAPE:
                 setGameState(GameState.LOBBY);
                 break;
-            case Input.Keys.P:
+            case Input.Keys.ENTER:
                 myRowing.buyOrSelectBoat();
+            case Input.Keys.DOWN:
+                InputProcessor.setShopSubState(ShopSubState.POWEUPS);
+            case Input.Keys.UP:
+                InputProcessor.setShopSubState(ShopSubState.BOATS);
+
 
         }
         return false;

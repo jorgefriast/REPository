@@ -39,10 +39,10 @@ public class Boat extends Entity{
         this.isPlayer = isPlayer;
         this.inputProcessor = inputProcessor;
         this.fatigueRate = calculateFatigueRate(fatigue);
+        this.robustness = shopBoat.getRobustness();
         this.boatHealth = determineBoatHealth();
         this.id = id;
         this.speedFactor = shopBoat.getSpeedFactor();
-        this.robustness = shopBoat.getRobustness();
         this.acceleration = shopBoat.getAcceleration();
         this.momentumFactor = shopBoat.getMomentumFactor();
         this.speedX = shopBoat.getManeuverability();
@@ -193,7 +193,7 @@ public class Boat extends Entity{
     }
 
     private int determineBoatHealth() {
-        return 50 + robustness * 25;
+        return (50 + robustness * 25);
     }
 
     /**

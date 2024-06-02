@@ -19,7 +19,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 
 import static com.introduction.rowing.Constants.*;
@@ -128,7 +127,7 @@ public class MyRowing extends ApplicationAdapter {
 
 
         // Load the custom font using FreeTypeFontGenerator
-        generator = new FreeTypeFontGenerator(Gdx.files.internal("Zanden.ttf"));
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("JainiPurva-Regular.ttf"));
         parameter = new FreeTypeFontParameter();
         parameter.size = 32;
         parameter.color = Color.BLACK;
@@ -235,7 +234,7 @@ public class MyRowing extends ApplicationAdapter {
                 break;
             case ENTER_SHOP:
                 Gdx.input.setInputProcessor(shopInputProcessor);
-                renderShop();
+                renderShop(ShopSubState.BOATS);
                 break;
             case LOSE_SCREEN:
                 Gdx.input.setInputProcessor(loseScreenInputProcessor);
@@ -262,7 +261,7 @@ public class MyRowing extends ApplicationAdapter {
             createNewGame(gameInputProcessor, numberLeg);
         }
         if (boatsPosition.size() == lanes.length) {
-            System.out.println("Game is finished winner is: " + boatsPosition.get(0));
+            System.out.println("Game is fini/hed winner is: " + boatsPosition.get(0));
         }
         // Water flow (GIF)
         stateTime += Gdx.graphics.getDeltaTime();
@@ -339,7 +338,7 @@ public class MyRowing extends ApplicationAdapter {
             }
         }
 
-        batch.draw(vertical_scroll,1300, 500, (float) (vertical_scroll.getWidth() * 2), (float) (vertical_scroll.getHeight()* 1.5));
+        batch.draw(vertical_scroll,1300, 470, (float) (vertical_scroll.getWidth() * 2), (float) (vertical_scroll.getHeight()* 1.7));
         font.draw(batch, ACCELERATION_BAR_TEXT, 1400, 900);
         batch.draw(accelerationBarRectangle, PBR_X_POS, PBR_Y_POS, accelerationBarRectangleWidth, accelerationBarRectangleHeight);
         batch.draw(accelerationBarBackground, PBB_X_POS, PBB_Y_POS, accelerationBarBackgroundWidth, accelerationBarBackgroundHeight);
@@ -382,27 +381,8 @@ public class MyRowing extends ApplicationAdapter {
         if (gameSubState == GameSubState.TUTORIAL) {
             renderTutorial();
         }
-        for (Lane lane : lanes) {
-            Boat currentBoat = lane.getBoat();
-            if (currentBoat.getIsPlayer()) {
-                // loose if the boat breaks
-                if (currentBoat.getBoatHealth() <= 0) {
-                    currentBoat.setBoatHealth(0);
-                    InputProcessor.setGameState(GameState.LOSE_SCREEN);
-                    resetGame(gameSubState);
-                }
-                double fatiguePercentage = currentBoat.getFatigueEffect();
-                String fatigueText = "Fatigue Effect: " + (int) (fatiguePercentage * 100) + "%";
-                String boatHealthText = "Boat Health: " + currentBoat.getBoatHealth();
-                String avoidedObstaclesText = "Avoided Obstacles: " + currentBoat.getNumberOfAvoidedObstacles();
-                String momentumText = "Momentum: " + currentBoat.getCurrentMomentum();
-                font.draw(batch, fatigueText, 1400, 760);
-                font.draw(batch, boatHealthText, 1400, 700);
-                font.draw(batch, momentumText, 1400, 640);
-            }
-        }
         // The game change between substates depending on the leg number
-        if (boatsPosition.size() == lanes.length) {
+        if (lanes != null && boatsPosition.size() == lanes.length) {
             System.out.println("Game is finished winner is: " + boatsPosition.get(0));
             if (gameSubState == GameSubState.RACE_LEG) {
                 InputProcessor.setGameState(GameState.PLAY_MINI_GAME);
@@ -418,6 +398,31 @@ public class MyRowing extends ApplicationAdapter {
             }
             resetGame(gameSubState);
             System.out.println("NUMBER LEG: " + numberLeg);
+        }
+        if (lanes != null) {
+            for (Lane lane : lanes) {
+                Boat currentBoat = lane.getBoat();
+                if (currentBoat.getIsPlayer()) {
+                    // loose if the boat breaks
+                    if (currentBoat.getBoatHealth() <= 0) {
+                        currentBoat.setBoatHealth(0);
+                        InputProcessor.setGameState(GameState.LOSE_SCREEN);
+                        resetGame(gameSubState);
+                    }
+                    double fatiguePercentage = currentBoat.getFatigueEffect();
+                    String fatigueText = "Fatigue Effect: " + (int) (fatiguePercentage * 100) + "%";
+                    String boatHealthText = "Boat Health: " + currentBoat.getBoatHealth();
+                    String avoidedObstaclesText = "Avoided Obstacles: " + currentBoat.getNumberOfAvoidedObstacles();
+                    String momentumText = "Momentum: " + currentBoat.getCurrentMomentum();
+                    String invulnerableText = "Invulnerable";
+                    font.draw(batch, fatigueText, 1400, 760);
+                    font.draw(batch, boatHealthText, 1400, 700);
+                    font.draw(batch, momentumText, 1400, 640);
+                    if (this.getPlayerBoat().isInvulnerable()) {
+                        font.draw(batch, invulnerableText, 1400, 580);
+                    }
+                }
+            }
         }
     }
 
@@ -716,7 +721,7 @@ public class MyRowing extends ApplicationAdapter {
         batch.draw(dragonPlayer.getImage(), dragonPlayer.position.getX(), dragonPlayer.position.getY(), dragonPlayer.getWidth(), dragonPlayer.getHeight());
     }
 
-    private void renderShop() {
+    private void renderBoatsShop() {
         ShopBoat shopBoat = dataManager.boats.get(currentShopBoatIndex);
         Texture boatTexture = new Texture(Gdx.files.internal("boats/" + shopBoat.getImageName()));
 
@@ -742,11 +747,44 @@ public class MyRowing extends ApplicationAdapter {
         if (!shopBoat.isUnlocked()) {
             font.draw(batch, "Price: " + shopBoat.getPrice(), (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.21));
         } else {
-                font.draw(batch, "Unlocked", (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.25));
+            font.draw(batch, "Unlocked", (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.25));
             if (shopBoat.isSelected())
                 font.draw(batch, "Selected", (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.17));
             else
                 font.draw(batch, "Not Selected", (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.17));
+        }
+    }
+
+    int currentShopPowerup = 0;
+    private void renderPowerupsShop() {
+        Powerup powerup = this.nextShopPowerup();
+        Texture powerupTexture = powerup.getTexture();
+
+        batch.draw(shopBackground,0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        batch.draw(vertical_scroll,(float) (WINDOW_WIDTH*0.1), (float) (WINDOW_HEIGHT*0.28), (float) (vertical_scroll.getWidth() * 2.15), (float) (vertical_scroll.getHeight()* 2.18));
+        batch.draw(shop_description, (float) (WINDOW_WIDTH*0.6), (float) (WINDOW_HEIGHT*0.1), (float) (shop_description.getWidth()*4), (float) (shop_description.getHeight()*4));
+
+        batch.draw(powerupTexture,(float) (WINDOW_WIDTH*0.20), (float) (WINDOW_HEIGHT*0.38),(float) (powerupTexture.getWidth()*0.25), (float) (powerupTexture.getHeight()*0.25));
+
+        batch.draw(left_arrow, (float) (WINDOW_WIDTH*0.05), (float) (WINDOW_HEIGHT*0.1), left_arrow.getWidth(), left_arrow.getHeight());
+        batch.draw(right_arrow, (float) (WINDOW_WIDTH*0.38), (float) (WINDOW_HEIGHT*0.1), right_arrow.getWidth(), right_arrow.getHeight());
+
+        batch.draw(horizontal_scroll, (float) (WINDOW_WIDTH*0.12), (float) (WINDOW_HEIGHT*0.12), horizontal_scroll.getWidth(), (float) (horizontal_scroll.getHeight()*0.3));
+
+        font.draw(batch, powerup.getName(), (float) (WINDOW_WIDTH*0.22), (float) (WINDOW_HEIGHT*0.18));
+        font.draw(batch, "Description: " + powerup.getDescription(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.39));
+        font.draw(batch, "Price: " + powerup.getPrice(), (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.21));
+        if (this.availablePowerup.getName().equals(powerup.getName())) {
+            font.draw(batch, "Acquired", (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.21));
+        }
+    }
+
+    private void renderShop(ShopSubState shopSubState) {
+        switch (shopSubState) {
+            case BOATS:
+                this.renderBoatsShop();
+            case POWEUPS:
+                this.renderPowerupsShop();
         }
     }
 
@@ -856,5 +894,8 @@ public class MyRowing extends ApplicationAdapter {
         this.availablePowerup = null;
     }
 
+    private Powerup nextShopPowerup() {
+        this.currentShopPowerup = (this.currentShopPowerup + 1) % dataManager.getPowerups();
+    }
 
 }
