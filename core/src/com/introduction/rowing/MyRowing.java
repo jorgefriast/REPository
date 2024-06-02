@@ -54,6 +54,7 @@ public class MyRowing extends ApplicationAdapter {
     float progressBarBackgroundHeight = 46;
     float progressLevel = 0;
     float finishLineY;
+    float invulnerabilityTimer = 0;
     Powerup availablePowerup;
     ArrayList<Boat> boatsPosition = new ArrayList<>();
     Texture laneDividerTexture;
@@ -376,6 +377,13 @@ public class MyRowing extends ApplicationAdapter {
                             * 0.9),
                     Math.round(powerUpSlotFactor * powerupSlot.getHeight() * 0.9)
             );
+        }
+
+        // Invulnerability  powerup logic
+        invulnerabilityTimer += Gdx.graphics.getDeltaTime();
+        if (this.getPlayerBoat().isInvulnerable() && invulnerabilityTimer >= 1) {
+            invulnerabilityTimer = 0;
+            this.getPlayerBoat().decreaseInvulnerabilityTime();
         }
 
 

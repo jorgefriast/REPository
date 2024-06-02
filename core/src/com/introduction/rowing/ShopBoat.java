@@ -62,9 +62,7 @@ public class ShopBoat {
         return maneuverability;
     }
 
-    public int getMomentumFactor() {
-        return momentumFactor;
-    }
+    public int getMomentumFactor() { return momentumFactor; }
 
     public int getFatigue() {
         return fatigue;

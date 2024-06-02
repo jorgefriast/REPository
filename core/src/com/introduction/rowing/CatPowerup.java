@@ -2,18 +2,17 @@ package com.introduction.rowing;
 
 import com.badlogic.gdx.graphics.Texture;
 
-public class FlowerPowerup implements Powerup {
-
+public class CatPowerup implements Powerup {
     private MyRowing myRowing;
-    private final Texture texture = new Texture("powerups/sakura_flower.png");
+    private final Texture texture = new Texture("powerups/cat.png");
 
-    public FlowerPowerup(MyRowing myRowing) {
+    public CatPowerup(MyRowing myRowing) {
         this.myRowing = myRowing;
     }
 
     @Override
     public void use() {
-        myRowing.getPlayerBoat().activateMomemtumPowerup();
+        myRowing.getPlayerBoat().setInvulnerabilityTime(5);
     }
 
     @Override

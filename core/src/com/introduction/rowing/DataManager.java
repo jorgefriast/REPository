@@ -134,6 +134,7 @@ public class DataManager {
             case 2:
                 return new FlowerPowerup(myRowing);
             case 3:
+                return new CatPowerup(myRowing);
             default:
                 return null;
         }
