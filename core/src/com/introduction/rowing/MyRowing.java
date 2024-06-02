@@ -19,7 +19,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 
 import static com.introduction.rowing.Constants.*;
@@ -272,7 +271,9 @@ public class MyRowing extends ApplicationAdapter {
 
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
-            batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY() - currentBoat.getHeight(), currentBoat.getWidth(), currentBoat.getHeight());
+            if (currentBoat.isVisible()){
+                batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY() - currentBoat.getHeight(), currentBoat.getWidth(), currentBoat.getHeight());
+            }
             if (currentBoat.getIsPlayer()) {
                 currentBoat.updateKeys(Gdx.graphics.getDeltaTime(), lane.getLeftBoundary());
                 updateProgressBar(currentBoat);
@@ -322,6 +323,7 @@ public class MyRowing extends ApplicationAdapter {
                 resetGame();
                 System.out.println("NUMBER LEG: " + numberLeg);
             }
+            checkCollisions();
             //make the obstacles move
             ArrayList<Obstacle> obstacles = lane.getObstacles();
             Iterator<Obstacle> iterator = obstacles.iterator();
@@ -339,6 +341,7 @@ public class MyRowing extends ApplicationAdapter {
                 // obstacle.adjustPosition((float) 0, (float) (-5));
                 batch.draw(obstacle.getImage(), obstacle.getPosition().getX(), obstacle.getPosition().getY(), obstacle.getWidth(), obstacle.getHeight());
             }
+            currentBoat.updateCooldown(Gdx.graphics.getDeltaTime());
         }
         font.draw(batch, ACCELERATION_BAR_TEXT, 1400, 900);
         batch.draw(accelerationBarRectangle, PBR_X_POS, PBR_Y_POS, accelerationBarRectangleWidth, accelerationBarRectangleHeight);
@@ -372,6 +375,36 @@ public class MyRowing extends ApplicationAdapter {
         if (gameSubState == GameSubState.TUTORIAL) {
             renderTutorial();
         }
+    }
+    private void checkCollisions() {
+        for (int i = 0; i < lanes.length; i++) {
+            Boat boat1 = lanes[i].getBoat();
+            for (int j = i + 1; j < lanes.length; j++) {
+                Boat boat2 = lanes[j].getBoat();
+                if (boat1.canCollide() && boat2.canCollide() && boat1.getBounds().intersects(boat2.getBounds())) {
+                    handleCollision(boat1, boat2);
+                }
+            }
+
+            for (Lane lane : lanes) {
+                for (Obstacle obstacle : lane.getObstacles()) {
+                    if (boat1.canCollide() && boat1.getBounds().intersects(obstacle.getBounds())) {
+                        handleCollision(boat1);
+                    }
+                }
+            }
+        }
+    }
+
+    private void handleCollision(Boat boat1, Boat boat2) {
+        boat1.setBoatHealth(boat1.getBoatHealth() - 10);
+        boat2.setBoatHealth(boat2.getBoatHealth() - 10);
+        boat1.setCollisionCooldown(2);
+        boat2.setCollisionCooldown(2);
+    }
+
+    private void handleCollision(Boat boat) {
+        boat.setBoatHealth(boat.getBoatHealth() - 20);
     }
 
     private void renderMiniGame() {
