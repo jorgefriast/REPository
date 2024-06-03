@@ -15,14 +15,15 @@ public class LobbyInputProcessor extends InputProcessor {
                 setGameSubState(GameSubState.RACE_LEG);
                 break;
             case Input.Keys.NUM_2:
-                setGameState(GameState.PLAY_MINI_GAME);
-                break;
-            case Input.Keys.NUM_3:
                 setGameState(GameState.ENTER_SHOP);
                 break;
-            case Input.Keys.NUM_4:
+            case Input.Keys.NUM_3:
                 setGameState(GameState.PLAY_GAME);
                 setGameSubState(GameSubState.TUTORIAL);
+                break;
+            case Input.Keys.NUM_4:
+            case Input.Keys.ESCAPE:
+                System.exit(0);
                 break;
 
         }

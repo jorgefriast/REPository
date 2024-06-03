@@ -5,10 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -42,7 +39,9 @@ public class MyRowing extends ApplicationAdapter {
     Texture error;
     Texture horizontalScroll;
     Texture verticalScroll;
+    Texture panel;
     Texture rightArrow;
+    Texture podiumTexture;
     Texture upperArrow;
     Texture bottomArrow;
     Texture leftArrow;
@@ -126,6 +125,7 @@ public class MyRowing extends ApplicationAdapter {
         lobbyImage = new Texture("backgrounds/lobby.png");
         keysTutorialTexture = new Texture("backgrounds/tutorial.png");
         loseScreenTexture = new Texture("backgrounds/loose-screen.png");
+        panel = new Texture("backgrounds/panel.png");
         UITutorialTexture = new Texture("backgrounds/ui-tutorial.png");
         shopBackground = new Texture("backgrounds/shop.png");
         horizontalScroll = new Texture("backgrounds/horizontal_scroll.png");
@@ -141,6 +141,7 @@ public class MyRowing extends ApplicationAdapter {
         progressBarRectangle = new Texture("accelerationBarRectangle.png");
         progressBarBackground = new Texture("progress_bar.png");
         laneDividerTexture = new Texture("backgrounds/lane-separator.png");
+        podiumTexture = new Texture("backgrounds/podio.png");
         correct = new Texture("tick.png");
         error = new Texture("error.png");
         tiles = new Texture("tiles/tile.jpg");
@@ -222,7 +223,8 @@ public class MyRowing extends ApplicationAdapter {
         int boatHeight = (boatPicture.getHeight() * boatWidth) / boatPicture.getWidth();
         for (int i = 0; i < NUMBER_OF_LANES; i++) {
             float multiplier = numberLeg != NUMBER_OF_LEGS ? 1 : (positionsRecord.get(i) / ((float) NUMBER_OF_LEGS * (NUMBER_OF_LANES - 1)) + 1) / 2;
-            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), (int) (boatHeight*0.5* multiplier));
+            System.out.println("MULTIPLIER " + multiplier);
+            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), (int) (boatHeight * 0.5 * multiplier));
             if (i == 0) {
                 lanes[i] = new Lane(new Boat(i, startingPosition, true, inputProcessor, dataManager.getSelectedBoat()), currentLeftBoundary);
             } else {
@@ -259,7 +261,7 @@ public class MyRowing extends ApplicationAdapter {
             lobbyMusic.loop();
         }
         batch.draw(lobbyImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
+        font.draw(batch, " " + dataManager.getBalance() , (float) (WINDOW_WIDTH* 0.13), (float) (WINDOW_HEIGHT*0.11));
     }
 
 
@@ -317,13 +319,13 @@ public class MyRowing extends ApplicationAdapter {
         batch.end();
     }
 
+    int positionReward;
     private Texture getTexture(int index) {
         Texture correctMedal = null;
         String congrats = "";
         float textWidth = 0;
-        float x = 0;
-        float y = 300;
-        int positionReward = 0;
+        float x = WINDOW_WIDTH;
+        float y = (float) (WINDOW_HEIGHT * 0.8);
 
         switch (index) {
             case 0:
@@ -370,10 +372,10 @@ public class MyRowing extends ApplicationAdapter {
 
     private void renderTutorial() {
         double tutorial_scaling = 0.7;
-        if (stateTime < LEG_DURATION) {
-            batch.draw(keysTutorialTexture, ((float) WINDOW_WIDTH / 2) - ((float) (int) (keysTutorialTexture.getWidth() * tutorial_scaling) / 2), (float) WINDOW_HEIGHT / 4, (int) (keysTutorialTexture.getWidth() * tutorial_scaling), (int) (keysTutorialTexture.getHeight() * tutorial_scaling));
+        if (stateTime < 5) {
+            batch.draw(keysTutorialTexture, ((float) WINDOW_WIDTH / 3) - ((float) (int) (keysTutorialTexture.getWidth() * tutorial_scaling) / 2), (float) WINDOW_HEIGHT / 4, (int) (keysTutorialTexture.getWidth() * tutorial_scaling), (int) (keysTutorialTexture.getHeight() * tutorial_scaling));
         } else if (stateTime >= 5 && stateTime < 10) {
-            batch.draw(UITutorialTexture, 0, (float) WINDOW_HEIGHT / 3, (int) (UITutorialTexture.getWidth() * tutorial_scaling), (int) (UITutorialTexture.getHeight() * tutorial_scaling));
+            batch.draw(UITutorialTexture, ((float) WINDOW_WIDTH / 3) - ((float) (int) (keysTutorialTexture.getWidth() * tutorial_scaling) / 2), (float) WINDOW_HEIGHT / 4, (int) (keysTutorialTexture.getWidth() * tutorial_scaling), (int) (keysTutorialTexture.getHeight() * tutorial_scaling));
         }
     }
 
@@ -387,13 +389,14 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private void renderWinner(){
-        batch.draw(sumScreenMiniGame, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(podiumTexture, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         // check for the position of boat number 0 in the boatsPosition list
         int index = boatsPosition.indexOf(lanes[0].getBoat());
         Texture correctMedal = getTexture(index);
-        float centeredX = ((float) WINDOW_WIDTH / 2) - ((float) correctMedal.getWidth() / 2);
-        float centeredY = ((float) WINDOW_HEIGHT / 2) - ((float) correctMedal.getHeight() / 2);
-        batch.draw(correctMedal, centeredX, centeredY, correctMedal.getWidth(), correctMedal.getHeight());
+        double factor = 0.3;
+        float centeredX = (float) (WINDOW_WIDTH / 2 - ((float) correctMedal.getWidth() * factor / 2));
+        float centeredY = (float) (WINDOW_HEIGHT * 0.9 - ((float) correctMedal.getHeight() * factor / 2));
+        batch.draw(correctMedal, centeredX, centeredY, (float) (correctMedal.getWidth() * factor), (float) (correctMedal.getHeight() * factor));
     }
 
     private void renderGame(GameInputProcessor gameInputProcessor) {
@@ -484,10 +487,10 @@ public class MyRowing extends ApplicationAdapter {
             currentBoat.updateCooldown(Gdx.graphics.getDeltaTime());
         }
 
-        batch.draw(verticalScroll,1300, 470, (float) (verticalScroll.getWidth() * 2), (float) (verticalScroll.getHeight()* 1.7));
-        font.draw(batch, ACCELERATION_BAR_TEXT, 1400, 900);
-        batch.draw(accelerationBarRectangle, PBR_X_POS, PBR_Y_POS, accelerationBarRectangleWidth, accelerationBarRectangleHeight);
-        batch.draw(accelerationBarBackground, PBB_X_POS, PBB_Y_POS, accelerationBarBackgroundWidth, accelerationBarBackgroundHeight);
+        batch.draw(panel, (float) (WINDOW_WIDTH*0.8), (float) (WINDOW_HEIGHT*0.55), (float) (panel.getWidth() * 0.3), (float) (panel.getHeight()* 0.4));
+        font.draw(batch, ACCELERATION_BAR_TEXT, (float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.84));
+        batch.draw(accelerationBarRectangle,  (float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.75), accelerationBarRectangleWidth, accelerationBarRectangleHeight);
+        batch.draw(accelerationBarBackground, (float) (WINDOW_WIDTH * 0.82)+4, (float) (WINDOW_HEIGHT *0.75)+4, accelerationBarBackgroundWidth, accelerationBarBackgroundHeight);
 
         batch.draw(progressBarBackground, (float) (WINDOW_WIDTH / 3.97) + 5, (float) (WINDOW_HEIGHT * 0.905), progressBarRectangleWidth * this.getProgress(this.getPlayerBoat(), stateTime) - 15, progressBarBackgroundHeight);
         batch.draw(progressBarRectangle, (float) WINDOW_WIDTH / 2 - progressBarBackgroundWidth / 2, (float) (WINDOW_HEIGHT * 0.9), progressBarRectangleWidth, progressBarRectangleHeight);
@@ -535,12 +538,10 @@ public class MyRowing extends ApplicationAdapter {
                 double fatiguePercentage = currentBoat.getFatigueEffect();
                 String fatigueText = "Fatigue Effect: " + (int) (fatiguePercentage * 100) + "%";
                 String boatHealthText = "Boat Health: " + currentBoat.getBoatHealth();
-                String avoidedObstaclesText = "Avoided Obstacles: " + currentBoat.getNumberOfAvoidedObstacles();
                 String momentumText = "Momentum: " + currentBoat.getCurrentMomentum();
-                font.draw(batch, fatigueText, 1400, 750);
-                font.draw(batch, boatHealthText, 1400, 700);
-                font.draw(batch, avoidedObstaclesText, 1400, 650);
-                font.draw(batch, momentumText, 1400, 600);
+                font.draw(batch, fatigueText,(float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.70));
+                font.draw(batch, boatHealthText,(float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.65));
+                font.draw(batch, momentumText, (float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.6));
             }
         }
         // Invulnerability  powerup logic
@@ -548,6 +549,9 @@ public class MyRowing extends ApplicationAdapter {
         if (this.getPlayerBoat().isInvulnerable() && invulnerabilityTimer >= 1) {
             invulnerabilityTimer = 0;
             this.getPlayerBoat().decreaseInvulnerabilityTime();
+        }
+        if (InputProcessor.getGameSubState() == GameSubState.TUTORIAL) {
+            renderTutorial();
         }
         // The game change between substates depending on the leg number
         if (boatsPosition.size() == lanes.length) {
@@ -646,9 +650,11 @@ public class MyRowing extends ApplicationAdapter {
                 minigameStage++;
                 boolean correctTileClicked = checkCorrectTileClicked();
                 if (correctTileClicked) {
+                    win.play();
                     dataManager.setBalance(dataManager.getBalance() + money);
                     //batch.draw(correct, WINDOW_WIDTH, WINDOW_HEIGHT , correct.getWidth(), correct.getHeight());
-                }
+                } else
+                    lose.play();
                 miniGameState = MiniGameState.NOT_STARTED;
                 if (minigameStage >= NUMBER_OF_MINIGAMES) {
                     miniGameState = MiniGameState.SUM_SCREEN;
@@ -667,7 +673,7 @@ public class MyRowing extends ApplicationAdapter {
                 break;
             default:
                 break;
-    }
+        }
         if (miniGameState != MiniGameState.SUM_SCREEN) {
             renderDragonPlayer();
         }
@@ -881,15 +887,14 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private void renderSumScreen() {
-        batch.draw(sumScreenMiniGame, 0, 0, WINDOW_WIDTH, WINDOW_WIDTH);
+        batch.draw(shopBackground, 0, 0, WINDOW_WIDTH, WINDOW_WIDTH);
         String coinsEarned = "Coins earned: " + money;
         String roundMade = "Round made: " + (money / 10);
-        GlyphLayout layout = new GlyphLayout(font, coinsEarned);
-        GlyphLayout layout2 = new GlyphLayout(font, roundMade);
-        float width = layout.width;
-        float width2 = layout2.width;
-        font.draw(batch, coinsEarned, (Gdx.graphics.getWidth() - width) / 2, ((float) Gdx.graphics.getHeight() /2) + 200);
-        font.draw(batch, roundMade, (Gdx.graphics.getWidth() - width2) / 2, ((float) Gdx.graphics.getHeight() /2) + 150);
+        GlyphLayout coinsEarnedGlyph = new GlyphLayout(font, coinsEarned);
+        GlyphLayout roundMadeGlyph = new GlyphLayout(font, roundMade);
+        batch.draw(verticalScroll, (float) (WINDOW_WIDTH * 0.5 - verticalScroll.getWidth() * 0.5), (float) (WINDOW_HEIGHT * 0.7 - verticalScroll.getHeight() * 0.5), verticalScroll.getWidth(), verticalScroll.getHeight());
+        font.draw(batch, coinsEarnedGlyph, (float) (WINDOW_WIDTH * 0.5 - coinsEarnedGlyph.width * 0.5), (float) (WINDOW_HEIGHT * 0.73 - coinsEarnedGlyph.height * 0.5));
+        font.draw(batch, roundMadeGlyph, (float) (WINDOW_WIDTH * 0.5 - coinsEarnedGlyph.width * 0.5), (float) (WINDOW_HEIGHT * 0.67 - coinsEarnedGlyph.height * 0.5));
     }
 
     public void resetMiniGame(){
@@ -933,7 +938,8 @@ public class MyRowing extends ApplicationAdapter {
         font.draw(batch, "Momentum Factor: " + shopBoat.getMomentumFactor(),  (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.46));
         font.draw(batch, "Fatigue: " + shopBoat.getFatigue(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.39));
         if (!shopBoat.isUnlocked()) {
-            font.draw(batch, "Price: " + shopBoat.getPrice(), (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.21));
+            font.draw(batch, "Price: " + shopBoat.getPrice(), (float) (WINDOW_WIDTH*0.73), (float) (WINDOW_HEIGHT*0.24));
+            font.draw(batch, "Press enter to unlock", (float) (WINDOW_WIDTH*0.7), (float) (WINDOW_HEIGHT*0.19));
         } else {
             font.draw(batch, "Unlocked", (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.25));
             if (shopBoat.isSelected())
@@ -953,13 +959,15 @@ public class MyRowing extends ApplicationAdapter {
 
         this.renderShopLayout();
 
-        batch.draw(powerupTexture,(float) (WINDOW_WIDTH*0.20), (float) (WINDOW_HEIGHT*0.38),(float) (powerupTexture.getWidth()*0.25), (float) (powerupTexture.getHeight()*0.25));
+        batch.draw(powerupTexture,(float) (WINDOW_WIDTH*0.20), (float) (WINDOW_HEIGHT*0.50),(float) (powerupTexture.getWidth()*0.25), (float) (powerupTexture.getHeight()*0.25));
 
         font.draw(batch, powerup.getName(), (float) (WINDOW_WIDTH*0.22), (float) (WINDOW_HEIGHT*0.18));
         font.draw(batch, "Description: " + powerup.getDescription(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.6));
-        font.draw(batch, "Price: " + powerup.getPrice(), (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.21));
         if (this.availablePowerup != null && this.availablePowerup.getName().equals(powerup.getName())) {
-            font.draw(batch, "Acquired", (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.18));
+            font.draw(batch, "Acquired", (float) (WINDOW_WIDTH*0.73), (float) (WINDOW_HEIGHT*0.22));
+        } else{
+            font.draw(batch, "Price: " + powerup.getPrice(), (float) (WINDOW_WIDTH*0.73), (float) (WINDOW_HEIGHT*0.24));
+            font.draw(batch, "Press enter to buy", (float) (WINDOW_WIDTH*0.71), (float) (WINDOW_HEIGHT*0.19));
         }
     }
 
