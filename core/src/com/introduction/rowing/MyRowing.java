@@ -222,7 +222,6 @@ public class MyRowing extends ApplicationAdapter {
         int boatHeight = (boatPicture.getHeight() * boatWidth) / boatPicture.getWidth();
         for (int i = 0; i < NUMBER_OF_LANES; i++) {
             float multiplier = numberLeg != NUMBER_OF_LEGS ? 1 : (positionsRecord.get(i) / ((float) NUMBER_OF_LEGS * (NUMBER_OF_LANES - 1)) + 1) / 2;
-            System.out.println("MULTIPLIER " + multiplier);
             Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), (int) (boatHeight*0.5* multiplier));
             if (i == 0) {
                 lanes[i] = new Lane(new Boat(i, startingPosition, true, inputProcessor, dataManager.getSelectedBoat()), currentLeftBoundary);
@@ -247,7 +246,6 @@ public class MyRowing extends ApplicationAdapter {
         createNewGame(gameInputProcessor, numberLeg);
         lanes = null;
         laneDividers.clear();
-        System.err.println("Game reset");
         if (InputProcessor.getGameSubState() == GameSubState.FINAL_LEG) {
             dataManager.setPowerup(-1);
         }
@@ -404,9 +402,6 @@ public class MyRowing extends ApplicationAdapter {
             System.out.println("Creating new game");
             gameMusic.loop();
             createNewGame(gameInputProcessor, numberLeg);
-        }
-        if (boatsPosition.size() == lanes.length) {
-            System.out.println("Game is finished winner is: " + boatsPosition.get(0));
         }
         // Water flow (GIF)
         stateTime += Gdx.graphics.getDeltaTime();
@@ -567,14 +562,12 @@ public class MyRowing extends ApplicationAdapter {
                 }
                 finishedGame = true;
             }else if(InputProcessor.getGameSubState() == GameSubState.FINAL_LEG){
-                    System.out.println("game is finisheddd");
                     InputProcessor.setGameState(GameState.WINNER);
             } else {
                 numberLeg = 0;
                 InputProcessor.setGameState(GameState.LOBBY);
                 finishedGame = true;
             }
-            System.out.println("NUMBER LEG: " + numberLeg);
         }
         if (InputProcessor.getGameSubState() == GameSubState.TUTORIAL) {
             renderTutorial();
@@ -651,7 +644,6 @@ public class MyRowing extends ApplicationAdapter {
                 break;
             case FINISHED:
                 minigameStage++;
-                System.out.println("MINIGAME SATATE " + minigameStage);
                 boolean correctTileClicked = checkCorrectTileClicked();
                 if (correctTileClicked) {
                     dataManager.setBalance(dataManager.getBalance() + money);
