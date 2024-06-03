@@ -16,18 +16,26 @@ public class MiniGameInputProcessor extends InputProcessor {
     public boolean keyDown(int keycode) {
         switch (keycode) {
             case Input.Keys.UP:
+            case Input.Keys.W:
+            case Input.Keys.K:
                 this.direction = 0;
                 this.moving = true;
                 break;
             case Input.Keys.LEFT:
+            case Input.Keys.A:
+            case Input.Keys.H:
                 this.direction = 1;
                 this.moving = true;
                 break;
             case Input.Keys.DOWN:
+            case Input.Keys.S:
+            case Input.Keys.J:
                 this.direction = 2;
                 this.moving = true;
                 break;
             case Input.Keys.RIGHT:
+            case Input.Keys.D:
+            case Input.Keys.L:
                 this.direction = 3;
                 this.moving = true;
                 break;
@@ -49,15 +57,7 @@ public class MiniGameInputProcessor extends InputProcessor {
     public boolean keyUp(int keycode) {
 
         // Handle key up events
-        switch (keycode) {
-            case Input.Keys.LEFT:
-            case Input.Keys.RIGHT:
-            case Input.Keys.UP:
-            case Input.Keys.DOWN:
-                this.moving = false;
-                break;
-
-        }
+        this.moving = false;
         return false;
     }
 }

@@ -13,10 +13,14 @@ public class ShopInputProcessor extends InputProcessor {
     public boolean keyUp(int keycode) {
         switch (keycode) {
             case Input.Keys.LEFT:
+            case Input.Keys.H:
+            case Input.Keys.A:
                 myRowing.previousBoat();
                 myRowing.previousShopPowerup();
                 break;
             case Input.Keys.RIGHT:
+            case Input.Keys.L:
+            case Input.Keys.D:
                 myRowing.nextBoat();
                 myRowing.nextShopPowerup();
                 break;
@@ -36,6 +40,10 @@ public class ShopInputProcessor extends InputProcessor {
                 break;
             case Input.Keys.DOWN:
             case Input.Keys.UP:
+            case Input.Keys.J:
+            case Input.Keys.K:
+            case Input.Keys.W:
+            case Input.Keys.S:
                 InputProcessor.switchGameSubState();
                 break;
 
