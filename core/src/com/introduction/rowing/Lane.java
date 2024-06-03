@@ -39,11 +39,10 @@ public class Lane {
      */
     public boolean spawnObstacleReady(float delta, int numberLegs) {
         Random rnd3 = new Random();
-        double baseRechargeTime = 0.1;
+        double baseRechargeTime = 0.1 + ((double) numberLegs /20);
         int temps = rnd3.nextInt(5) + 1;
 
-        double rechargeTimeFactor = (numberLegs == 0) ? 1 : (1.0 / numberLegs);
-        double rechargeTime = baseRechargeTime * temps * rechargeTimeFactor;
+        double rechargeTime = baseRechargeTime * temps;
         newObstacleReady += rechargeTime * delta;
         if (newObstacleReady >= 0.8) {
             newObstacleReady = 0;
