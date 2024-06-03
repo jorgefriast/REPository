@@ -2,7 +2,7 @@ package com.introduction.rowing;
 
 import com.badlogic.gdx.graphics.Texture;
 
-public class Obstacle extends Entity {
+public abstract class Obstacle extends Entity {
 
     protected int damage, pushBack;
 

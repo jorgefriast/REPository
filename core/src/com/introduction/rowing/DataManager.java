@@ -86,7 +86,6 @@ public class DataManager {
                 e.printStackTrace();
             }
         }
-        System.out.println(boats);
         return boats;
     }
 

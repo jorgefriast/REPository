@@ -99,6 +99,7 @@ public class MyRowing extends ApplicationAdapter {
     int currentShopBoatIndex = 0;
     FreeTypeFontGenerator generator;
     FreeTypeFontParameter parameter;
+    FreeTypeFontParameter parameter2;
 
     GlyphLayout layoutCongrats;
 
@@ -169,6 +170,11 @@ public class MyRowing extends ApplicationAdapter {
         parameter.size = 32;
         parameter.color = Color.BLACK;
         font = generator.generateFont(parameter);
+
+        parameter2 = new FreeTypeFontParameter();
+        parameter2.size = 64;
+        parameter2.color = Color.RED;
+        fontWhite = generator.generateFont(parameter2);
 
         currentState = GameState.LOBBY;
 
@@ -242,7 +248,6 @@ public class MyRowing extends ApplicationAdapter {
         createNewGame(gameInputProcessor, numberLeg);
         lanes = null;
         laneDividers.clear();
-        System.err.println("Game reset");
         if (InputProcessor.getGameSubState() == GameSubState.FINAL_LEG) {
             dataManager.setPowerup(-1);
         }
@@ -324,21 +329,24 @@ public class MyRowing extends ApplicationAdapter {
         switch (index) {
             case 0:
                 //put a text congratulating the player in the center
-                congrats = "Congrats you won first place!";
+                congrats = "Congrats you won first place! + 100 coins";
+                positionReward = 100;
                 layoutCongrats.setText(fontWhite, congrats);
                 textWidth = layoutCongrats.width;
                 x = (WINDOW_WIDTH - textWidth) / 2;
                 correctMedal = goldMedal;
                 break;
             case 1:
-                congrats = "Congrats you won second place!";
+                congrats = "Congrats you won second place! + 50 coins";
+                positionReward = 50;
                 layoutCongrats.setText(fontWhite, congrats);
                 textWidth = layoutCongrats.width;
                 x = (WINDOW_WIDTH - textWidth) / 2;
                 correctMedal = silverMedal;
                 break;
             case 2:
-                congrats = "Congrats you won third place!";
+                congrats = "Congrats you won third place! + 25 coins";
+                positionReward = 25;
                 layoutCongrats.setText(fontWhite, congrats);
                 textWidth = layoutCongrats.width;
                 x = (WINDOW_WIDTH - textWidth) / 2;
@@ -355,6 +363,7 @@ public class MyRowing extends ApplicationAdapter {
                 break;
 
         }
+        dataManager.setBalance(dataManager.getBalance() + positionReward);
         fontWhite.draw(batch, congrats, x, y);
         assert correctMedal != null;
         return correctMedal;
@@ -395,9 +404,6 @@ public class MyRowing extends ApplicationAdapter {
             System.out.println("Creating new game");
             gameMusic.loop();
             createNewGame(gameInputProcessor, numberLeg);
-        }
-        if (boatsPosition.size() == lanes.length) {
-            System.out.println("Game is finished winner is: " + boatsPosition.get(0));
         }
         // Water flow (GIF)
         stateTime += Gdx.graphics.getDeltaTime();
@@ -475,7 +481,6 @@ public class MyRowing extends ApplicationAdapter {
                 } else {
                     obstacle.adjustPosition(0, -5);
                 }
-                // obstacle.adjustPosition((float) 0, (float) (-5));
                 batch.draw(obstacle.getImage(), obstacle.getPosition().getX(), obstacle.getPosition().getY(), obstacle.getWidth(), obstacle.getHeight());
             }
             currentBoat.updateCooldown(Gdx.graphics.getDeltaTime());
@@ -488,7 +493,7 @@ public class MyRowing extends ApplicationAdapter {
 
         batch.draw(progressBarBackground, (float) (WINDOW_WIDTH / 3.97) + 5, (float) (WINDOW_HEIGHT * 0.905), progressBarRectangleWidth * this.getProgress(this.getPlayerBoat(), stateTime) - 15, progressBarBackgroundHeight);
         batch.draw(progressBarRectangle, (float) WINDOW_WIDTH / 2 - progressBarBackgroundWidth / 2, (float) (WINDOW_HEIGHT * 0.9), progressBarRectangleWidth, progressBarRectangleHeight);
-
+        font.draw(batch, "Leg # : "+ (numberLeg+1), (float) WINDOW_WIDTH / 3, (float)(WINDOW_HEIGHT*0.88));
         // Render powerup
         float powerUpSlotFactor = 3;
         int space = (int) (WINDOW_HEIGHT * 0.01);
@@ -500,7 +505,7 @@ public class MyRowing extends ApplicationAdapter {
                 powerUpSlotFactor * powerupSlot.getHeight(),
                 powerUpSlotFactor * powerupSlot.getWidth()
         );
-        if (this.availablePowerup != null) { // If there's a powerup show it in the slot
+        if (this.availablePowerup != null) {
             // The mathematical expression is used to scale the image to fit in the slot without altering its proportions
             batch.draw(
                     availablePowerup.getTexture(),
@@ -560,14 +565,12 @@ public class MyRowing extends ApplicationAdapter {
                 }
                 finishedGame = true;
             }else if(InputProcessor.getGameSubState() == GameSubState.FINAL_LEG){
-                    System.out.println("game is finisheddd");
                     InputProcessor.setGameState(GameState.WINNER);
             } else {
                 numberLeg = 0;
                 InputProcessor.setGameState(GameState.LOBBY);
                 finishedGame = true;
             }
-            System.out.println("NUMBER LEG: " + numberLeg);
         }
         if (InputProcessor.getGameSubState() == GameSubState.TUTORIAL) {
             renderTutorial();
@@ -587,7 +590,6 @@ public class MyRowing extends ApplicationAdapter {
             }
 
             for (Lane lane : lanes) {
-                // check that lane is not the same as the lane of the boat
                 if (lane != lanes[i]) {
                     for (Obstacle obstacle : lane.getObstacles()) {
                         if (boat1.canCollide() && boat1.getBounds().intersects(obstacle.getBounds())) {
@@ -645,7 +647,6 @@ public class MyRowing extends ApplicationAdapter {
                 break;
             case FINISHED:
                 minigameStage++;
-                System.out.println("MINIGAME SATATE " + minigameStage);
                 boolean correctTileClicked = checkCorrectTileClicked();
                 if (correctTileClicked) {
                     win.play();

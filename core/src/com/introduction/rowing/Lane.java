@@ -39,11 +39,10 @@ public class Lane {
      */
     public boolean spawnObstacleReady(float delta, int numberLegs) {
         Random rnd3 = new Random();
-        double baseRechargeTime = 0.1;
+        double baseRechargeTime = 0.1 + ((double) numberLegs /20);
         int temps = rnd3.nextInt(5) + 1;
 
-        double rechargeTimeFactor = (numberLegs == 0) ? 1 : (1.0 / numberLegs);
-        double rechargeTime = baseRechargeTime * temps * rechargeTimeFactor;
+        double rechargeTime = baseRechargeTime * temps;
         newObstacleReady += rechargeTime * delta;
         if (newObstacleReady >= 0.8) {
             newObstacleReady = 0;
@@ -54,22 +53,19 @@ public class Lane {
 
     public void spawnObstacles() {
         Random rnd = new Random();
-        int random = rnd.nextInt(4);
+        int random = rnd.nextInt(3);
         int LANE_WIDTH = WINDOW_WIDTH / NUMBER_OF_LANES;
         int randomWidth = rnd.nextInt(LANE_WIDTH) - 50;
         Texture gees = new Texture("obstacles/duck.png");
-        Texture ducks = new Texture("duck-bg.png");
         Texture branch = new Texture("obstacles/log.png");
         Texture rock = new Texture("obstacles/rock.png");
 
         if (random == 0) {
-            obstacles.add(new Gees(new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight() + gees.getHeight()), 100, 100, gees));
+            obstacles.add(ObstacleFactory.createObstacle("Gees", new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight() + gees.getHeight()), 100, 100, gees));
         } else if (random == 1) {
-            obstacles.add(new Rock(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50+rock.getHeight()), 100, 100, rock));
+            obstacles.add(ObstacleFactory.createObstacle("Rock", new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50+rock.getHeight()), 100, 100, rock));
         } else {
-            obstacles.add(new Branch(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50+branch.getHeight()), 100, 100, branch));
-        //} else {
-            //  obstacles.add(new Ducks(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, ducks));
+            obstacles.add(ObstacleFactory.createObstacle("Branch", new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50+branch.getHeight()), 100, 100, branch));
         }
     }
 
