@@ -930,8 +930,10 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     public void usePowerup() {
-        this.availablePowerup.use();
-        this.availablePowerup = null;
+        if (availablePowerup != null) {
+            this.availablePowerup.use();
+            this.availablePowerup = null;
+        }
     }
 
     public void nextShopPowerup() {
