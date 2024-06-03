@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 public class FishPowerup implements Powerup {
     private MyRowing myRowing;
     private final Texture texture = new Texture("powerups/koi.png");
-    private final String description = "Fills the acceleration bar.";
+    private final String description = "All obstacles in your lane \n disappear";
     private final String name = "Koi";
     private final int price = 200;
     public FishPowerup(MyRowing myRowing) {
@@ -14,7 +14,7 @@ public class FishPowerup implements Powerup {
 
     @Override
     public void use() {
-        this.myRowing.maxAccelerationLevel();
+        this.myRowing.deleteAllPlayerObstacles();
     }
 
     @Override

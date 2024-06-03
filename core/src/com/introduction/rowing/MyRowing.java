@@ -929,11 +929,6 @@ public class MyRowing extends ApplicationAdapter {
         return lanes[0].getBoat();
     }
 
-    public void maxAccelerationLevel() {
-        // Get which is the player boat
-        this.increaseAcceleration(1, getPlayerBoat());
-    }
-
     public void usePowerup() {
         this.availablePowerup.use();
         this.availablePowerup = null;
@@ -962,6 +957,10 @@ public class MyRowing extends ApplicationAdapter {
             this.availablePowerup = selected;
             dataManager.setBalance(dataManager.getBalance() - selected.getPrice());
         }
+    }
+
+    public void deleteAllPlayerObstacles() {
+        this.lanes[0].obstacles.clear();
     }
 
 }
