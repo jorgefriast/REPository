@@ -287,12 +287,12 @@ public class MyRowing extends ApplicationAdapter {
         batch.end();
     }
 
-    private  void renderTutorial() {
+    private  void renderTutorial(float stateTime) {
         double tutorial_scaling = 0.7;
-        if (stateTime < LEG_DURATION) {
-            batch.draw(keysTutorialTexture, ((float) WINDOW_WIDTH / 2) - ((float) (int) (keysTutorialTexture.getWidth() * tutorial_scaling) / 2), (float) WINDOW_HEIGHT / 4, (int) (keysTutorialTexture.getWidth() * tutorial_scaling), (int) (keysTutorialTexture.getHeight() * tutorial_scaling));
+        if (stateTime < 5) {
+            batch.draw(keysTutorialTexture, ((float) WINDOW_WIDTH / 3) - ((float) (int) (keysTutorialTexture.getWidth() * tutorial_scaling) / 2), (float) WINDOW_HEIGHT / 4, (int) (keysTutorialTexture.getWidth() * tutorial_scaling), (int) (keysTutorialTexture.getHeight() * tutorial_scaling));
         } else if (stateTime >= 5 && stateTime < 10) {
-            batch.draw(UITutorialTexture, 0, (float) WINDOW_HEIGHT / 3, (int) (UITutorialTexture.getWidth() * tutorial_scaling), (int) (UITutorialTexture.getHeight() * tutorial_scaling));
+            batch.draw(UITutorialTexture, ((float) WINDOW_WIDTH / 3) - ((float) (int) (keysTutorialTexture.getWidth() * tutorial_scaling) / 2), (float) WINDOW_HEIGHT / 4, (int) (keysTutorialTexture.getWidth() * tutorial_scaling), (int) (keysTutorialTexture.getHeight() * tutorial_scaling));
         }
     }
 
@@ -421,7 +421,7 @@ public class MyRowing extends ApplicationAdapter {
             this.getPlayerBoat().decreaseInvulnerabilityTime();
         }
         if (gameSubState == GameSubState.TUTORIAL) {
-            renderTutorial();
+            renderTutorial(stateTime);
         }
         // The game change between substates depending on the leg number
         if (lanes != null && boatsPosition.size() == lanes.length) {
@@ -505,9 +505,11 @@ public class MyRowing extends ApplicationAdapter {
                 System.out.println("MINIGAME SATATE " + minigameStage);
                 boolean correctTileClicked = checkCorrectTileClicked();
                 if (correctTileClicked) {
+                    win.play();
                     dataManager.setBalance(dataManager.getBalance() + money);
                     //batch.draw(correct, WINDOW_WIDTH, WINDOW_HEIGHT , correct.getWidth(), correct.getHeight());
-                }
+                } else
+                    lose.play();
                 miniGameState = MiniGameState.NOT_STARTED;
                 if (minigameStage >= NUMBER_OF_MINIGAMES) {
                     miniGameState = MiniGameState.SUM_SCREEN;
@@ -526,7 +528,7 @@ public class MyRowing extends ApplicationAdapter {
                 break;
             default:
                 break;
-    }
+        }
         if (miniGameState != MiniGameState.SUM_SCREEN) {
             renderDragonPlayer();
         }
@@ -792,6 +794,7 @@ public class MyRowing extends ApplicationAdapter {
         font.draw(batch, "Fatigue: " + shopBoat.getFatigue(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.39));
         if (!shopBoat.isUnlocked()) {
             font.draw(batch, "Price: " + shopBoat.getPrice(), (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.21));
+            font.draw(batch, "Press enter to unlock", (float) (WINDOW_WIDTH*0.69), (float) (WINDOW_HEIGHT*0.17));
         } else {
             font.draw(batch, "Unlocked", (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.25));
             if (shopBoat.isSelected())
@@ -811,7 +814,7 @@ public class MyRowing extends ApplicationAdapter {
 
         this.renderShopLayout();
 
-        batch.draw(powerupTexture,(float) (WINDOW_WIDTH*0.20), (float) (WINDOW_HEIGHT*0.38),(float) (powerupTexture.getWidth()*0.25), (float) (powerupTexture.getHeight()*0.25));
+        batch.draw(powerupTexture,(float) (WINDOW_WIDTH*0.20), (float) (WINDOW_HEIGHT*0.50),(float) (powerupTexture.getWidth()*0.25), (float) (powerupTexture.getHeight()*0.25));
 
         font.draw(batch, powerup.getName(), (float) (WINDOW_WIDTH*0.22), (float) (WINDOW_HEIGHT*0.18));
         font.draw(batch, "Description: " + powerup.getDescription(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.6));
