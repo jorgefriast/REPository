@@ -35,12 +35,15 @@ public class Lane {
     /**
      * Method to check if the lane is ready to spawn an obstacle
      * @param delta
+     * @param numberLegs
      */
-    public boolean spawnObstacleReady(float delta) {
+    public boolean spawnObstacleReady(float delta, int numberLegs) {
         Random rnd3 = new Random();
-        double rechargeTime = 0.2;
-        int temps = rnd3.nextInt(5);
-        rechargeTime = rechargeTime * temps;
+        double baseRechargeTime = 0.1;
+        int temps = rnd3.nextInt(5) + 1;
+
+        double rechargeTimeFactor = (numberLegs == 0) ? 1 : (1.0 / numberLegs);
+        double rechargeTime = baseRechargeTime * temps * rechargeTimeFactor;
         newObstacleReady += rechargeTime * delta;
         if (newObstacleReady >= 0.8) {
             newObstacleReady = 0;

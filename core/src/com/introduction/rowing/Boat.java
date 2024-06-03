@@ -29,6 +29,9 @@ public class Boat extends Entity{
     private int id;
     private int width;
     private int height;
+    private float collisionCooldown = 0;
+    private boolean isVisible = true;
+    private float flashTimer = 0;
     private int invulnerabilityTime = 0;
     private boolean momentumPowerupActive = false;
 
@@ -80,7 +83,7 @@ public class Boat extends Entity{
         }
         // Update boat position
         int laneWidth = Constants.WINDOW_WIDTH / Constants.NUMBER_OF_LANES;
-        newX = Math.max(leftBoundary, Math.min(leftBoundary + laneWidth - this.width, newX));
+        newX = Math.max(0, Math.min(WINDOW_WIDTH - this.width, newX));
         position.setX(Math.round(newX));
     }
 
@@ -194,6 +197,36 @@ public class Boat extends Entity{
 
     private int determineBoatHealth() {
         return (50 + robustness * 25);
+    }
+
+    public float getCollisionCooldown() {
+        return collisionCooldown;
+    }
+
+    public void setCollisionCooldown(float collisionCooldown) {
+        this.collisionCooldown = collisionCooldown;
+        if (collisionCooldown > 0) {
+            flashTimer = 0;
+        }
+    }
+
+    public void updateCooldown(float deltaTime) {
+        if (collisionCooldown > 0) {
+            collisionCooldown -= deltaTime;
+            flashTimer += deltaTime;
+            if (flashTimer >= 0.1f) {
+                isVisible = !isVisible;
+                flashTimer = 0;
+            }
+        } else {
+            isVisible = true;
+        }
+    }
+    public boolean canCollide() {
+        return collisionCooldown <= 0;
+    }
+    public boolean isVisible() {
+        return isVisible;
     }
 
     /**

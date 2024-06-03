@@ -42,7 +42,7 @@ public class GameInputProcessor extends InputProcessor {
 				break;
 			case Input.Keys.ESCAPE:
 				myRowing.resetPowerup();
-				myRowing.resetGame(InputProcessor.getGameSubState());
+				myRowing.resetGame();
 				setGameState(GameState.LOBBY);
 				break;
 			case Input.Keys.SPACE:

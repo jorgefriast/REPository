@@ -32,6 +32,7 @@ public class MyRowing extends ApplicationAdapter {
     TextureRegion[] water;
     Texture shopBackground;
     BitmapFont font;
+    BitmapFont fontWhite;
     Lane[] lanes;
     float stateTime = 0;
     float frameDuration = 0.1f;
@@ -76,6 +77,10 @@ public class MyRowing extends ApplicationAdapter {
     Texture finishLineTexture;
     Texture tiles;
     Texture dragonHead;
+    Texture goldMedal;
+    Texture silverMedal;
+    Texture bronzeMedal;
+    Texture fourthMedal;
     DragonHead dragonPlayer;
     CountdownTimer countdownTimer;
     int randomObstacle;
@@ -89,12 +94,15 @@ public class MyRowing extends ApplicationAdapter {
     LobbyInputProcessor lobbyInputProcessor;
     ShopInputProcessor shopInputProcessor;
     MiniGameInputProcessor miniGameInputProcessor;
+    WinnerScreenInputProcessor winnerScreenInputProcessor;
     ScreenViewport viewport;
     Stage stage;
     private DataManager dataManager;
     int currentShopBoatIndex = 0;
     FreeTypeFontGenerator generator;
     FreeTypeFontParameter parameter;
+
+    GlyphLayout layoutCongrats;
 
     Sound crash;
     Sound lobbyMusic;
@@ -139,10 +147,21 @@ public class MyRowing extends ApplicationAdapter {
         tiles = new Texture("tiles/tile.jpg");
         dragonHead = new Texture("powerups/dragon_head.png");
         sumScreenMiniGame = new Texture("shop-background/frame_1_delay-0.1s.png");
+        goldMedal = new Texture("medals/gold.png");
+        silverMedal = new Texture("medals/silver.png");
+        bronzeMedal = new Texture("medals/bronze.png");
+        fourthMedal = new Texture("medals/fourth.png");
         powerupSlot = new Texture("powerups/powerup-slot.png");
+
         font = new BitmapFont();
         font.setColor(Color.BLACK);
         font.getData().setScale(2);
+
+        fontWhite = new BitmapFont();
+        fontWhite.setColor(Color.RED);
+        fontWhite.getData().setScale(3);
+
+        layoutCongrats = new GlyphLayout();
 
 
         // Load the custom font using FreeTypeFontGenerator
@@ -162,6 +181,7 @@ public class MyRowing extends ApplicationAdapter {
         lobbyInputProcessor = new LobbyInputProcessor(this);
         miniGameInputProcessor = new MiniGameInputProcessor(this);
         shopInputProcessor = new ShopInputProcessor(this);
+        winnerScreenInputProcessor = new WinnerScreenInputProcessor(this);
         dragonPlayer = new DragonHead(new Position((Gdx.graphics.getWidth() - dragonHead.getWidth()/2) / 2, (Gdx.graphics.getHeight() - dragonHead.getHeight()/2) / 2 -50), dragonHead.getWidth() /6, dragonHead.getHeight()/6, dragonHead, miniGameInputProcessor);
         countdownTimer = new CountdownTimer(3);
         randomObstacle = 1;
@@ -198,6 +218,7 @@ public class MyRowing extends ApplicationAdapter {
         int boatHeight = (boatPicture.getHeight() * boatWidth) / boatPicture.getWidth();
         for (int i = 0; i < NUMBER_OF_LANES; i++) {
             float multiplier = numberLeg != NUMBER_OF_LEGS ? 1 : (positionsRecord.get(i) / ((float) NUMBER_OF_LEGS * (NUMBER_OF_LANES - 1)) + 1) / 2;
+            System.out.println("MULTIPLIER " + multiplier);
             Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), (int) (boatHeight*0.5* multiplier));
             if (i == 0) {
                 lanes[i] = new Lane(new Boat(i, startingPosition, true, inputProcessor, dataManager.getSelectedBoat()), currentLeftBoundary);
@@ -214,7 +235,7 @@ public class MyRowing extends ApplicationAdapter {
         availablePowerup = dataManager.getPowerup(this);
     }
 
-    public void resetGame(GameSubState gameSubState) {
+    public void resetGame() {
         boatsPosition.clear();
         accelerationLevel = 0;
         stateAccelerating = false;
@@ -223,7 +244,7 @@ public class MyRowing extends ApplicationAdapter {
         lanes = null;
         laneDividers.clear();
         System.err.println("Game reset");
-        if (gameSubState == GameSubState.FINAL_LEG) {
+        if (InputProcessor.getGameSubState() == GameSubState.FINAL_LEG) {
             dataManager.setPowerup(-1);
         }
         gameMusic.pause();
@@ -248,7 +269,9 @@ public class MyRowing extends ApplicationAdapter {
         switch (currentState) {
             case LOBBY:
                 enteredShop = false;
+                enteredLoseScreen = false;
                 shopMusic.pause();
+                lose.pause();
                 Gdx.input.setInputProcessor(lobbyInputProcessor);
                 renderLobby();
                 break;
@@ -258,7 +281,11 @@ public class MyRowing extends ApplicationAdapter {
                 Gdx.input.setInputProcessor(gameInputProcessor);
                 shopMusic.pause();
                 lobbyMusic.pause();
-                renderGame(gameInputProcessor, InputProcessor.getGameSubState());
+                renderGame(gameInputProcessor);
+                break;
+            case WINNER:
+                Gdx.input.setInputProcessor(winnerScreenInputProcessor);
+                renderWinner();
                 break;
             case PLAY_MINI_GAME:
                 lobbyEntered = false;
@@ -275,13 +302,12 @@ public class MyRowing extends ApplicationAdapter {
                 renderShop();
                 break;
             case LOSE_SCREEN:
-                enteredShop = false;
-                lobbyEntered = false;
                 Gdx.input.setInputProcessor(loseScreenInputProcessor);
                 lobbyMusic.pause();
                 shopMusic.pause();
-                batch.draw(loseScreenTexture, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-                lose.play();
+                enteredShop = false;
+                lobbyEntered = false;
+                renderLostScreen();
                 break;
             default:
                 break;
@@ -289,7 +315,53 @@ public class MyRowing extends ApplicationAdapter {
         batch.end();
     }
 
-    private  void renderTutorial(float stateTime) {
+    private Texture getTexture(int index) {
+        Texture correctMedal = null;
+        String congrats = "";
+        float textWidth = 0;
+        float x = 0;
+        float y = 300;
+
+        switch (index) {
+            case 0:
+                //put a text congratulating the player in the center
+                congrats = "Congrats you won first place!";
+                layoutCongrats.setText(fontWhite, congrats);
+                textWidth = layoutCongrats.width;
+                x = (WINDOW_WIDTH - textWidth) / 2;
+                correctMedal = goldMedal;
+                break;
+            case 1:
+                congrats = "Congrats you won second place!";
+                layoutCongrats.setText(fontWhite, congrats);
+                textWidth = layoutCongrats.width;
+                x = (WINDOW_WIDTH - textWidth) / 2;
+                correctMedal = silverMedal;
+                break;
+            case 2:
+                congrats = "Congrats you won third place!";
+                layoutCongrats.setText(fontWhite, congrats);
+                textWidth = layoutCongrats.width;
+                x = (WINDOW_WIDTH - textWidth) / 2;
+                correctMedal = bronzeMedal;
+                break;
+            case 3:
+                congrats = "You arrived fourth place!";
+                layoutCongrats.setText(fontWhite, congrats);
+                textWidth = layoutCongrats.width;
+                x = (WINDOW_WIDTH - textWidth) / 2;
+                correctMedal = fourthMedal;
+                break;
+            default:
+                break;
+
+        }
+        fontWhite.draw(batch, congrats, x, y);
+        assert correctMedal != null;
+        return correctMedal;
+    }
+
+    private void renderTutorial() {
         double tutorial_scaling = 0.7;
         if (stateTime < 5) {
             batch.draw(keysTutorialTexture, ((float) WINDOW_WIDTH / 3) - ((float) (int) (keysTutorialTexture.getWidth() * tutorial_scaling) / 2), (float) WINDOW_HEIGHT / 4, (int) (keysTutorialTexture.getWidth() * tutorial_scaling), (int) (keysTutorialTexture.getHeight() * tutorial_scaling));
@@ -298,14 +370,34 @@ public class MyRowing extends ApplicationAdapter {
         }
     }
 
-    private void renderGame(GameInputProcessor gameInputProcessor, GameSubState gameSubState) {
+    boolean enteredLoseScreen = false;
+    private void renderLostScreen() {
+        if (!enteredLoseScreen) {
+            enteredLoseScreen = true;
+            lose.play();
+        }
+        batch.draw(loseScreenTexture, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    }
+
+    private void renderWinner(){
+        batch.draw(sumScreenMiniGame, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        // check for the position of boat number 0 in the boatsPosition list
+        int index = boatsPosition.indexOf(lanes[0].getBoat());
+        Texture correctMedal = getTexture(index);
+        float centeredX = ((float) WINDOW_WIDTH / 2) - ((float) correctMedal.getWidth() / 2);
+        float centeredY = ((float) WINDOW_HEIGHT / 2) - ((float) correctMedal.getHeight() / 2);
+        batch.draw(correctMedal, centeredX, centeredY, correctMedal.getWidth(), correctMedal.getHeight());
+    }
+
+    private void renderGame(GameInputProcessor gameInputProcessor) {
+        boolean finishedGame = false;
         if (lanes == null) {
             System.out.println("Creating new game");
             gameMusic.loop();
             createNewGame(gameInputProcessor, numberLeg);
         }
         if (boatsPosition.size() == lanes.length) {
-            System.out.println("Game is fini/hed winner is: " + boatsPosition.get(0));
+            System.out.println("Game is finished winner is: " + boatsPosition.get(0));
         }
         // Water flow (GIF)
         stateTime += Gdx.graphics.getDeltaTime();
@@ -317,9 +409,10 @@ public class MyRowing extends ApplicationAdapter {
             laneDivider.adjustPosition(0,-2 );
             batch.draw(laneDivider.getImage(), laneDivider.getPosition().getX(), laneDivider.getPosition().getY(), laneDivider.getWidth(), laneDivider.getHeight());
             if (laneDivider.getPosition().getY() < -laneDivider.getHeight()/2) {
-                laneDivider.adjustPosition(0,laneDivider.getHeight()/2);
+                laneDivider.adjustPosition(0, (float) laneDivider.getHeight() /2);
             }
         }
+
         if (stateTime > LEG_DURATION) {
             finishLine();
         }
@@ -327,7 +420,9 @@ public class MyRowing extends ApplicationAdapter {
         boolean crossed;
         for (Lane lane : lanes) {
             Boat currentBoat = lane.getBoat();
-            batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY() - currentBoat.getHeight(), currentBoat.getWidth(), currentBoat.getHeight());
+            if (currentBoat.isVisible()) {
+                batch.draw(currentBoat.getImage(), currentBoat.getPosition().getX(), currentBoat.getPosition().getY() - currentBoat.getHeight(), currentBoat.getWidth(), currentBoat.getHeight());
+            }
             if (currentBoat.getIsPlayer()) {
                 currentBoat.updateKeys(Gdx.graphics.getDeltaTime(), lane.getLeftBoundary());
             } else {
@@ -351,7 +446,9 @@ public class MyRowing extends ApplicationAdapter {
             }
 
             // Generate obstacles
-            if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime())) { lane.spawnObstacles(); }
+            if (lane.spawnObstacleReady(Gdx.graphics.getDeltaTime(), numberLeg)) {
+                lane.spawnObstacles();
+            }
             lane.collision(this);
 
             crossed = checkFinishLineCrossed(lane.getBoat());
@@ -363,11 +460,12 @@ public class MyRowing extends ApplicationAdapter {
                     win.play();
                 }
             }
+            checkCollisions();
+
+
             //make the obstacles move
             ArrayList<Obstacle> obstacles = lane.getObstacles();
-            Iterator<Obstacle> iterator = obstacles.iterator();
-            while (iterator.hasNext()) {
-                Obstacle obstacle = iterator.next();
+            for (Obstacle obstacle : obstacles) {
                 if (obstacle instanceof Gees) {
                     float movementSpeed = 2;
                     float deltaX = MathUtils.sinDeg(obstacle.getPosition().getY() * 5) * 5;
@@ -380,6 +478,7 @@ public class MyRowing extends ApplicationAdapter {
                 // obstacle.adjustPosition((float) 0, (float) (-5));
                 batch.draw(obstacle.getImage(), obstacle.getPosition().getX(), obstacle.getPosition().getY(), obstacle.getWidth(), obstacle.getHeight());
             }
+            currentBoat.updateCooldown(Gdx.graphics.getDeltaTime());
         }
 
         batch.draw(panel, (float) (WINDOW_WIDTH*0.8), (float) (WINDOW_HEIGHT*0.55), (float) (panel.getWidth() * 0.3), (float) (panel.getHeight()* 0.4));
@@ -416,6 +515,31 @@ public class MyRowing extends ApplicationAdapter {
             );
         }
 
+        for (Lane lane : lanes) {
+            String invulnerableText = "Invulnerable";
+            if (this.getPlayerBoat().isInvulnerable()) {
+                font.draw(batch, invulnerableText, 1400, 580);
+            }
+            Boat currentBoat = lane.getBoat();
+            if (currentBoat.getIsPlayer()) {
+                // loose if the boat breaks
+                if (currentBoat.getBoatHealth() <= 0 && currentBoat.getIsPlayer()) {
+                    currentBoat.setBoatHealth(0);
+                    InputProcessor.setGameState(GameState.LOSE_SCREEN);
+                    this.resetPowerup();
+                    finishedGame = true;
+                }
+                double fatiguePercentage = currentBoat.getFatigueEffect();
+                String fatigueText = "Fatigue Effect: " + (int) (fatiguePercentage * 100) + "%";
+                String boatHealthText = "Boat Health: " + currentBoat.getBoatHealth();
+                String avoidedObstaclesText = "Avoided Obstacles: " + currentBoat.getNumberOfAvoidedObstacles();
+                String momentumText = "Momentum: " + currentBoat.getCurrentMomentum();
+                font.draw(batch, fatigueText, 1400, 750);
+                font.draw(batch, boatHealthText, 1400, 700);
+                font.draw(batch, avoidedObstaclesText, 1400, 650);
+                font.draw(batch, momentumText, 1400, 600);
+            }
+        }
         // Invulnerability  powerup logic
         invulnerabilityTimer += Gdx.graphics.getDeltaTime();
         if (this.getPlayerBoat().isInvulnerable() && invulnerabilityTimer >= 1) {
@@ -423,12 +547,12 @@ public class MyRowing extends ApplicationAdapter {
             this.getPlayerBoat().decreaseInvulnerabilityTime();
         }
         if (gameSubState == GameSubState.TUTORIAL) {
-            renderTutorial(stateTime);
+            renderTutorial();
         }
         // The game change between substates depending on the leg number
-        if (lanes != null && boatsPosition.size() == lanes.length) {
+        if (boatsPosition.size() == lanes.length) {
             System.out.println("Game is finished winner is: " + boatsPosition.get(0));
-            if (gameSubState == GameSubState.RACE_LEG) {
+            if (InputProcessor.getGameSubState() == GameSubState.RACE_LEG) {
                 InputProcessor.setGameState(GameState.PLAY_MINI_GAME);
                 numberLeg++;
                 for (int i = 0; i < NUMBER_OF_LANES; i++) {
@@ -436,27 +560,41 @@ public class MyRowing extends ApplicationAdapter {
                     positionsRecord.set(currentId, positionsRecord.get(currentId) + i);
                     System.out.println("Position record:" + positionsRecord);
                 }
+                finishedGame = true;
+            }else if(InputProcessor.getGameSubState() == GameSubState.FINAL_LEG){
+                    System.out.println("game is finisheddd");
+                    InputProcessor.setGameState(GameState.WINNER);
             } else {
                 numberLeg = 0;
                 InputProcessor.setGameState(GameState.LOBBY);
+                finishedGame = true;
             }
-            resetGame(gameSubState);
             System.out.println("NUMBER LEG: " + numberLeg);
         }
-        if (lanes != null) {
-            String invulnerableText = "Invulnerable";
-            if (this.getPlayerBoat().isInvulnerable()) {
-                font.draw(batch, invulnerableText, 1400, 580);
+        if (InputProcessor.getGameSubState() == GameSubState.TUTORIAL) {
+            renderTutorial();
+        }
+        if (finishedGame){
+            resetGame();
+        }
+    }
+    private void checkCollisions() {
+        for (int i = 0; i < lanes.length; i++) {
+            Boat boat1 = lanes[i].getBoat();
+            for (int j = i + 1; j < lanes.length; j++) {
+                Boat boat2 = lanes[j].getBoat();
+                if (boat1.canCollide() && boat2.canCollide() && boat1.getBounds().intersects(boat2.getBounds())) {
+                    handleCollision(boat1, boat2);
+                }
             }
+
             for (Lane lane : lanes) {
-                Boat currentBoat = lane.getBoat();
-                if (currentBoat.getIsPlayer()) {
-                    // loose if the boat breaks
-                    if (currentBoat.getBoatHealth() <= 0) {
-                        currentBoat.setBoatHealth(0);
-                        InputProcessor.setGameState(GameState.LOSE_SCREEN);
-                        this.resetPowerup();
-                        resetGame(gameSubState);
+                // check that lane is not the same as the lane of the boat
+                if (lane != lanes[i]) {
+                    for (Obstacle obstacle : lane.getObstacles()) {
+                        if (boat1.canCollide() && boat1.getBounds().intersects(obstacle.getBounds())) {
+                            handleCollision(boat1, obstacle);
+                        }
                     }
                     double fatiguePercentage = currentBoat.getFatigueEffect();
                     String fatigueText = "Fatigue Effect: " + (int) (fatiguePercentage * 100) + "%";
@@ -470,6 +608,19 @@ public class MyRowing extends ApplicationAdapter {
             }
         }
     }
+
+    private void handleCollision(Boat boat1, Boat boat2) {
+        boat1.setBoatHealth(boat1.getBoatHealth() - 10);
+        boat2.setBoatHealth(boat2.getBoatHealth() - 10);
+        boat1.setCollisionCooldown(2);
+        boat2.setCollisionCooldown(2);
+    }
+
+    private void handleCollision(Boat boat, Obstacle obstacle) {
+        boat.setBoatHealth(boat.getBoatHealth() - obstacle.getDamage());
+        boat.setCollisionCooldown(2);
+    }
+
 
     private void renderMiniGame() {
         renderUI();
@@ -760,7 +911,8 @@ public class MyRowing extends ApplicationAdapter {
         miniGameState = MiniGameState.NOT_STARTED;
         dragonPlayer.setPosition((Gdx.graphics.getWidth() - dragonHead.getWidth()/2) / 2, (Gdx.graphics.getHeight() - dragonHead.getHeight()/2) / 2 -50);
         countdownTimer.reset();
-        itemTiles.clear();
+        if (itemTiles != null)
+            itemTiles.clear();
     }
 
     private void renderDragonPlayer() {
@@ -881,6 +1033,10 @@ public class MyRowing extends ApplicationAdapter {
         for (TextureRegion textureRegion : water) {
             textureRegion.getTexture().dispose();
         }
+        goldMedal.dispose();
+        silverMedal.dispose();
+        bronzeMedal.dispose();
+        fourthMedal.dispose();
 
     }
 
