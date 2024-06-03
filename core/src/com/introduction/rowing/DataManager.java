@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.FileHandler;
 
@@ -14,6 +15,7 @@ public class DataManager {
     public List<ShopBoat> boats;
     private static final String MONEY_BALANCE_FILE_PATH = "core/data/money_balance.txt";
     private static final String BOATS_FILE_PATH = "core/data/boats.csv";
+    private static final String INVENTORY_FILE_PATH = "core/data/inventory";
 
     public DataManager() {
         this.balance = readBalance();
@@ -110,7 +112,6 @@ public class DataManager {
         file.writeString(sb.toString(), false);
     }
 
-
     public ShopBoat getSelectedBoat() {
         for (ShopBoat boat : boats) {
             if (boat.isSelected()) {
@@ -118,5 +119,65 @@ public class DataManager {
             }
         }
         return null;
+    }
+
+    public void setPowerup(int powerupId) {
+        FileHandle fh = Gdx.files.local(INVENTORY_FILE_PATH);
+        int[] availablePowerups = new int[]{0, 1, 2, 3};
+        if (Arrays.stream(availablePowerups).anyMatch(e -> e == powerupId)) {
+            // If the powerup id in the argument is available
+            fh.writeString(Integer.toString(powerupId), false);
+        } else {
+            fh.writeString("-1", false);
+        }
+    }
+
+    public int getPowerups() {
+        FileHandle fh = Gdx.files.local(INVENTORY_FILE_PATH);
+        int lineCounter = 0;
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(fh.reader());
+            while (reader.readLine() != null) {
+                lineCounter++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
+            }
+        }
+        return lineCounter;
+    }
+
+    public Powerup getPowerupById(int id, MyRowing myRowing) {
+        switch (id) {
+            case 0:
+                return new FishPowerup(myRowing);
+            case 1:
+                return new CookiePowerup(myRowing);
+            case 2:
+                return new FlowerPowerup(myRowing);
+            case 3:
+                return new CatPowerup(myRowing);
+            default:
+                return null;
+        }
+    }
+
+    public Powerup getPowerup(MyRowing myRowing) {
+        FileHandle file = Gdx.files.local(INVENTORY_FILE_PATH);
+        if (!file.exists()) {
+            return null;
+        }
+        int id = Integer.parseInt(file.readString());
+        return getPowerupById(id, myRowing);
     }
 }

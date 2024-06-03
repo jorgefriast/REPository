@@ -32,6 +32,8 @@ public class Boat extends Entity{
     private float collisionCooldown = 0;
     private boolean isVisible = true;
     private float flashTimer = 0;
+    private int invulnerabilityTime = 0;
+    private boolean momentumPowerupActive = false;
 
     public Boat(int id, Position position, boolean isPlayer, GameInputProcessor inputProcessor, ShopBoat shopBoat) {
         super(position, 10, 10, new Texture(shopBoat.getImageName()));
@@ -40,10 +42,10 @@ public class Boat extends Entity{
         this.isPlayer = isPlayer;
         this.inputProcessor = inputProcessor;
         this.fatigueRate = calculateFatigueRate(fatigue);
+        this.robustness = shopBoat.getRobustness();
         this.boatHealth = determineBoatHealth();
         this.id = id;
         this.speedFactor = shopBoat.getSpeedFactor();
-        this.robustness = shopBoat.getRobustness();
         this.acceleration = shopBoat.getAcceleration();
         this.momentumFactor = shopBoat.getMomentumFactor();
         this.speedX = shopBoat.getManeuverability();
@@ -168,7 +170,9 @@ public class Boat extends Entity{
     }
 
     public double getCurrentMomentum() {
-        if (numberOfAvoidedObstacles >= 15)
+        if (this.momentumPowerupActive) {
+            return 3;
+        } else if (numberOfAvoidedObstacles >= 15)
             return 2.5;
         else if (numberOfAvoidedObstacles >= 10)
             return 2;
@@ -192,7 +196,7 @@ public class Boat extends Entity{
     }
 
     private int determineBoatHealth() {
-        return 50 + robustness * 25;
+        return (50 + robustness * 25);
     }
 
     public float getCollisionCooldown() {
@@ -365,6 +369,7 @@ public class Boat extends Entity{
         return this.id;
     }
 
+
     @Override
     public Rectangle getBounds() {
         return new Rectangle(position.getX(), position.getY() - this.height, this.width, this.height);
@@ -383,5 +388,32 @@ public class Boat extends Entity{
     @Override
     public String toString() {
         return "BOAT " + this.id;
+    }
+
+    public boolean isInvulnerable() {
+        return this.invulnerabilityTime > 0;
+    }
+
+    public void setInvulnerabilityTime(int seconds) {
+        this.invulnerabilityTime = seconds;
+    }
+
+    public int getInvulnerabilityTime() {
+        return invulnerabilityTime;
+    }
+
+    public void decreaseInvulnerabilityTime() {
+        invulnerabilityTime--;
+        if (invulnerabilityTime < 0) {
+            this.invulnerabilityTime = 0;
+        }
+    }
+
+    public void activateMomemtumPowerup() {
+        this.momentumPowerupActive = true;
+    }
+
+    public void deactivateMomemtumPowerup() {
+        this.momentumPowerupActive = false;
     }
 }

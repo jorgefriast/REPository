@@ -39,7 +39,7 @@ public class Lane {
      */
     public boolean spawnObstacleReady(float delta, int numberLegs) {
         Random rnd3 = new Random();
-        double baseRechargeTime = 0.2;
+        double baseRechargeTime = 0.1;
         int temps = rnd3.nextInt(5) + 1;
 
         double rechargeTimeFactor = (numberLegs == 0) ? 1 : (1.0 / numberLegs);
@@ -55,7 +55,7 @@ public class Lane {
     public void spawnObstacles() {
         Random rnd = new Random();
         int random = rnd.nextInt(4);
-        int LANE_WIDTH = WINDOW_WIDTH / 4;
+        int LANE_WIDTH = WINDOW_WIDTH / NUMBER_OF_LANES;
         int randomWidth = rnd.nextInt(LANE_WIDTH) - 50;
         Texture gees = new Texture("obstacles/duck.png");
         Texture ducks = new Texture("duck-bg.png");
@@ -63,26 +63,28 @@ public class Lane {
         Texture rock = new Texture("obstacles/rock.png");
 
         if (random == 0) {
-            obstacles.add(new Gees(new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight()), 100, 100, gees));
+            obstacles.add(new Gees(new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight() + gees.getHeight()), 100, 100, gees));
         } else if (random == 1) {
-            obstacles.add(new Rock(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, rock));
+            obstacles.add(new Rock(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50+rock.getHeight()), 100, 100, rock));
         } else {
-            obstacles.add(new Branch(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, branch));
+            obstacles.add(new Branch(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50+branch.getHeight()), 100, 100, branch));
         //} else {
             //  obstacles.add(new Ducks(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, ducks));
         }
     }
 
-    public void collision(){
+    public void collision(MyRowing myRowing){
         for (Obstacle obstacle : obstacles) {
-            if (boat.getBounds().intersects(obstacle.getBounds())) {
+            if (boat.getBounds().intersects(obstacle.getBounds()) && !boat.isInvulnerable()) {
                 obstacles.remove(obstacle);
                 boat.setPosition(boat.getPosition().getX(), Math.max(boat.getHeight() / 2, boat.getPosition().getY() - obstacle.pushBack));
                 boat.resetNumberOfAvoidedObstacles();
+                boat.deactivateMomemtumPowerup();
                 boat.damageBoat(obstacle.getDamage());
+                myRowing.crash.play();
                 break;
             }
-            else if (obstacle.getPosition().getY() < 0) {
+            else if (obstacle.getPosition().getY() + obstacle.getHeight() < 0) {
                 obstacles.remove(obstacle);
                 boat.increaseNumberOfAvoidedObstacles();
                 break;
