@@ -41,6 +41,7 @@ public class MyRowing extends ApplicationAdapter {
     Texture error;
     Texture horizontalScroll;
     Texture verticalScroll;
+    Texture panel;
     Texture rightArrow;
     Texture upperArrow;
     Texture bottomArrow;
@@ -117,6 +118,7 @@ public class MyRowing extends ApplicationAdapter {
         lobbyImage = new Texture("backgrounds/lobby.png");
         keysTutorialTexture = new Texture("backgrounds/tutorial.png");
         loseScreenTexture = new Texture("backgrounds/loose-screen.png");
+        panel = new Texture("backgrounds/panel.png");
         UITutorialTexture = new Texture("backgrounds/ui-tutorial.png");
         shopBackground = new Texture("backgrounds/shop.png");
         horizontalScroll = new Texture("backgrounds/horizontal_scroll.png");
@@ -234,7 +236,7 @@ public class MyRowing extends ApplicationAdapter {
             lobbyMusic.loop();
         }
         batch.draw(lobbyImage, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        font.draw(batch, "Money balance: "+ dataManager.getBalance() , 150, 150);
+        font.draw(batch, " " + dataManager.getBalance() , (float) (WINDOW_WIDTH* 0.13), (float) (WINDOW_HEIGHT*0.11));
     }
 
 
@@ -380,10 +382,10 @@ public class MyRowing extends ApplicationAdapter {
             }
         }
 
-        batch.draw(verticalScroll,1300, 470, (float) (verticalScroll.getWidth() * 2), (float) (verticalScroll.getHeight()* 1.7));
-        font.draw(batch, ACCELERATION_BAR_TEXT, 1400, 900);
-        batch.draw(accelerationBarRectangle, PBR_X_POS, PBR_Y_POS, accelerationBarRectangleWidth, accelerationBarRectangleHeight);
-        batch.draw(accelerationBarBackground, PBB_X_POS, PBB_Y_POS, accelerationBarBackgroundWidth, accelerationBarBackgroundHeight);
+        batch.draw(panel, (float) (WINDOW_WIDTH*0.8), (float) (WINDOW_HEIGHT*0.55), (float) (panel.getWidth() * 0.3), (float) (panel.getHeight()* 0.4));
+        font.draw(batch, ACCELERATION_BAR_TEXT, (float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.84));
+        batch.draw(accelerationBarRectangle,  (float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.75), accelerationBarRectangleWidth, accelerationBarRectangleHeight);
+        batch.draw(accelerationBarBackground, (float) (WINDOW_WIDTH * 0.82)+4, (float) (WINDOW_HEIGHT *0.75)+4, accelerationBarBackgroundWidth, accelerationBarBackgroundHeight);
 
         batch.draw(progressBarBackground, (float) (WINDOW_WIDTH / 3.97) + 5, (float) (WINDOW_HEIGHT * 0.905), progressBarRectangleWidth * this.getProgress(this.getPlayerBoat(), stateTime) - 15, progressBarBackgroundHeight);
         batch.draw(progressBarRectangle, (float) WINDOW_WIDTH / 2 - progressBarBackgroundWidth / 2, (float) (WINDOW_HEIGHT * 0.9), progressBarRectangleWidth, progressBarRectangleHeight);
@@ -461,9 +463,9 @@ public class MyRowing extends ApplicationAdapter {
                     String boatHealthText = "Boat Health: " + currentBoat.getBoatHealth();
                     String avoidedObstaclesText = "Avoided Obstacles: " + currentBoat.getNumberOfAvoidedObstacles();
                     String momentumText = "Momentum: " + currentBoat.getCurrentMomentum();
-                    font.draw(batch, fatigueText, 1400, 760);
-                    font.draw(batch, boatHealthText, 1400, 700);
-                    font.draw(batch, momentumText, 1400, 640);
+                    font.draw(batch, fatigueText,(float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.70));
+                    font.draw(batch, boatHealthText,(float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.65));
+                    font.draw(batch, momentumText, (float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.6));
                 }
             }
         }
@@ -793,8 +795,8 @@ public class MyRowing extends ApplicationAdapter {
         font.draw(batch, "Momentum Factor: " + shopBoat.getMomentumFactor(),  (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.46));
         font.draw(batch, "Fatigue: " + shopBoat.getFatigue(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.39));
         if (!shopBoat.isUnlocked()) {
-            font.draw(batch, "Price: " + shopBoat.getPrice(), (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.21));
-            font.draw(batch, "Press enter to unlock", (float) (WINDOW_WIDTH*0.69), (float) (WINDOW_HEIGHT*0.17));
+            font.draw(batch, "Price: " + shopBoat.getPrice(), (float) (WINDOW_WIDTH*0.73), (float) (WINDOW_HEIGHT*0.24));
+            font.draw(batch, "Press enter to unlock", (float) (WINDOW_WIDTH*0.7), (float) (WINDOW_HEIGHT*0.19));
         } else {
             font.draw(batch, "Unlocked", (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.25));
             if (shopBoat.isSelected())
@@ -818,9 +820,11 @@ public class MyRowing extends ApplicationAdapter {
 
         font.draw(batch, powerup.getName(), (float) (WINDOW_WIDTH*0.22), (float) (WINDOW_HEIGHT*0.18));
         font.draw(batch, "Description: " + powerup.getDescription(), (float) (WINDOW_WIDTH*0.63), (float) (WINDOW_HEIGHT*0.6));
-        font.draw(batch, "Price: " + powerup.getPrice(), (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.21));
         if (this.availablePowerup != null && this.availablePowerup.getName().equals(powerup.getName())) {
-            font.draw(batch, "Acquired", (float) (WINDOW_WIDTH*0.72), (float) (WINDOW_HEIGHT*0.18));
+            font.draw(batch, "Acquired", (float) (WINDOW_WIDTH*0.73), (float) (WINDOW_HEIGHT*0.22));
+        } else{
+            font.draw(batch, "Price: " + powerup.getPrice(), (float) (WINDOW_WIDTH*0.73), (float) (WINDOW_HEIGHT*0.24));
+            font.draw(batch, "Press enter to buy", (float) (WINDOW_WIDTH*0.71), (float) (WINDOW_HEIGHT*0.19));
         }
     }
 
