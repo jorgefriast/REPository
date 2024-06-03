@@ -55,18 +55,15 @@ public class Lane {
         int LANE_WIDTH = WINDOW_WIDTH / NUMBER_OF_LANES;
         int randomWidth = rnd.nextInt(LANE_WIDTH) - 50;
         Texture gees = new Texture("obstacles/duck.png");
-        Texture ducks = new Texture("duck-bg.png");
         Texture branch = new Texture("obstacles/log.png");
         Texture rock = new Texture("obstacles/rock.png");
 
         if (random == 0) {
-            obstacles.add(new Gees(new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight() + gees.getHeight()), 100, 100, gees));
+            obstacles.add(ObstacleFactory.createObstacle("Gees", new Position(leftBoundary + randomWidth, Gdx.graphics.getHeight() + gees.getHeight()), 100, 100, gees));
         } else if (random == 1) {
-            obstacles.add(new Rock(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50+rock.getHeight()), 100, 100, rock));
+            obstacles.add(ObstacleFactory.createObstacle("Rock", new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50+rock.getHeight()), 100, 100, rock));
         } else {
-            obstacles.add(new Branch(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50+branch.getHeight()), 100, 100, branch));
-        //} else {
-            //  obstacles.add(new Ducks(new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50), 100, 100, ducks));
+            obstacles.add(ObstacleFactory.createObstacle("Branch", new Position(leftBoundary + randomWidth,  Gdx.graphics.getHeight()-50+branch.getHeight()), 100, 100, branch));
         }
     }
 

@@ -116,3 +116,4 @@ Thumbs.db
 ## Core
 /core/data/money_balance.txt
 /core/data/boats.csv
+/core/data/inventory
