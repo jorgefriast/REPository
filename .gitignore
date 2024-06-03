@@ -6,7 +6,7 @@
 hs_err_pid*
 
 ## Robovm
-/ios/robovm-build/
+/Code/ios/robovm-build/
 
 ## GWT
 /html/war/
@@ -39,7 +39,7 @@ com_crashlytics_export_strings.xml
 /core/bin/
 /desktop/bin/
 /html/bin/
-/ios/bin/
+/Code/ios/bin/
 *.tmp
 *.bak
 *.swp
@@ -56,35 +56,35 @@ com_crashlytics_export_strings.xml
 /core/nbproject/private/
 /desktop/nbproject/private/
 /html/nbproject/private/
-/ios/nbproject/private/
+/Code/ios/nbproject/private/
 
 /build/
 /android/build/
 /core/build/
 /desktop/build/
 /html/build/
-/ios/build/
+/Code/ios/build/
 
 /nbbuild/
 /android/nbbuild/
 /core/nbbuild/
 /desktop/nbbuild/
 /html/nbbuild/
-/ios/nbbuild/
+/Code/ios/nbbuild/
 
 /dist/
 /android/dist/
 /core/dist/
 /desktop/dist/
 /html/dist/
-/ios/dist/
+/Code/ios/dist/
 
 /nbdist/
 /android/nbdist/
 /core/nbdist/
 /desktop/nbdist/
 /html/nbdist/
-/ios/nbdist/
+/Code/ios/nbdist/
 
 nbactions.xml
 nb-configuration.xml
@@ -99,7 +99,7 @@ gradle-app.setting
 /core/build/
 /desktop/build/
 /html/build/
-/ios/build/
+/Code/ios/build/
 
 ## OS Specific
 .DS_Store
@@ -109,9 +109,9 @@ Thumbs.db
 /ios/xcode/*.xcodeproj/*
 !/ios/xcode/*.xcodeproj/xcshareddata
 !/ios/xcode/*.xcodeproj/project.pbxproj
-/ios/xcode/native/
-/ios/IOSLauncher.app
-/ios/IOSLauncher.app.dSYM
+/Code/ios/xcode/native/
+/Code/ios/IOSLauncher.app
+/Code/ios/IOSLauncher.app.dSYM
 
 ## Core
 /core/data/money_balance.txt
