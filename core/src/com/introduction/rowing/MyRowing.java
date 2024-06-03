@@ -5,10 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -44,6 +41,7 @@ public class MyRowing extends ApplicationAdapter {
     Texture verticalScroll;
     Texture panel;
     Texture rightArrow;
+    Texture podiumTexture;
     Texture upperArrow;
     Texture bottomArrow;
     Texture leftArrow;
@@ -142,6 +140,7 @@ public class MyRowing extends ApplicationAdapter {
         progressBarRectangle = new Texture("accelerationBarRectangle.png");
         progressBarBackground = new Texture("progress_bar.png");
         laneDividerTexture = new Texture("backgrounds/lane-separator.png");
+        podiumTexture = new Texture("backgrounds/podio.png");
         correct = new Texture("tick.png");
         error = new Texture("error.png");
         tiles = new Texture("tiles/tile.jpg");
@@ -219,7 +218,7 @@ public class MyRowing extends ApplicationAdapter {
         for (int i = 0; i < NUMBER_OF_LANES; i++) {
             float multiplier = numberLeg != NUMBER_OF_LEGS ? 1 : (positionsRecord.get(i) / ((float) NUMBER_OF_LEGS * (NUMBER_OF_LANES - 1)) + 1) / 2;
             System.out.println("MULTIPLIER " + multiplier);
-            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), (int) (boatHeight*0.5* multiplier));
+            Position startingPosition = new Position(currentLeftBoundary + (laneWidth / 2), (int) (boatHeight * 0.5 * multiplier));
             if (i == 0) {
                 lanes[i] = new Lane(new Boat(i, startingPosition, true, inputProcessor, dataManager.getSelectedBoat()), currentLeftBoundary);
             } else {
@@ -319,8 +318,8 @@ public class MyRowing extends ApplicationAdapter {
         Texture correctMedal = null;
         String congrats = "";
         float textWidth = 0;
-        float x = 0;
-        float y = 300;
+        float x = WINDOW_WIDTH;
+        float y = (float) (WINDOW_HEIGHT * 0.8);
 
         switch (index) {
             case 0:
@@ -380,13 +379,14 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private void renderWinner(){
-        batch.draw(sumScreenMiniGame, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(podiumTexture, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         // check for the position of boat number 0 in the boatsPosition list
         int index = boatsPosition.indexOf(lanes[0].getBoat());
         Texture correctMedal = getTexture(index);
-        float centeredX = ((float) WINDOW_WIDTH / 2) - ((float) correctMedal.getWidth() / 2);
-        float centeredY = ((float) WINDOW_HEIGHT / 2) - ((float) correctMedal.getHeight() / 2);
-        batch.draw(correctMedal, centeredX, centeredY, correctMedal.getWidth(), correctMedal.getHeight());
+        double factor = 0.3;
+        float centeredX = (float) (WINDOW_WIDTH / 2 - ((float) correctMedal.getWidth() * factor / 2));
+        float centeredY = (float) (WINDOW_HEIGHT * 0.9 - ((float) correctMedal.getHeight() * factor / 2));
+        batch.draw(correctMedal, centeredX, centeredY, (float) (correctMedal.getWidth() * factor), (float) (correctMedal.getHeight() * factor));
     }
 
     private void renderGame(GameInputProcessor gameInputProcessor) {
@@ -532,12 +532,10 @@ public class MyRowing extends ApplicationAdapter {
                 double fatiguePercentage = currentBoat.getFatigueEffect();
                 String fatigueText = "Fatigue Effect: " + (int) (fatiguePercentage * 100) + "%";
                 String boatHealthText = "Boat Health: " + currentBoat.getBoatHealth();
-                String avoidedObstaclesText = "Avoided Obstacles: " + currentBoat.getNumberOfAvoidedObstacles();
                 String momentumText = "Momentum: " + currentBoat.getCurrentMomentum();
-                font.draw(batch, fatigueText, 1400, 750);
-                font.draw(batch, boatHealthText, 1400, 700);
-                font.draw(batch, avoidedObstaclesText, 1400, 650);
-                font.draw(batch, momentumText, 1400, 600);
+                font.draw(batch, fatigueText,(float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.70));
+                font.draw(batch, boatHealthText,(float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.65));
+                font.draw(batch, momentumText, (float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.6));
             }
         }
         // Invulnerability  powerup logic
@@ -546,7 +544,7 @@ public class MyRowing extends ApplicationAdapter {
             invulnerabilityTimer = 0;
             this.getPlayerBoat().decreaseInvulnerabilityTime();
         }
-        if (gameSubState == GameSubState.TUTORIAL) {
+        if (InputProcessor.getGameSubState() == GameSubState.TUTORIAL) {
             renderTutorial();
         }
         // The game change between substates depending on the leg number
@@ -596,14 +594,6 @@ public class MyRowing extends ApplicationAdapter {
                             handleCollision(boat1, obstacle);
                         }
                     }
-                    double fatiguePercentage = currentBoat.getFatigueEffect();
-                    String fatigueText = "Fatigue Effect: " + (int) (fatiguePercentage * 100) + "%";
-                    String boatHealthText = "Boat Health: " + currentBoat.getBoatHealth();
-                    String avoidedObstaclesText = "Avoided Obstacles: " + currentBoat.getNumberOfAvoidedObstacles();
-                    String momentumText = "Momentum: " + currentBoat.getCurrentMomentum();
-                    font.draw(batch, fatigueText,(float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.70));
-                    font.draw(batch, boatHealthText,(float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.65));
-                    font.draw(batch, momentumText, (float) (WINDOW_WIDTH * 0.82), (float) (WINDOW_HEIGHT *0.6));
                 }
             }
         }
@@ -895,15 +885,14 @@ public class MyRowing extends ApplicationAdapter {
     }
 
     private void renderSumScreen() {
-        batch.draw(sumScreenMiniGame, 0, 0, WINDOW_WIDTH, WINDOW_WIDTH);
+        batch.draw(shopBackground, 0, 0, WINDOW_WIDTH, WINDOW_WIDTH);
         String coinsEarned = "Coins earned: " + money;
         String roundMade = "Round made: " + (money / 10);
-        GlyphLayout layout = new GlyphLayout(font, coinsEarned);
-        GlyphLayout layout2 = new GlyphLayout(font, roundMade);
-        float width = layout.width;
-        float width2 = layout2.width;
-        font.draw(batch, coinsEarned, (Gdx.graphics.getWidth() - width) / 2, ((float) Gdx.graphics.getHeight() /2) + 200);
-        font.draw(batch, roundMade, (Gdx.graphics.getWidth() - width2) / 2, ((float) Gdx.graphics.getHeight() /2) + 150);
+        GlyphLayout coinsEarnedGlyph = new GlyphLayout(font, coinsEarned);
+        GlyphLayout roundMadeGlyph = new GlyphLayout(font, roundMade);
+        batch.draw(verticalScroll, (float) (WINDOW_WIDTH * 0.5 - verticalScroll.getWidth() * 0.5), (float) (WINDOW_HEIGHT * 0.7 - verticalScroll.getHeight() * 0.5), verticalScroll.getWidth(), verticalScroll.getHeight());
+        font.draw(batch, coinsEarnedGlyph, (float) (WINDOW_WIDTH * 0.5 - coinsEarnedGlyph.width * 0.5), (float) (WINDOW_HEIGHT * 0.73 - coinsEarnedGlyph.height * 0.5));
+        font.draw(batch, roundMadeGlyph, (float) (WINDOW_WIDTH * 0.5 - coinsEarnedGlyph.width * 0.5), (float) (WINDOW_HEIGHT * 0.67 - coinsEarnedGlyph.height * 0.5));
     }
 
     public void resetMiniGame(){
