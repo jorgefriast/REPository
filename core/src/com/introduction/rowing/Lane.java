@@ -53,7 +53,7 @@ public class Lane {
 
     public void spawnObstacles() {
         Random rnd = new Random();
-        int random = rnd.nextInt(4);
+        int random = rnd.nextInt(3);
         int LANE_WIDTH = WINDOW_WIDTH / NUMBER_OF_LANES;
         int randomWidth = rnd.nextInt(LANE_WIDTH) - 50;
         Texture gees = new Texture("obstacles/duck.png");
