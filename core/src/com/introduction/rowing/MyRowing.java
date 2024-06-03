@@ -319,6 +319,7 @@ public class MyRowing extends ApplicationAdapter {
         batch.end();
     }
 
+    int positionReward;
     private Texture getTexture(int index) {
         Texture correctMedal = null;
         String congrats = "";
